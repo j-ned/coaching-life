@@ -1,8 +1,8 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanMatchFn, Router } from '@angular/router';
 import { Supabase } from '../services/supabase/supabase';
 
-export const authGuard: CanActivateFn = async () => {
+export const authGuard: CanMatchFn = async () => {
   const supabase = inject(Supabase);
   const router = inject(Router);
 

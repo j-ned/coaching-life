@@ -181,7 +181,11 @@ const SERVICE_CARDS: readonly {
       </div>
     </section>
 
-    <app-reviews></app-reviews>
+    @defer (on viewport) {
+      <app-reviews />
+    } @placeholder {
+      <div class="py-20"></div>
+    }
 
     <section
       id="contact"
@@ -251,11 +255,19 @@ const SERVICE_CARDS: readonly {
 
       @if (activePanel() === 'booking') {
         <div class="max-w-5xl mx-auto">
-          <app-booking />
+          @defer {
+            <app-booking />
+          } @placeholder {
+            <div class="py-10"></div>
+          }
         </div>
       } @else if (activePanel() === 'contact') {
         <div class="max-w-2xl mx-auto">
-          <app-contact-form />
+          @defer {
+            <app-contact-form />
+          } @placeholder {
+            <div class="py-10"></div>
+          }
         </div>
       }
     </section>
