@@ -39,7 +39,7 @@ jobs:
         run: pnpm typecheck
 
       - name: Tests
-        run: pnpm test -- --run
+        run: pnpm test
 
   # ─── Build (only on push to master, after CI passes) ───
   build:
