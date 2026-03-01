@@ -56,7 +56,9 @@ type SlotSelection = {
       </div>
 
       @if (availableSlots().length === 0) {
-        <p class="text-slate-400 text-sm text-center py-4">Aucun créneau disponible pour cette date.</p>
+        <p class="text-slate-400 text-sm text-center py-4">
+          Aucun créneau disponible pour cette date.
+        </p>
       }
     </div>
   `,

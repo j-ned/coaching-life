@@ -7,7 +7,10 @@ import type { PageContent, PageSlug } from '../models/page-content.model';
 export class UpdatePageContentUseCase {
   private readonly gateway = inject(PageContentGateway);
 
-  execute(slug: PageSlug, data: Partial<Omit<PageContent, 'id' | 'slug' | 'updatedAt'>>): Observable<PageContent> {
+  execute(
+    slug: PageSlug,
+    data: Partial<Omit<PageContent, 'id' | 'slug' | 'updatedAt'>>,
+  ): Observable<PageContent> {
     return this.gateway.update(slug, data);
   }
 }

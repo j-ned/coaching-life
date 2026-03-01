@@ -2,7 +2,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { GetMessagesUseCase } from '../../contact/domain/use-cases/get-messages.use-case';
 import { UpdateMessageStatusUseCase } from '../../contact/domain/use-cases/update-message-status.use-case';
 import { DeleteMessageUseCase } from '../../contact/domain/use-cases/delete-message.use-case';
-import { MESSAGE_SUBJECT_LABELS, type Message, type MessageStatus } from '../../contact/domain/models/message.model';
+import {
+  MESSAGE_SUBJECT_LABELS,
+  type Message,
+  type MessageStatus,
+} from '../../contact/domain/models/message.model';
 import { DatePipe } from '@angular/common';
 import { Icon } from '../../../shared/components/icon/icon';
 
@@ -33,7 +37,10 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
     </div>
 
     <!-- Filter tabs -->
-    <nav class="flex gap-1 mb-4 bg-slate-100 rounded-lg p-1 w-fit" aria-label="Filtrer les messages">
+    <nav
+      class="flex gap-1 mb-4 bg-slate-100 rounded-lg p-1 w-fit"
+      aria-label="Filtrer les messages"
+    >
       @for (tab of tabs; track tab.key) {
         <button
           type="button"
@@ -48,18 +55,31 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
         >
           {{ tab.label }}
           @if (tab.key === 'unread' && unreadCount() > 0) {
-            <span class="ml-1.5 bg-brand-500 text-white text-xs px-1.5 py-0.5 rounded-full">{{ unreadCount() }}</span>
+            <span class="ml-1.5 bg-brand-500 text-white text-xs px-1.5 py-0.5 rounded-full">{{
+              unreadCount()
+            }}</span>
           }
         </button>
       }
     </nav>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 grow flex overflow-hidden min-h-[500px]">
+    <div
+      class="bg-white rounded-xl shadow-sm border border-slate-100 grow flex overflow-hidden min-h-[500px]"
+    >
       <!-- Sidebar: Message List -->
       <div class="w-1/3 border-r border-slate-100 overflow-y-auto">
         @if (filteredMessages().length === 0) {
           <div class="p-8 text-center text-slate-400">
-            <svg class="w-12 h-12 mx-auto mb-3 text-slate-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><use href="/icons/sprite.svg#mail" /></svg>
+            <svg
+              class="w-12 h-12 mx-auto mb-3 text-slate-200"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <use href="/icons/sprite.svg#mail" />
+            </svg>
             <p class="text-sm">Aucun message</p>
           </div>
         } @else {
@@ -79,10 +99,24 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
                     <app-icon name="archive" size="sm" class="text-slate-400" />
                   </div>
                 }
-                <p class="font-medium text-slate-800 pr-6 truncate" [class.font-bold]="msg.status === 'unread'">{{ msg.senderName }}</p>
-                <p class="text-sm text-slate-600 truncate mb-1" [class.font-semibold]="msg.status === 'unread'">{{ subjectLabel(msg.subject) }}</p>
+                <p
+                  class="font-medium text-slate-800 pr-6 truncate"
+                  [class.font-bold]="msg.status === 'unread'"
+                >
+                  {{ msg.senderName }}
+                </p>
+                <p
+                  class="text-sm text-slate-600 truncate mb-1"
+                  [class.font-semibold]="msg.status === 'unread'"
+                >
+                  {{ subjectLabel(msg.subject) }}
+                </p>
                 <p class="text-xs text-slate-500 truncate pr-12">{{ msg.content }}</p>
-                <time class="text-[10px] text-slate-400 absolute bottom-4 right-4" [attr.datetime]="msg.createdAt">{{ msg.createdAt | date:'dd/MM/yy HH:mm' }}</time>
+                <time
+                  class="text-[10px] text-slate-400 absolute bottom-4 right-4"
+                  [attr.datetime]="msg.createdAt"
+                  >{{ msg.createdAt | date: 'dd/MM/yy HH:mm' }}</time
+                >
               </button>
             }
           </div>
@@ -97,32 +131,44 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
               <div>
                 <h3 class="text-lg font-medium text-slate-800">{{ subjectLabel(msg.subject) }}</h3>
                 <p class="text-sm text-slate-500">
-                  De <span class="font-medium text-slate-700">{{ msg.senderName }}</span>
-                  &lt;{{ msg.senderEmail }}&gt;
+                  De <span class="font-medium text-slate-700">{{ msg.senderName }}</span> &lt;{{
+                    msg.senderEmail
+                  }}&gt;
                 </p>
               </div>
-              <time class="text-sm text-slate-500 shrink-0" [attr.datetime]="msg.createdAt">{{ msg.createdAt | date:'dd MMM yyyy à HH:mm' }}</time>
+              <time class="text-sm text-slate-500 shrink-0" [attr.datetime]="msg.createdAt">{{
+                msg.createdAt | date: 'dd MMM yyyy à HH:mm'
+              }}</time>
             </div>
 
             <!-- Actions -->
             <div class="flex gap-2 mt-3">
               @if (msg.status !== 'unread') {
-                <button type="button" (click)="changeStatus(msg.id, 'unread')"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+                <button
+                  type="button"
+                  (click)="changeStatus(msg.id, 'unread')"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+                >
                   <app-icon name="info" size="xs" />
                   Marquer non lu
                 </button>
               }
               @if (msg.status !== 'read') {
-                <button type="button" (click)="changeStatus(msg.id, 'read')"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+                <button
+                  type="button"
+                  (click)="changeStatus(msg.id, 'read')"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+                >
                   <app-icon name="check" size="xs" />
                   Marquer lu
                 </button>
               }
               @if (msg.status !== 'archived') {
-                <button type="button" (click)="changeStatus(msg.id, 'archived')"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+                <button
+                  type="button"
+                  (click)="changeStatus(msg.id, 'archived')"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+                >
                   <app-icon name="archive" size="xs" />
                   Archiver
                 </button>
@@ -131,17 +177,26 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
               <div class="ml-auto">
                 @if (confirmDeleteId() === msg.id) {
                   <span class="text-xs text-red-600 mr-2">Confirmer ?</span>
-                  <button type="button" (click)="deleteMessage(msg.id)"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors">
+                  <button
+                    type="button"
+                    (click)="deleteMessage(msg.id)"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+                  >
                     Oui, supprimer
                   </button>
-                  <button type="button" (click)="confirmDeleteId.set(null)"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors ml-1">
+                  <button
+                    type="button"
+                    (click)="confirmDeleteId.set(null)"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors ml-1"
+                  >
                     Annuler
                   </button>
                 } @else {
-                  <button type="button" (click)="confirmDeleteId.set(msg.id)"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors">
+                  <button
+                    type="button"
+                    (click)="confirmDeleteId.set(msg.id)"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors"
+                  >
                     <app-icon name="trash-2" size="xs" />
                     Supprimer
                   </button>
@@ -155,13 +210,22 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
           </div>
         } @else {
           <div class="grow flex flex-col items-center justify-center text-slate-400">
-            <svg class="w-16 h-16 mb-4 text-slate-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><use href="/icons/sprite.svg#mail" /></svg>
+            <svg
+              class="w-16 h-16 mb-4 text-slate-200"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <use href="/icons/sprite.svg#mail" />
+            </svg>
             <p>Sélectionnez un message pour le lire</p>
           </div>
         }
       </div>
     </div>
-  `
+  `,
 })
 export class DashboardMessages {
   private readonly getMessages = inject(GetMessagesUseCase);
@@ -175,15 +239,15 @@ export class DashboardMessages {
 
   private readonly _messages = signal<readonly Message[]>([]);
 
-  protected readonly unreadCount = computed(() =>
-    this._messages().filter(m => m.status === 'unread').length
+  protected readonly unreadCount = computed(
+    () => this._messages().filter((m) => m.status === 'unread').length,
   );
 
   protected readonly filteredMessages = computed(() => {
     const filter = this.activeFilter();
     const messages = this._messages();
-    if (filter === 'all') return messages.filter(m => m.status !== 'archived');
-    return messages.filter(m => m.status === filter);
+    if (filter === 'all') return messages.filter((m) => m.status !== 'archived');
+    return messages.filter((m) => m.status === filter);
   });
 
   constructor() {
@@ -204,7 +268,7 @@ export class DashboardMessages {
   protected changeStatus(id: string, status: MessageStatus): void {
     this.updateMessageStatus.execute(id, status).subscribe({
       next: (updated) => {
-        this._messages.update(msgs => msgs.map(m => m.id === id ? updated : m));
+        this._messages.update((msgs) => msgs.map((m) => (m.id === id ? updated : m)));
         if (this.selectedMessage()?.id === id) {
           this.selectedMessage.set(updated);
         }
@@ -215,7 +279,7 @@ export class DashboardMessages {
   protected deleteMessage(id: string): void {
     this.deleteMessageUseCase.execute(id).subscribe({
       next: () => {
-        this._messages.update(msgs => msgs.filter(m => m.id !== id));
+        this._messages.update((msgs) => msgs.filter((m) => m.id !== id));
         if (this.selectedMessage()?.id === id) {
           this.selectedMessage.set(null);
         }
@@ -225,7 +289,7 @@ export class DashboardMessages {
   }
 
   private loadMessages(): void {
-    this.getMessages.execute().subscribe(messages => {
+    this.getMessages.execute().subscribe((messages) => {
       this._messages.set(messages);
     });
   }

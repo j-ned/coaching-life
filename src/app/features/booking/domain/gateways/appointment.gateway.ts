@@ -1,5 +1,11 @@
 import type { Observable } from 'rxjs';
-import type { Appointment, AppointmentFormData, AppointmentSubmission, AppointmentStatus, DisabledDate } from '../models/appointment.model';
+import type {
+  Appointment,
+  AppointmentFormData,
+  AppointmentSubmission,
+  AppointmentStatus,
+  DisabledDate,
+} from '../models/appointment.model';
 
 export abstract class AppointmentGateway {
   abstract getBookedSlots(month: string): Observable<readonly Appointment[]>;

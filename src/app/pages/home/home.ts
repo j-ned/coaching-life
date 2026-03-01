@@ -9,11 +9,26 @@ import { Reviews } from '../../features/reviews/reviews';
 import { Icon } from '../../shared/components/icon/icon';
 import { GetSiteSettingUseCase } from '../../features/content/domain/use-cases/get-site-setting.use-case';
 import { GetAllPagesUseCase } from '../../features/content/domain/use-cases/get-all-pages.use-case';
-import { DEFAULT_HERO, DEFAULT_HOME_CTA, DEFAULT_HOME_SERVICES, DEFAULT_PAGES } from '../../features/content/domain/models/default-content';
-import type { HeroSettings, HomeCTASettings, HomeServicesSettings } from '../../features/content/domain/models/site-settings.model';
+import {
+  DEFAULT_HERO,
+  DEFAULT_HOME_CTA,
+  DEFAULT_HOME_SERVICES,
+  DEFAULT_PAGES,
+} from '../../features/content/domain/models/default-content';
+import type {
+  HeroSettings,
+  HomeCTASettings,
+  HomeServicesSettings,
+} from '../../features/content/domain/models/site-settings.model';
 import type { PageSlug } from '../../features/content/domain/models/page-content.model';
 
-const SERVICE_CARDS: readonly { slug: PageSlug; route: string; iconBg: string; iconColor: string; iconName: string }[] = [
+const SERVICE_CARDS: readonly {
+  slug: PageSlug;
+  route: string;
+  iconBg: string;
+  iconColor: string;
+  iconName: string;
+}[] = [
   {
     slug: 'life-coach',
     route: '/life-coach',

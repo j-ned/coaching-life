@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { GetDashboardStatsUseCase } from '../../analytics/domain/use-cases/get-dashboard-stats.use-case';
 import { GetWeeklyActivityUseCase } from '../../analytics/domain/use-cases/get-weekly-activity.use-case';
@@ -22,11 +29,11 @@ const SERVICE_COLOR_CONFIG: Record<string, string> = {
   'personal-development': 'bg-amber-100 text-amber-800',
   'equine-coaching': 'bg-emerald-100 text-emerald-800',
   'neuroatypical-parents': 'bg-sky-100 text-sky-800',
-  'life_coach': 'bg-violet-100 text-violet-800',
-  'dev_personnel': 'bg-amber-100 text-amber-800',
-  'equine': 'bg-emerald-100 text-emerald-800',
-  'parents': 'bg-sky-100 text-sky-800',
-  'other': 'bg-slate-100 text-slate-700',
+  life_coach: 'bg-violet-100 text-violet-800',
+  dev_personnel: 'bg-amber-100 text-amber-800',
+  equine: 'bg-emerald-100 text-emerald-800',
+  parents: 'bg-sky-100 text-sky-800',
+  other: 'bg-slate-100 text-slate-700',
   '': 'bg-slate-100 text-slate-600',
 };
 
@@ -44,30 +51,37 @@ const SERVICE_COLOR_CONFIG: Record<string, string> = {
         label="Visites (30 jours)"
         [value]="visitsDisplay()"
         icon="trending-up"
-        iconBgClass="bg-violet-50 text-violet-500" />
+        iconBgClass="bg-violet-50 text-violet-500"
+      />
       <app-stat-card
         label="RDV à venir"
         [value]="appointmentsDisplay()"
         icon="calendar"
-        iconBgClass="bg-amber-50 text-amber-500" />
+        iconBgClass="bg-amber-50 text-amber-500"
+      />
       <app-stat-card
         label="Nouveaux Messages"
         [value]="messagesDisplay()"
         icon="mail"
-        iconBgClass="bg-teal-50 text-teal-500" />
+        iconBgClass="bg-teal-50 text-teal-500"
+      />
     </div>
 
     @if (stats(); as s) {
       <!-- Appointment status breakdown -->
-      <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6"
-               aria-labelledby="status-heading">
+      <section
+        class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6"
+        aria-labelledby="status-heading"
+      >
         <h3 id="status-heading" class="text-sm font-medium text-slate-700 mb-4">
           Rendez-vous par statut
         </h3>
         <div class="flex flex-wrap gap-3">
           @for (entry of statusEntries(); track entry.key) {
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium"
-                  [class]="entry.colorClass">
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium"
+              [class]="entry.colorClass"
+            >
               {{ entry.label }}: {{ entry.count }}
             </span>
           }
@@ -75,15 +89,19 @@ const SERVICE_COLOR_CONFIG: Record<string, string> = {
       </section>
 
       <!-- Appointment service breakdown -->
-      <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6"
-               aria-labelledby="rdv-service-heading">
+      <section
+        class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6"
+        aria-labelledby="rdv-service-heading"
+      >
         <h3 id="rdv-service-heading" class="text-sm font-medium text-slate-700 mb-4">
           Rendez-vous par service
         </h3>
         <div class="flex flex-wrap gap-3">
           @for (entry of appointmentServiceEntries(); track entry.key) {
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium"
-                  [class]="entry.colorClass">
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium"
+              [class]="entry.colorClass"
+            >
               {{ entry.label }}: {{ entry.count }}
             </span>
           } @empty {
@@ -93,15 +111,19 @@ const SERVICE_COLOR_CONFIG: Record<string, string> = {
       </section>
 
       <!-- Message service breakdown -->
-      <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-8"
-               aria-labelledby="msg-service-heading">
+      <section
+        class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-8"
+        aria-labelledby="msg-service-heading"
+      >
         <h3 id="msg-service-heading" class="text-sm font-medium text-slate-700 mb-4">
           Messages par service
         </h3>
         <div class="flex flex-wrap gap-3">
           @for (entry of messageServiceEntries(); track entry.key) {
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium"
-                  [class]="entry.colorClass">
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium"
+              [class]="entry.colorClass"
+            >
               {{ entry.label }}: {{ entry.count }}
             </span>
           } @empty {
@@ -112,8 +134,10 @@ const SERVICE_COLOR_CONFIG: Record<string, string> = {
     }
 
     <!-- Weekly activity chart -->
-    <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
-             aria-labelledby="activity-heading">
+    <section
+      class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+      aria-labelledby="activity-heading"
+    >
       <div class="flex items-center justify-between mb-4">
         <h3 id="activity-heading" class="text-sm font-medium text-slate-700">
           Activité hebdomadaire
@@ -201,7 +225,7 @@ export class DashboardHome {
     effect(() => {
       const period = this.selectedPeriod();
       this.weeklyData.set(null);
-      this.getWeeklyActivity.execute(period).subscribe(data => {
+      this.getWeeklyActivity.execute(period).subscribe((data) => {
         this.weeklyData.set(data);
       });
     });

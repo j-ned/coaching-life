@@ -28,7 +28,9 @@ export function toPageContent(raw: SupabasePageRow): PageContent {
   };
 }
 
-export function toSupabasePageUpdate(data: Partial<Omit<PageContent, 'id' | 'slug' | 'updatedAt'>>) {
+export function toSupabasePageUpdate(
+  data: Partial<Omit<PageContent, 'id' | 'slug' | 'updatedAt'>>,
+) {
   const result: Record<string, unknown> = {};
   if (data.title !== undefined) result['title'] = data.title;
   if (data.introduction !== undefined) result['introduction'] = data.introduction;

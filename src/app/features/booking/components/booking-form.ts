@@ -27,7 +27,9 @@ export type BookingFormPayload = {
   imports: [ReactiveFormsModule, Icon],
   template: `
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 h-full">
-      <output class="mb-6 p-4 rounded-xl bg-brand-50 border border-brand-100 flex items-center gap-3 block">
+      <output
+        class="mb-6 p-4 rounded-xl bg-brand-50 border border-brand-100 flex items-center gap-3 block"
+      >
         <app-icon name="calendar" size="md" class="text-brand-500 shrink-0" />
         <div class="text-sm">
           <span class="font-medium text-slate-800">{{ formattedDate() }}</span>
@@ -50,7 +52,11 @@ export type BookingFormPayload = {
                 Nom complet <span aria-hidden="true">*</span>
               </label>
               <div class="relative">
-                <app-icon name="user" size="md" class="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <app-icon
+                  name="user"
+                  size="md"
+                  class="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+                />
                 <input
                   id="booking-name"
                   type="text"
@@ -61,10 +67,18 @@ export type BookingFormPayload = {
                   autocomplete="name"
                 />
               </div>
-              @if (form.controls.clientName.touched && form.controls.clientName.errors?.['required']) {
-                <small class="text-red-500 text-xs mt-1 block" role="alert">Le nom est obligatoire</small>
-              } @else if (form.controls.clientName.touched && form.controls.clientName.errors?.['minlength']) {
-                <small class="text-red-500 text-xs mt-1 block" role="alert">Le nom doit contenir au moins 2 caractères</small>
+              @if (
+                form.controls.clientName.touched && form.controls.clientName.errors?.['required']
+              ) {
+                <small class="text-red-500 text-xs mt-1 block" role="alert"
+                  >Le nom est obligatoire</small
+                >
+              } @else if (
+                form.controls.clientName.touched && form.controls.clientName.errors?.['minlength']
+              ) {
+                <small class="text-red-500 text-xs mt-1 block" role="alert"
+                  >Le nom doit contenir au moins 2 caractères</small
+                >
               }
             </div>
 
@@ -73,7 +87,11 @@ export type BookingFormPayload = {
                 Email <span aria-hidden="true">*</span>
               </label>
               <div class="relative">
-                <app-icon name="mail" size="md" class="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <app-icon
+                  name="mail"
+                  size="md"
+                  class="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+                />
                 <input
                   id="booking-email"
                   type="email"
@@ -84,10 +102,18 @@ export type BookingFormPayload = {
                   autocomplete="email"
                 />
               </div>
-              @if (form.controls.clientEmail.touched && form.controls.clientEmail.errors?.['required']) {
-                <small class="text-red-500 text-xs mt-1 block" role="alert">L'email est obligatoire</small>
-              } @else if (form.controls.clientEmail.touched && form.controls.clientEmail.errors?.['pattern']) {
-                <small class="text-red-500 text-xs mt-1 block" role="alert">Le format de l'email est invalide</small>
+              @if (
+                form.controls.clientEmail.touched && form.controls.clientEmail.errors?.['required']
+              ) {
+                <small class="text-red-500 text-xs mt-1 block" role="alert"
+                  >L'email est obligatoire</small
+                >
+              } @else if (
+                form.controls.clientEmail.touched && form.controls.clientEmail.errors?.['pattern']
+              ) {
+                <small class="text-red-500 text-xs mt-1 block" role="alert"
+                  >Le format de l'email est invalide</small
+                >
               }
             </div>
           </div>
@@ -98,7 +124,11 @@ export type BookingFormPayload = {
                 Téléphone <span aria-hidden="true">*</span>
               </label>
               <div class="relative">
-                <app-icon name="phone" size="md" class="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <app-icon
+                  name="phone"
+                  size="md"
+                  class="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+                />
                 <input
                   id="booking-phone"
                   type="tel"
@@ -109,15 +139,26 @@ export type BookingFormPayload = {
                   autocomplete="tel"
                 />
               </div>
-              @if (form.controls.clientPhone.touched && form.controls.clientPhone.errors?.['required']) {
-                <small class="text-red-500 text-xs mt-1 block" role="alert">Le téléphone est obligatoire</small>
-              } @else if (form.controls.clientPhone.touched && form.controls.clientPhone.errors?.['pattern']) {
-                <small class="text-red-500 text-xs mt-1 block" role="alert">Le numéro doit contenir 10 chiffres</small>
+              @if (
+                form.controls.clientPhone.touched && form.controls.clientPhone.errors?.['required']
+              ) {
+                <small class="text-red-500 text-xs mt-1 block" role="alert"
+                  >Le téléphone est obligatoire</small
+                >
+              } @else if (
+                form.controls.clientPhone.touched && form.controls.clientPhone.errors?.['pattern']
+              ) {
+                <small class="text-red-500 text-xs mt-1 block" role="alert"
+                  >Le numéro doit contenir 10 chiffres</small
+                >
               }
             </div>
 
             <div>
-              <label for="booking-coaching-type" class="block text-sm font-medium text-slate-700 mb-1.5">
+              <label
+                for="booking-coaching-type"
+                class="block text-sm font-medium text-slate-700 mb-1.5"
+              >
                 Type de coaching <span aria-hidden="true">*</span>
               </label>
               <select
@@ -131,8 +172,13 @@ export type BookingFormPayload = {
                   <option [value]="type.value">{{ type.label }}</option>
                 }
               </select>
-              @if (form.controls.coachingType.touched && form.controls.coachingType.errors?.['required']) {
-                <small class="text-red-500 text-xs mt-1 block" role="alert">Le type de coaching est obligatoire</small>
+              @if (
+                form.controls.coachingType.touched &&
+                form.controls.coachingType.errors?.['required']
+              ) {
+                <small class="text-red-500 text-xs mt-1 block" role="alert"
+                  >Le type de coaching est obligatoire</small
+                >
               }
             </div>
           </div>
@@ -150,9 +196,15 @@ export type BookingFormPayload = {
               aria-required="true"
             ></textarea>
             @if (form.controls.message.touched && form.controls.message.errors?.['required']) {
-              <small class="text-red-500 text-xs mt-1 block" role="alert">Le message est obligatoire</small>
-            } @else if (form.controls.message.touched && form.controls.message.errors?.['minlength']) {
-              <small class="text-red-500 text-xs mt-1 block" role="alert">Le message doit contenir au moins 10 caractères</small>
+              <small class="text-red-500 text-xs mt-1 block" role="alert"
+                >Le message est obligatoire</small
+              >
+            } @else if (
+              form.controls.message.touched && form.controls.message.errors?.['minlength']
+            ) {
+              <small class="text-red-500 text-xs mt-1 block" role="alert"
+                >Le message doit contenir au moins 10 caractères</small
+              >
             }
           </div>
         </fieldset>
@@ -164,8 +216,19 @@ export type BookingFormPayload = {
         >
           @if (isSubmitting()) {
             <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              ></path>
             </svg>
             Réservation en cours...
           } @else {
@@ -185,7 +248,10 @@ export class BookingForm {
 
   readonly isSubmitting = signal(false);
 
-  readonly coachingTypes = Object.entries(COACHING_TYPE_LABELS).map(([value, label]) => ({ value, label }));
+  readonly coachingTypes = Object.entries(COACHING_TYPE_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  }));
 
   readonly form = new FormGroup<BookingFormGroup>({
     clientName: new FormControl('', {

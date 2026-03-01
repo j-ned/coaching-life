@@ -22,17 +22,13 @@ export class SupabaseServer extends Supabase {
 
     const cookieHeader = request?.headers?.get('cookie') ?? '';
 
-    this.client = createServerClient(
-      environment.supabase.url,
-      environment.supabase.key,
-      {
-        cookies: {
-          getAll: () => parseCookies(cookieHeader),
-          setAll: () => {
-            // No-op during SSR rendering — cookies are managed by the browser client
-          },
+    this.client = createServerClient(environment.supabase.url, environment.supabase.key, {
+      cookies: {
+        getAll: () => parseCookies(cookieHeader),
+        setAll: () => {
+          // No-op during SSR rendering — cookies are managed by the browser client
         },
       },
-    );
+    });
   }
 }

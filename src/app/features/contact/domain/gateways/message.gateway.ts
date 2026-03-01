@@ -1,5 +1,10 @@
 import type { Observable } from 'rxjs';
-import type { Message, MessageStatus, MessageSubmission, SendMessageData } from '../models/message.model';
+import type {
+  Message,
+  MessageStatus,
+  MessageSubmission,
+  SendMessageData,
+} from '../models/message.model';
 
 export abstract class MessageGateway {
   abstract getAll(): Observable<readonly Message[]>;

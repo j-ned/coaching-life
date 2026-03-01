@@ -26,7 +26,11 @@ import { Icon } from '../../shared/components/icon/icon';
           <ul class="space-y-4 text-slate-700">
             @for (item of c.items; track $index) {
               <li class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-500 flex items-center justify-center shrink-0">{{ $index + 1 }}</div>
+                <div
+                  class="w-10 h-10 rounded-full bg-brand-50 text-brand-500 flex items-center justify-center shrink-0"
+                >
+                  {{ $index + 1 }}
+                </div>
                 <div>
                   @if (item.title) {
                     <strong class="block text-slate-800">{{ item.title }}</strong>
@@ -44,18 +48,24 @@ import { Icon } from '../../shared/components/icon/icon';
         </div>
       </div>
       <div class="rounded-3xl overflow-hidden shadow-xl lg:h-[700px]">
-        <img [src]="c.imageUrl" width="800" height="800" [alt]="c.imageAlt" class="object-cover w-full h-full" />
+        <img
+          [src]="c.imageUrl"
+          width="800"
+          height="800"
+          [alt]="c.imageAlt"
+          class="object-cover w-full h-full"
+        />
       </div>
     </div>
-  `
+  `,
 })
 export class EquineCoaching {
   private readonly getPageContent = inject(GetPageContentUseCase);
 
   protected readonly content = toSignal(
-    this.getPageContent.execute('equine-coaching').pipe(
-      map(v => v ?? DEFAULT_PAGES['equine-coaching']),
-    ),
+    this.getPageContent
+      .execute('equine-coaching')
+      .pipe(map((v) => v ?? DEFAULT_PAGES['equine-coaching'])),
     { initialValue: DEFAULT_PAGES['equine-coaching'] },
   );
 }

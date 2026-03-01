@@ -3,11 +3,11 @@ export type MessageStatus = 'unread' | 'read' | 'archived';
 export type MessageSubject = 'life_coach' | 'dev_personnel' | 'equine' | 'parents' | 'other' | '';
 
 export const MESSAGE_SUBJECT_LABELS: Record<string, string> = {
-  'life_coach': 'Coaching de Vie',
-  'dev_personnel': 'Développement Personnel',
-  'equine': 'Coaching Équin',
-  'parents': 'Parents Neuroatypiques',
-  'other': 'Autre demande',
+  life_coach: 'Coaching de Vie',
+  dev_personnel: 'Développement Personnel',
+  equine: 'Coaching Équin',
+  parents: 'Parents Neuroatypiques',
+  other: 'Autre demande',
   '': 'Non spécifié',
 };
 

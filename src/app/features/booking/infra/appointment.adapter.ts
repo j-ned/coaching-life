@@ -1,4 +1,8 @@
-import type { Appointment, AppointmentFormData, DisabledDate } from '../domain/models/appointment.model';
+import type {
+  Appointment,
+  AppointmentFormData,
+  DisabledDate,
+} from '../domain/models/appointment.model';
 
 export type SupabaseAppointmentRow = {
   id: string;

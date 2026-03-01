@@ -12,8 +12,7 @@ import { Icon } from '../icon/icon';
         <p class="text-slate-500 font-medium mb-1">{{ label() }}</p>
         <p class="text-3xl font-bold text-slate-800">{{ value() }}</p>
       </div>
-      <div class="w-12 h-12 rounded-full flex items-center justify-center"
-           [class]="iconBgClass()">
+      <div class="w-12 h-12 rounded-full flex items-center justify-center" [class]="iconBgClass()">
         <app-icon [name]="icon()" size="lg" />
       </div>
     </div>

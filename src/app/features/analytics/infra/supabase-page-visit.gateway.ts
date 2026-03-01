@@ -13,7 +13,7 @@ export class SupabasePageVisitGateway extends PageVisitGateway {
     return from(
       this.supabase.client
         .from('page_visits')
-        .insert({ page_path: pagePath, referrer, user_agent: userAgent })
+        .insert({ page_path: pagePath, referrer, user_agent: userAgent }),
     ).pipe(
       map(() => undefined),
       catchError(() => of(undefined)),
@@ -27,7 +27,7 @@ export class SupabasePageVisitGateway extends PageVisitGateway {
         .select('*')
         .gte('visited_at', start)
         .lte('visited_at', end)
-        .order('visited_at', { ascending: true })
+        .order('visited_at', { ascending: true }),
     ).pipe(
       map(({ data, error }) => {
         if (error) throw error;
@@ -42,7 +42,7 @@ export class SupabasePageVisitGateway extends PageVisitGateway {
       this.supabase.client
         .from('page_visits')
         .select('*', { count: 'exact', head: true })
-        .gte('visited_at', date)
+        .gte('visited_at', date),
     ).pipe(
       map(({ count, error }) => {
         if (error) throw error;

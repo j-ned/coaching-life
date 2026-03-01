@@ -3,8 +3,18 @@ import { Icon } from '../icon/icon';
 import type { PeriodFilter } from '../../../features/analytics/domain/models/analytics.model';
 
 const MONTH_NAMES = [
-  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+  'Janvier',
+  'Février',
+  'Mars',
+  'Avril',
+  'Mai',
+  'Juin',
+  'Juillet',
+  'Août',
+  'Septembre',
+  'Octobre',
+  'Novembre',
+  'Décembre',
 ];
 
 @Component({
@@ -13,19 +23,23 @@ const MONTH_NAMES = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'inline-flex items-center gap-2' },
   template: `
-    <button type="button"
-            class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors"
-            aria-label="Mois précédent"
-            (click)="previousMonth()">
+    <button
+      type="button"
+      class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors"
+      aria-label="Mois précédent"
+      (click)="previousMonth()"
+    >
       <app-icon name="chevron-left" size="sm" />
     </button>
     <span class="text-sm font-medium text-slate-700 min-w-[140px] text-center">
       {{ displayLabel() }}
     </span>
-    <button type="button"
-            class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors"
-            aria-label="Mois suivant"
-            (click)="nextMonth()">
+    <button
+      type="button"
+      class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors"
+      aria-label="Mois suivant"
+      (click)="nextMonth()"
+    >
       <app-icon name="chevron-right" size="sm" />
     </button>
   `,

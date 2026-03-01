@@ -56,7 +56,9 @@ type CalendarDay = {
             >
               <span>{{ day.dayNumber }}</span>
               @if (day.hasBooking) {
-                <span class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand-400"></span>
+                <span
+                  class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand-400"
+                ></span>
               }
             </button>
           } @else {

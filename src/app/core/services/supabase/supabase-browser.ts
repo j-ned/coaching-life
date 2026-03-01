@@ -10,9 +10,6 @@ export class SupabaseBrowser extends Supabase {
 
   constructor() {
     super();
-    this.client = createBrowserClient(
-      environment.supabase.url,
-      environment.supabase.key,
-    );
+    this.client = createBrowserClient(environment.supabase.url, environment.supabase.key);
   }
 }

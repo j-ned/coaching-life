@@ -1,4 +1,8 @@
-export type CoachingType = 'life-coaching' | 'personal-development' | 'equine-coaching' | 'neuroatypical-parents';
+export type CoachingType =
+  | 'life-coaching'
+  | 'personal-development'
+  | 'equine-coaching'
+  | 'neuroatypical-parents';
 
 export type AppointmentStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 

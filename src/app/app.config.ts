@@ -37,5 +37,5 @@ export const appConfig: ApplicationConfig = {
     { provide: SiteSettingsGateway, useClass: SupabaseSiteSettingsGateway },
     { provide: ImageStorageGateway, useClass: SupabaseImageStorageGateway },
     { provide: PageVisitGateway, useClass: SupabasePageVisitGateway },
-  ]
+  ],
 };

@@ -1,6 +1,10 @@
 import { Component, ChangeDetectionStrategy, inject, signal, viewChild } from '@angular/core';
 import { AppointmentGateway } from '../domain/gateways/appointment.gateway';
-import type { Appointment, AppointmentFormData, DisabledDate } from '../domain/models/appointment.model';
+import type {
+  Appointment,
+  AppointmentFormData,
+  DisabledDate,
+} from '../domain/models/appointment.model';
 import { BookingCalendar } from '../components/booking-calendar';
 import { BookingTimePicker } from '../components/booking-time-picker';
 import { BookingForm, type BookingFormPayload } from '../components/booking-form';
@@ -13,20 +17,40 @@ import { BookingForm, type BookingFormPayload } from '../components/booking-form
   template: `
     <section aria-labelledby="booking-heading">
       <div class="text-center mb-10">
-        <div class="w-16 h-16 bg-brand-50 rounded-full flex items-center justify-center text-brand-500 mx-auto mb-4">
-          <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+        <div
+          class="w-16 h-16 bg-brand-50 rounded-full flex items-center justify-center text-brand-500 mx-auto mb-4"
+        >
+          <svg
+            width="32"
+            height="32"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
           </svg>
         </div>
-        <h2 id="booking-heading" class="text-2xl font-semibold text-slate-800 mb-2">Prendre Rendez-vous</h2>
-        <p class="text-slate-600 max-w-md mx-auto">Choisissez une date et un créneau qui vous conviennent pour votre séance de coaching.</p>
+        <h2 id="booking-heading" class="text-2xl font-semibold text-slate-800 mb-2">
+          Prendre Rendez-vous
+        </h2>
+        <p class="text-slate-600 max-w-md mx-auto">
+          Choisissez une date et un créneau qui vous conviennent pour votre séance de coaching.
+        </p>
       </div>
 
       @if (submissionMessage()) {
         <div
-          [class]="submissionMessage()!.success
-            ? 'mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm text-center'
-            : 'mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm text-center'"
+          [class]="
+            submissionMessage()!.success
+              ? 'mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm text-center'
+              : 'mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm text-center'
+          "
         >
           {{ submissionMessage()!.message }}
         </div>
@@ -48,13 +72,27 @@ import { BookingForm, type BookingFormPayload } from '../components/booking-form
                 (slotSelected)="onSlotSelected($event)"
               />
             } @else {
-              <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col items-center justify-center text-center min-h-64">
-                <svg class="w-16 h-16 text-slate-200 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+              <div
+                class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col items-center justify-center text-center min-h-64"
+              >
+                <svg
+                  class="w-16 h-16 text-slate-200 mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
                 <p class="text-slate-500 text-lg font-medium mb-2">Sélectionnez un créneau</p>
                 <p class="text-slate-400 text-sm max-w-xs">
-                  Choisissez une date dans le calendrier puis un horaire pour accéder au formulaire de réservation.
+                  Choisissez une date dans le calendrier puis un horaire pour accéder au formulaire
+                  de réservation.
                 </p>
               </div>
             }

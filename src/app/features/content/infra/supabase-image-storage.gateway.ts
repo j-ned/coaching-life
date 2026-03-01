@@ -12,13 +12,11 @@ export class SupabaseImageStorageGateway extends ImageStorageGateway {
 
   upload(file: File, path: string): Observable<ImageUploadResult> {
     return from(
-      this.supabase.client.storage
-        .from(BUCKET)
-        .upload(path, file, {
-          cacheControl: '3600',
-          upsert: true,
-          contentType: file.type,
-        })
+      this.supabase.client.storage.from(BUCKET).upload(path, file, {
+        cacheControl: '3600',
+        upsert: true,
+        contentType: file.type,
+      }),
     ).pipe(
       map(({ data, error }) => {
         if (error) {
@@ -32,11 +30,7 @@ export class SupabaseImageStorageGateway extends ImageStorageGateway {
   }
 
   delete(path: string): Observable<void> {
-    return from(
-      this.supabase.client.storage
-        .from(BUCKET)
-        .remove([path])
-    ).pipe(
+    return from(this.supabase.client.storage.from(BUCKET).remove([path])).pipe(
       map(({ error }) => {
         if (error) throw error;
       }),
@@ -44,9 +38,7 @@ export class SupabaseImageStorageGateway extends ImageStorageGateway {
   }
 
   getPublicUrl(path: string): string {
-    const { data } = this.supabase.client.storage
-      .from(BUCKET)
-      .getPublicUrl(path);
+    const { data } = this.supabase.client.storage.from(BUCKET).getPublicUrl(path);
     return data.publicUrl;
   }
 }

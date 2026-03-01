@@ -20,7 +20,7 @@ export class GetWeeklyActivityUseCase {
     return forkJoin({
       visits: this.pageVisitGateway.getVisitsBetween(
         `${startDate}T00:00:00.000Z`,
-        `${endDate}T23:59:59.999Z`
+        `${endDate}T23:59:59.999Z`,
       ),
       appointments: this.appointmentGateway.getAllAppointments(),
       messages: this.messageGateway.getAll(),
@@ -28,17 +28,17 @@ export class GetWeeklyActivityUseCase {
       map(({ visits, appointments, messages }) => {
         const weeks = this.getWeekRanges(year, month, lastDay);
 
-        return weeks.map(week => {
-          const visitCount = visits.filter(v => {
+        return weeks.map((week) => {
+          const visitCount = visits.filter((v) => {
             const d = v.visitedAt.split('T')[0];
             return d >= week.start && d <= week.end;
           }).length;
 
-          const appointmentCount = [...appointments].filter(a =>
-            a.appointmentDate >= week.start && a.appointmentDate <= week.end
+          const appointmentCount = [...appointments].filter(
+            (a) => a.appointmentDate >= week.start && a.appointmentDate <= week.end,
           ).length;
 
-          const messageCount = [...messages].filter(m => {
+          const messageCount = [...messages].filter((m) => {
             const d = m.createdAt.split('T')[0];
             return d >= week.start && d <= week.end;
           }).length;
@@ -54,7 +54,11 @@ export class GetWeeklyActivityUseCase {
     );
   }
 
-  private getWeekRanges(year: number, month: number, lastDay: number): { start: string; end: string; label: string }[] {
+  private getWeekRanges(
+    year: number,
+    month: number,
+    lastDay: number,
+  ): { start: string; end: string; label: string }[] {
     const weeks: { start: string; end: string; label: string }[] = [];
     let weekStart = 1;
     let weekIndex = 1;

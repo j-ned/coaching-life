@@ -9,7 +9,7 @@ const serverConfig: ApplicationConfig = {
   providers: [
     provideServerRendering(withRoutes(serverRoutes)),
     { provide: Supabase, useClass: SupabaseServer },
-  ]
+  ],
 };
 
 export const config = mergeApplicationConfig(appConfig, serverConfig);

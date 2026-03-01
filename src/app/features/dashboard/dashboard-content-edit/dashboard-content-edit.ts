@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { GetPageContentUseCase } from '../../content/domain/use-cases/get-page-content.use-case';
@@ -44,7 +52,10 @@ const PAGE_ICONS: Record<string, string> = {
   host: { class: 'block' },
   template: `
     <div class="mb-8 flex items-center gap-4">
-      <a routerLink="/dashboard/content" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+      <a
+        routerLink="/dashboard/content"
+        class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+      >
         <app-icon name="chevron-left" size="lg" />
       </a>
       <div>
@@ -55,18 +66,26 @@ const PAGE_ICONS: Record<string, string> = {
 
     @if (isLoading()) {
       <div class="flex items-center justify-center py-20">
-        <div class="w-8 h-8 border-3 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+        <div
+          class="w-8 h-8 border-3 border-brand-500 border-t-transparent rounded-full animate-spin"
+        ></div>
       </div>
     } @else {
       <!-- Toast feedback -->
       @if (saveSuccess()) {
-        <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-center gap-3" role="alert">
+        <div
+          class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-center gap-3"
+          role="alert"
+        >
           <app-icon name="check-circle" size="md" />
           <span class="font-medium">Contenu enregistré avec succès !</span>
         </div>
       }
       @if (saveError()) {
-        <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-3" role="alert">
+        <div
+          class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-3"
+          role="alert"
+        >
           <app-icon name="info" size="md" />
           <span>{{ saveError() }}</span>
         </div>
@@ -87,17 +106,31 @@ const PAGE_ICONS: Record<string, string> = {
 
           <div class="p-6 space-y-5">
             <div>
-              <label for="title" class="block text-sm font-medium text-slate-700 mb-1.5">Titre de la page <span aria-hidden="true" class="text-red-400">*</span></label>
-              <input id="title" type="text" formControlName="title" placeholder="Ex : Coach de Vie Certifié"
-                     class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
-                     aria-required="true" />
+              <label for="title" class="block text-sm font-medium text-slate-700 mb-1.5"
+                >Titre de la page <span aria-hidden="true" class="text-red-400">*</span></label
+              >
+              <input
+                id="title"
+                type="text"
+                formControlName="title"
+                placeholder="Ex : Coach de Vie Certifié"
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
+                aria-required="true"
+              />
             </div>
 
             <div>
-              <label for="introduction" class="block text-sm font-medium text-slate-700 mb-1.5">Introduction <span aria-hidden="true" class="text-red-400">*</span></label>
-              <textarea id="introduction" formControlName="introduction" rows="4" placeholder="Décrivez votre accompagnement en quelques phrases..."
-                        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all resize-none"
-                        aria-required="true"></textarea>
+              <label for="introduction" class="block text-sm font-medium text-slate-700 mb-1.5"
+                >Introduction <span aria-hidden="true" class="text-red-400">*</span></label
+              >
+              <textarea
+                id="introduction"
+                formControlName="introduction"
+                rows="4"
+                placeholder="Décrivez votre accompagnement en quelques phrases..."
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all resize-none"
+                aria-required="true"
+              ></textarea>
             </div>
           </div>
         </section>
@@ -116,17 +149,27 @@ const PAGE_ICONS: Record<string, string> = {
 
           <div class="p-6 space-y-5">
             <div>
-              <label for="sectionTitle" class="block text-sm font-medium text-slate-700 mb-1.5">Titre de section</label>
-              <input id="sectionTitle" type="text" formControlName="sectionTitle" placeholder="Ex : Pourquoi faire appel à mes services ?"
-                     class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all" />
+              <label for="sectionTitle" class="block text-sm font-medium text-slate-700 mb-1.5"
+                >Titre de section</label
+              >
+              <input
+                id="sectionTitle"
+                type="text"
+                formControlName="sectionTitle"
+                placeholder="Ex : Pourquoi faire appel à mes services ?"
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
+              />
             </div>
 
             <!-- Items -->
             <div>
               <div class="flex items-center justify-between mb-3">
                 <label class="text-sm font-medium text-slate-700">Éléments</label>
-                <button type="button" (click)="addItem()"
-                        class="inline-flex items-center gap-1.5 text-sm text-brand-500 hover:text-brand-600 font-medium transition-colors cursor-pointer">
+                <button
+                  type="button"
+                  (click)="addItem()"
+                  class="inline-flex items-center gap-1.5 text-sm text-brand-500 hover:text-brand-600 font-medium transition-colors cursor-pointer"
+                >
                   <app-icon name="check" size="xs" />
                   Ajouter
                 </button>
@@ -134,32 +177,60 @@ const PAGE_ICONS: Record<string, string> = {
 
               <div class="space-y-3">
                 @for (item of itemsArray.controls; track $index; let i = $index) {
-                  <div class="group relative bg-slate-50 hover:bg-slate-100/80 rounded-xl p-4 transition-colors border border-slate-100" [formGroup]="item">
+                  <div
+                    class="group relative bg-slate-50 hover:bg-slate-100/80 rounded-xl p-4 transition-colors border border-slate-100"
+                    [formGroup]="item"
+                  >
                     <!-- Numéro -->
                     <div class="flex items-start gap-4">
-                      <span class="shrink-0 w-7 h-7 rounded-full bg-brand-100 text-brand-600 text-xs font-bold flex items-center justify-center mt-1">
+                      <span
+                        class="shrink-0 w-7 h-7 rounded-full bg-brand-100 text-brand-600 text-xs font-bold flex items-center justify-center mt-1"
+                      >
                         {{ i + 1 }}
                       </span>
 
                       <div class="grow space-y-2">
-                        <input type="text" formControlName="title" placeholder="Titre (optionnel)"
-                               class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all" />
-                        <textarea formControlName="description" rows="2" placeholder="Description *"
-                                  class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all resize-none"></textarea>
+                        <input
+                          type="text"
+                          formControlName="title"
+                          placeholder="Titre (optionnel)"
+                          class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
+                        />
+                        <textarea
+                          formControlName="description"
+                          rows="2"
+                          placeholder="Description *"
+                          class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all resize-none"
+                        ></textarea>
                       </div>
 
                       <div class="flex flex-col gap-0.5 shrink-0">
                         @if (i > 0) {
-                          <button type="button" (click)="moveItem(i, -1)" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-white transition-all cursor-pointer" aria-label="Monter">
+                          <button
+                            type="button"
+                            (click)="moveItem(i, -1)"
+                            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-white transition-all cursor-pointer"
+                            aria-label="Monter"
+                          >
                             <app-icon name="chevron-up" size="sm" />
                           </button>
                         }
                         @if (i < itemsArray.length - 1) {
-                          <button type="button" (click)="moveItem(i, 1)" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-white transition-all cursor-pointer" aria-label="Descendre">
+                          <button
+                            type="button"
+                            (click)="moveItem(i, 1)"
+                            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-white transition-all cursor-pointer"
+                            aria-label="Descendre"
+                          >
                             <app-icon name="chevron-down" size="sm" />
                           </button>
                         }
-                        <button type="button" (click)="removeItem(i)" class="p-1.5 rounded-lg text-red-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer" aria-label="Supprimer">
+                        <button
+                          type="button"
+                          (click)="removeItem(i)"
+                          class="p-1.5 rounded-lg text-red-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer"
+                          aria-label="Supprimer"
+                        >
                           <app-icon name="trash-2" size="sm" />
                         </button>
                       </div>
@@ -174,16 +245,25 @@ const PAGE_ICONS: Record<string, string> = {
             </div>
 
             <div>
-              <label for="extraText" class="block text-sm font-medium text-slate-700 mb-1.5">Texte complémentaire</label>
-              <textarea id="extraText" formControlName="extraText" rows="2" placeholder="Un texte additionnel sous la liste (optionnel)"
-                        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all resize-none"></textarea>
+              <label for="extraText" class="block text-sm font-medium text-slate-700 mb-1.5"
+                >Texte complémentaire</label
+              >
+              <textarea
+                id="extraText"
+                formControlName="extraText"
+                rows="2"
+                placeholder="Un texte additionnel sous la liste (optionnel)"
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all resize-none"
+              ></textarea>
             </div>
           </div>
         </section>
 
         <!-- Image -->
         <section class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div class="bg-linear-to-r from-violet-500 to-violet-400 px-6 py-4 flex items-center gap-3">
+          <div
+            class="bg-linear-to-r from-violet-500 to-violet-400 px-6 py-4 flex items-center gap-3"
+          >
             <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white">
               <app-icon name="image" size="md" />
             </div>
@@ -201,28 +281,48 @@ const PAGE_ICONS: Record<string, string> = {
             />
 
             <div>
-              <label for="imageAlt" class="block text-sm font-medium text-slate-700 mb-1.5">Description de l'image <span aria-hidden="true" class="text-red-400">*</span></label>
-              <input id="imageAlt" type="text" formControlName="imageAlt" placeholder="Ex : Séance de coaching de vie"
-                     class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
-                     aria-required="true" />
-              <p class="text-xs text-slate-400 mt-1">Important pour l'accessibilité et le référencement</p>
+              <label for="imageAlt" class="block text-sm font-medium text-slate-700 mb-1.5"
+                >Description de l'image
+                <span aria-hidden="true" class="text-red-400">*</span></label
+              >
+              <input
+                id="imageAlt"
+                type="text"
+                formControlName="imageAlt"
+                placeholder="Ex : Séance de coaching de vie"
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
+                aria-required="true"
+              />
+              <p class="text-xs text-slate-400 mt-1">
+                Important pour l'accessibilité et le référencement
+              </p>
             </div>
           </div>
         </section>
       </form>
 
       <!-- Sticky save bar -->
-      <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200 py-4 px-6 z-40">
+      <div
+        class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200 py-4 px-6 z-40"
+      >
         <div class="max-w-3xl mx-auto flex items-center justify-between">
-          <a routerLink="/dashboard/content"
-             class="px-5 py-2.5 text-slate-600 hover:text-slate-800 font-medium transition-colors">
+          <a
+            routerLink="/dashboard/content"
+            class="px-5 py-2.5 text-slate-600 hover:text-slate-800 font-medium transition-colors"
+          >
             Annuler
           </a>
-          <button type="button" (click)="save()" [disabled]="form.invalid || isSaving()"
-                  class="px-8 py-2.5 bg-brand-500 text-white rounded-xl font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg cursor-pointer">
+          <button
+            type="button"
+            (click)="save()"
+            [disabled]="form.invalid || isSaving()"
+            class="px-8 py-2.5 bg-brand-500 text-white rounded-xl font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg cursor-pointer"
+          >
             @if (isSaving()) {
               <span class="flex items-center gap-2">
-                <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span
+                  class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+                ></span>
                 Enregistrement...
               </span>
             } @else {
@@ -232,7 +332,7 @@ const PAGE_ICONS: Record<string, string> = {
         </div>
       </div>
     }
-  `
+  `,
 })
 export class DashboardContentEdit {
   private readonly getPageContent = inject(GetPageContentUseCase);
@@ -288,7 +388,7 @@ export class DashboardContentEdit {
     this.isLoading.set(true);
     const fallback = DEFAULT_PAGES[slug];
 
-    this.getPageContent.execute(slug).subscribe(page => {
+    this.getPageContent.execute(slug).subscribe((page) => {
       const content = page ?? fallback;
       this.form.patchValue({
         title: content.title,
@@ -311,7 +411,10 @@ export class DashboardContentEdit {
   private createItemGroup(item: PageContentItem = { title: '', description: '' }): ItemFormGroup {
     return new FormGroup({
       title: new FormControl(item.title, { nonNullable: true }),
-      description: new FormControl(item.description, { nonNullable: true, validators: [Validators.required] }),
+      description: new FormControl(item.description, {
+        nonNullable: true,
+        validators: [Validators.required],
+      }),
     });
   }
 
@@ -358,7 +461,7 @@ export class DashboardContentEdit {
         error: () => {
           this.isUploadingImage.set(false);
           this.isSaving.set(false);
-          this.saveError.set('Erreur lors de l\'upload de l\'image.');
+          this.saveError.set("Erreur lors de l'upload de l'image.");
         },
       });
     } else {
@@ -368,24 +471,26 @@ export class DashboardContentEdit {
 
   private saveContent(slug: PageSlug, imageUrl?: string): void {
     const formValue = this.form.getRawValue();
-    this.updatePageContent.execute(slug, {
-      title: formValue.title,
-      introduction: formValue.introduction,
-      sectionTitle: formValue.sectionTitle,
-      items: formValue.items,
-      extraText: formValue.extraText,
-      imageUrl: imageUrl ?? '',
-      imageAlt: formValue.imageAlt,
-    }).subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.saveSuccess.set(true);
-        setTimeout(() => this.saveSuccess.set(false), 4000);
-      },
-      error: () => {
-        this.isSaving.set(false);
-        this.saveError.set('Erreur lors de la sauvegarde du contenu.');
-      },
-    });
+    this.updatePageContent
+      .execute(slug, {
+        title: formValue.title,
+        introduction: formValue.introduction,
+        sectionTitle: formValue.sectionTitle,
+        items: formValue.items,
+        extraText: formValue.extraText,
+        imageUrl: imageUrl ?? '',
+        imageAlt: formValue.imageAlt,
+      })
+      .subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.saveSuccess.set(true);
+          setTimeout(() => this.saveSuccess.set(false), 4000);
+        },
+        error: () => {
+          this.isSaving.set(false);
+          this.saveError.set('Erreur lors de la sauvegarde du contenu.');
+        },
+      });
   }
 }

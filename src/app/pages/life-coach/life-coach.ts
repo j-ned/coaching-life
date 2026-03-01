@@ -39,18 +39,22 @@ import { Icon } from '../../shared/components/icon/icon';
         </div>
       </div>
       <div class="rounded-3xl overflow-hidden shadow-xl lg:h-[700px]">
-        <img [src]="c.imageUrl" width="800" height="800" [alt]="c.imageAlt" class="object-cover w-full h-full" />
+        <img
+          [src]="c.imageUrl"
+          width="800"
+          height="800"
+          [alt]="c.imageAlt"
+          class="object-cover w-full h-full"
+        />
       </div>
     </div>
-  `
+  `,
 })
 export class LifeCoach {
   private readonly getPageContent = inject(GetPageContentUseCase);
 
   protected readonly content = toSignal(
-    this.getPageContent.execute('life-coach').pipe(
-      map(v => v ?? DEFAULT_PAGES['life-coach']),
-    ),
+    this.getPageContent.execute('life-coach').pipe(map((v) => v ?? DEFAULT_PAGES['life-coach'])),
     { initialValue: DEFAULT_PAGES['life-coach'] },
   );
 }

@@ -1,4 +1,7 @@
-import type { AppointmentStatus, CoachingType } from '../../../booking/domain/models/appointment.model';
+import type {
+  AppointmentStatus,
+  CoachingType,
+} from '../../../booking/domain/models/appointment.model';
 import type { MessageSubject } from '../../../contact/domain/models/message.model';
 
 export type PageVisit = {

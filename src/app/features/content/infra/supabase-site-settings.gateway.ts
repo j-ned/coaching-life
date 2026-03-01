@@ -11,11 +11,7 @@ export class SupabaseSiteSettingsGateway extends SiteSettingsGateway {
 
   get<T extends SiteSettingValue>(key: SiteSettingKey): Observable<T | null> {
     return from(
-      this.supabase.client
-        .from('site_settings')
-        .select('*')
-        .eq('key', key)
-        .single()
+      this.supabase.client.from('site_settings').select('*').eq('key', key).single(),
     ).pipe(
       map(({ data, error }) => {
         if (error || !data) return null;
@@ -29,12 +25,9 @@ export class SupabaseSiteSettingsGateway extends SiteSettingsGateway {
     return from(
       this.supabase.client
         .from('site_settings')
-        .upsert(
-          { key, value, updated_at: new Date().toISOString() },
-          { onConflict: 'key' }
-        )
+        .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' })
         .select()
-        .single()
+        .single(),
     ).pipe(
       map(({ data, error }) => {
         if (error) throw error;

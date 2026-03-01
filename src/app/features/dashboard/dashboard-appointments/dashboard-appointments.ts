@@ -2,7 +2,11 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { FormsModule } from '@angular/forms';
 import { Icon } from '../../../shared/components/icon/icon';
 import { AppointmentGateway } from '../../booking/domain/gateways/appointment.gateway';
-import type { Appointment, AppointmentStatus, DisabledDate } from '../../booking/domain/models/appointment.model';
+import type {
+  Appointment,
+  AppointmentStatus,
+  DisabledDate,
+} from '../../booking/domain/models/appointment.model';
 import { COACHING_TYPE_LABELS } from '../../booking/domain/models/appointment.model';
 import { getFrenchHolidays, getUnavailableReason } from '../../../shared/calendar/french-holidays';
 
@@ -33,17 +37,21 @@ type CalendarDay = {
     <nav class="flex gap-1 mb-6 bg-slate-100 rounded-lg p-1 w-fit" aria-label="Onglets rendez-vous">
       <button
         (click)="activeTab.set('appointments')"
-        [class]="activeTab() === 'appointments'
-          ? 'px-4 py-2 rounded-md text-sm font-medium bg-white text-slate-800 shadow-sm transition-all'
-          : 'px-4 py-2 rounded-md text-sm font-medium text-slate-500 hover:text-slate-700 transition-all'"
+        [class]="
+          activeTab() === 'appointments'
+            ? 'px-4 py-2 rounded-md text-sm font-medium bg-white text-slate-800 shadow-sm transition-all'
+            : 'px-4 py-2 rounded-md text-sm font-medium text-slate-500 hover:text-slate-700 transition-all'
+        "
       >
         Rendez-vous ({{ appointments().length }})
       </button>
       <button
         (click)="activeTab.set('availability')"
-        [class]="activeTab() === 'availability'
-          ? 'px-4 py-2 rounded-md text-sm font-medium bg-white text-slate-800 shadow-sm transition-all'
-          : 'px-4 py-2 rounded-md text-sm font-medium text-slate-500 hover:text-slate-700 transition-all'"
+        [class]="
+          activeTab() === 'availability'
+            ? 'px-4 py-2 rounded-md text-sm font-medium bg-white text-slate-800 shadow-sm transition-all'
+            : 'px-4 py-2 rounded-md text-sm font-medium text-slate-500 hover:text-slate-700 transition-all'
+        "
       >
         Disponibilités
       </button>
@@ -55,7 +63,9 @@ type CalendarDay = {
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-slate-50 border-b border-slate-100 text-xs uppercase tracking-wider text-slate-500">
+              <tr
+                class="bg-slate-50 border-b border-slate-100 text-xs uppercase tracking-wider text-slate-500"
+              >
                 <th class="p-4 font-medium">Client</th>
                 <th class="p-4 font-medium">Service</th>
                 <th class="p-4 font-medium">Date & Heure</th>
@@ -73,7 +83,10 @@ type CalendarDay = {
                   <td class="p-4 text-slate-600">{{ getCoachingLabel(appt.coachingType) }}</td>
                   <td class="p-4 text-slate-600">{{ formatDateTime(appt) }}</td>
                   <td class="p-4">
-                    <span class="px-2.5 py-1 rounded-full text-xs font-medium" [class]="getStatusClass(appt.status)">
+                    <span
+                      class="px-2.5 py-1 rounded-full text-xs font-medium"
+                      [class]="getStatusClass(appt.status)"
+                    >
                       {{ getStatusLabel(appt.status) }}
                     </span>
                   </td>
@@ -118,9 +131,7 @@ type CalendarDay = {
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="5" class="p-8 text-center text-slate-500">
-                    Aucun rendez-vous.
-                  </td>
+                  <td colspan="5" class="p-8 text-center text-slate-500">Aucun rendez-vous.</td>
                 </tr>
               }
             </tbody>
@@ -176,7 +187,9 @@ type CalendarDay = {
                   @if (day.isDisabled) {
                     <span class="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-red-400"></span>
                   } @else if (day.isAutoBlocked) {
-                    <span class="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-amber-400"></span>
+                    <span
+                      class="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-amber-400"
+                    ></span>
                   }
                 </button>
               } @else {
@@ -261,7 +274,9 @@ type CalendarDay = {
             </h4>
             <div class="space-y-2 max-h-64 overflow-y-auto">
               @for (dd of disabledDates(); track dd.id) {
-                <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-red-50 border border-red-100">
+                <div
+                  class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-red-50 border border-red-100"
+                >
                   <div class="min-w-0">
                     <p class="text-xs font-medium text-slate-700">{{ formatDate(dd.date) }}</p>
                     @if (dd.reason) {
@@ -284,7 +299,7 @@ type CalendarDay = {
         </div>
       </div>
     }
-  `
+  `,
 })
 export class DashboardAppointments {
   private readonly appointmentGateway = inject(AppointmentGateway);
@@ -381,21 +396,31 @@ export class DashboardAppointments {
 
   protected getStatusClass(status: string): string {
     switch (status) {
-      case 'confirmed': return 'bg-emerald-100 text-emerald-700';
-      case 'pending': return 'bg-amber-100 text-amber-700';
-      case 'cancelled': return 'bg-red-100 text-red-700';
-      case 'completed': return 'bg-blue-100 text-blue-700';
-      default: return 'bg-slate-100 text-slate-700';
+      case 'confirmed':
+        return 'bg-emerald-100 text-emerald-700';
+      case 'pending':
+        return 'bg-amber-100 text-amber-700';
+      case 'cancelled':
+        return 'bg-red-100 text-red-700';
+      case 'completed':
+        return 'bg-blue-100 text-blue-700';
+      default:
+        return 'bg-slate-100 text-slate-700';
     }
   }
 
   protected getStatusLabel(status: string): string {
     switch (status) {
-      case 'confirmed': return 'Confirmé';
-      case 'pending': return 'En attente';
-      case 'cancelled': return 'Annulé';
-      case 'completed': return 'Terminé';
-      default: return status;
+      case 'confirmed':
+        return 'Confirmé';
+      case 'pending':
+        return 'En attente';
+      case 'cancelled':
+        return 'Annulé';
+      case 'completed':
+        return 'Terminé';
+      default:
+        return status;
     }
   }
 
@@ -452,15 +477,17 @@ export class DashboardAppointments {
     const date = this.selectedDate();
     if (!date) return;
 
-    this.appointmentGateway.addDisabledDate({
-      date,
-      reason: this.reasonInput || undefined,
-    }).subscribe({
-      next: () => {
-        this.reasonInput = '';
-        this.loadDisabledDates();
-      },
-    });
+    this.appointmentGateway
+      .addDisabledDate({
+        date,
+        reason: this.reasonInput || undefined,
+      })
+      .subscribe({
+        next: () => {
+          this.reasonInput = '';
+          this.loadDisabledDates();
+        },
+      });
   }
 
   protected enableDate(): void {

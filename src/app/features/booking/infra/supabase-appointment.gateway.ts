@@ -1,7 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, from, map, of, catchError } from 'rxjs';
 import { AppointmentGateway } from '../domain/gateways/appointment.gateway';
-import type { Appointment, AppointmentFormData, AppointmentSubmission, AppointmentStatus, DisabledDate } from '../domain/models/appointment.model';
+import type {
+  Appointment,
+  AppointmentFormData,
+  AppointmentSubmission,
+  AppointmentStatus,
+  DisabledDate,
+} from '../domain/models/appointment.model';
 import { Supabase } from '../../../core/services/supabase/supabase';
 import { toAppointment, toDisabledDate, toSupabaseInsert } from './appointment.adapter';
 
@@ -21,7 +27,7 @@ export class SupabaseAppointmentGateway extends AppointmentGateway {
         .select('*')
         .gte('appointment_date', startDate)
         .lte('appointment_date', endDate)
-        .neq('status', 'cancelled')
+        .neq('status', 'cancelled'),
     ).pipe(
       map(({ data, error }) => {
         if (error) throw error;
@@ -33,26 +39,23 @@ export class SupabaseAppointmentGateway extends AppointmentGateway {
 
   submitAppointment(data: AppointmentFormData): Observable<AppointmentSubmission> {
     return from(
-      this.supabase.client
-        .from('appointments')
-        .insert(toSupabaseInsert(data))
-        .select()
-        .single()
+      this.supabase.client.from('appointments').insert(toSupabaseInsert(data)).select().single(),
     ).pipe(
       map(({ error }) => {
         if (error) throw error;
         return { success: true, message: 'Votre rendez-vous a été réservé avec succès !' };
       }),
       catchError(() =>
-        of({ success: false, message: 'Une erreur est survenue lors de la réservation. Veuillez réessayer.' }),
+        of({
+          success: false,
+          message: 'Une erreur est survenue lors de la réservation. Veuillez réessayer.',
+        }),
       ),
     );
   }
 
   getDisabledDates(): Observable<readonly DisabledDate[]> {
-    return from(
-      this.supabase.client.from('disabled_dates').select('*')
-    ).pipe(
+    return from(this.supabase.client.from('disabled_dates').select('*')).pipe(
       map(({ data, error }) => {
         if (error) throw error;
         return (data ?? []).map(toDisabledDate);
@@ -66,7 +69,7 @@ export class SupabaseAppointmentGateway extends AppointmentGateway {
       this.supabase.client
         .from('appointments')
         .select('*')
-        .order('appointment_date', { ascending: true })
+        .order('appointment_date', { ascending: true }),
     ).pipe(
       map(({ data, error }) => {
         if (error) throw error;
@@ -78,12 +81,7 @@ export class SupabaseAppointmentGateway extends AppointmentGateway {
 
   updateStatus(id: string, status: AppointmentStatus): Observable<Appointment> {
     return from(
-      this.supabase.client
-        .from('appointments')
-        .update({ status })
-        .eq('id', id)
-        .select()
-        .single()
+      this.supabase.client.from('appointments').update({ status }).eq('id', id).select().single(),
     ).pipe(
       map(({ data, error }) => {
         if (error) throw error;
@@ -93,12 +91,7 @@ export class SupabaseAppointmentGateway extends AppointmentGateway {
   }
 
   deleteAppointment(id: string): Observable<void> {
-    return from(
-      this.supabase.client
-        .from('appointments')
-        .delete()
-        .eq('id', id)
-    ).pipe(
+    return from(this.supabase.client.from('appointments').delete().eq('id', id)).pipe(
       map(({ error }) => {
         if (error) throw error;
       }),
@@ -111,7 +104,7 @@ export class SupabaseAppointmentGateway extends AppointmentGateway {
         .from('disabled_dates')
         .insert({ date: date.date, reason: date.reason ?? null })
         .select()
-        .single()
+        .single(),
     ).pipe(
       map(({ data, error }) => {
         if (error) throw error;
@@ -121,12 +114,7 @@ export class SupabaseAppointmentGateway extends AppointmentGateway {
   }
 
   removeDisabledDate(id: string): Observable<void> {
-    return from(
-      this.supabase.client
-        .from('disabled_dates')
-        .delete()
-        .eq('id', id)
-    ).pipe(
+    return from(this.supabase.client.from('disabled_dates').delete().eq('id', id)).pipe(
       map(({ error }) => {
         if (error) throw error;
       }),

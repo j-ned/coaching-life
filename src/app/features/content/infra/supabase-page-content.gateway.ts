@@ -10,13 +10,7 @@ export class SupabasePageContentGateway extends PageContentGateway {
   private readonly supabase = inject(Supabase);
 
   getBySlug(slug: PageSlug): Observable<PageContent | null> {
-    return from(
-      this.supabase.client
-        .from('pages')
-        .select('*')
-        .eq('slug', slug)
-        .maybeSingle()
-    ).pipe(
+    return from(this.supabase.client.from('pages').select('*').eq('slug', slug).maybeSingle()).pipe(
       map(({ data, error }) => {
         if (error) {
           console.error('[Pages] getBySlug failed:', error.message);
@@ -29,10 +23,7 @@ export class SupabasePageContentGateway extends PageContentGateway {
 
   getAll(): Observable<readonly PageContent[]> {
     return from(
-      this.supabase.client
-        .from('pages')
-        .select('*')
-        .order('slug', { ascending: true })
+      this.supabase.client.from('pages').select('*').order('slug', { ascending: true }),
     ).pipe(
       map(({ data, error }) => {
         if (error) throw error;
@@ -42,13 +33,16 @@ export class SupabasePageContentGateway extends PageContentGateway {
     );
   }
 
-  update(slug: PageSlug, data: Partial<Omit<PageContent, 'id' | 'slug' | 'updatedAt'>>): Observable<PageContent> {
+  update(
+    slug: PageSlug,
+    data: Partial<Omit<PageContent, 'id' | 'slug' | 'updatedAt'>>,
+  ): Observable<PageContent> {
     return from(
       this.supabase.client
         .from('pages')
         .upsert({ slug, ...toSupabasePageUpdate(data) }, { onConflict: 'slug' })
         .select()
-        .single()
+        .single(),
     ).pipe(
       map(({ data: row, error }) => {
         if (error) throw error;

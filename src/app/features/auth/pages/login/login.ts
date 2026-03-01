@@ -8,9 +8,14 @@ import { Icon } from '../../../../shared/components/icon/icon';
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, Icon],
-  host: { class: 'fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm' },
+  host: {
+    class:
+      'fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm',
+  },
   template: `
-    <div class="relative w-full max-w-md bg-white p-8 shadow-2xl rounded-2xl border border-slate-100">
+    <div
+      class="relative w-full max-w-md bg-white p-8 shadow-2xl rounded-2xl border border-slate-100"
+    >
       <button
         (click)="closeModal()"
         class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
@@ -20,7 +25,9 @@ import { Icon } from '../../../../shared/components/icon/icon';
       </button>
 
       <div class="text-center mb-8">
-        <div class="w-14 h-14 bg-brand-50 rounded-full flex items-center justify-center text-brand-500 mx-auto mb-4">
+        <div
+          class="w-14 h-14 bg-brand-50 rounded-full flex items-center justify-center text-brand-500 mx-auto mb-4"
+        >
           <app-icon name="lock" size="xl" />
         </div>
         <h2 class="text-2xl font-bold text-slate-900">Accès Administrateur</h2>
@@ -29,9 +36,15 @@ import { Icon } from '../../../../shared/components/icon/icon';
 
       <form class="space-y-5" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
         <div>
-          <label for="login-email" class="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+          <label for="login-email" class="block text-sm font-medium text-slate-700 mb-1.5"
+            >Email</label
+          >
           <div class="relative">
-            <app-icon name="mail" size="md" class="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <app-icon
+              name="mail"
+              size="md"
+              class="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+            />
             <input
               id="login-email"
               type="email"
@@ -45,9 +58,15 @@ import { Icon } from '../../../../shared/components/icon/icon';
         </div>
 
         <div>
-          <label for="login-password" class="block text-sm font-medium text-slate-700 mb-1.5">Mot de passe</label>
+          <label for="login-password" class="block text-sm font-medium text-slate-700 mb-1.5"
+            >Mot de passe</label
+          >
           <div class="relative">
-            <app-icon name="lock" size="md" class="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <app-icon
+              name="lock"
+              size="md"
+              class="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+            />
             <input
               id="login-password"
               [type]="showPassword() ? 'text' : 'password'"
@@ -61,7 +80,9 @@ import { Icon } from '../../../../shared/components/icon/icon';
               type="button"
               (click)="togglePassword()"
               class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-              [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+              [attr.aria-label]="
+                showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+              "
             >
               @if (showPassword()) {
                 <app-icon name="eye-off" size="md" />
@@ -85,8 +106,19 @@ import { Icon } from '../../../../shared/components/icon/icon';
         >
           @if (isLoading()) {
             <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              ></path>
             </svg>
             Connexion en cours...
           } @else {
@@ -96,7 +128,7 @@ import { Icon } from '../../../../shared/components/icon/icon';
         </button>
       </form>
     </div>
-  `
+  `,
 })
 export class Login {
   private readonly router = inject(Router);
@@ -115,7 +147,7 @@ export class Login {
   protected readonly showPassword = signal(false);
 
   togglePassword(): void {
-    this.showPassword.update(v => !v);
+    this.showPassword.update((v) => !v);
   }
 
   closeModal(): void {
@@ -138,9 +170,11 @@ export class Login {
       },
       error: (err) => {
         this.isLoading.set(false);
-        this.error.set(err.message === 'Invalid login credentials'
-          ? 'Email ou mot de passe incorrect.'
-          : err.message || 'Erreur de connexion.');
+        this.error.set(
+          err.message === 'Invalid login credentials'
+            ? 'Email ou mot de passe incorrect.'
+            : err.message || 'Erreur de connexion.',
+        );
       },
     });
   }

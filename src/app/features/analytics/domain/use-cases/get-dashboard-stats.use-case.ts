@@ -4,7 +4,10 @@ import { PageVisitGateway } from '../gateways/page-visit.gateway';
 import { AppointmentGateway } from '../../../booking/domain/gateways/appointment.gateway';
 import { MessageGateway } from '../../../contact/domain/gateways/message.gateway';
 import type { DashboardStats, AppointmentStatusBreakdown } from '../models/analytics.model';
-import type { AppointmentStatus, CoachingType } from '../../../booking/domain/models/appointment.model';
+import type {
+  AppointmentStatus,
+  CoachingType,
+} from '../../../booking/domain/models/appointment.model';
 import type { MessageSubject } from '../../../contact/domain/models/message.model';
 
 @Injectable({ providedIn: 'root' })
@@ -27,10 +30,10 @@ export class GetDashboardStatsUseCase {
     }).pipe(
       map(({ visitCount, appointments, messages }) => {
         const upcoming = appointments.filter(
-          a => a.appointmentDate >= today && (a.status === 'pending' || a.status === 'confirmed')
+          (a) => a.appointmentDate >= today && (a.status === 'pending' || a.status === 'confirmed'),
         );
 
-        const unread = messages.filter(m => m.status === 'unread');
+        const unread = messages.filter((m) => m.status === 'unread');
 
         const statusBreakdown: AppointmentStatusBreakdown = {
           pending: 0,
