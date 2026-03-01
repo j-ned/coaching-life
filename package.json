@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "format:check": "prettier --check \"src/**/*.{ts,html,css,json}\"",
     "format": "prettier --write \"src/**/*.{ts,html,css,json}\"",
-    "serve:ssr:coaching-life": "node dist/coaching-life/server/server.mjs"
+    "serve:ssr:coaching-life": "node dist/coaching-life/server/server.mjs",
+    "prepare": "husky"
   },
   "private": true,
   "packageManager": "pnpm@10.12.1",
@@ -46,6 +47,7 @@
     "@tailwindcss/postcss": "^4.1.12",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
+    "husky": "^9.1.7",
     "jsdom": "^28.0.0",
     "postcss": "^8.5.3",
     "prettier": "^3.8.1",

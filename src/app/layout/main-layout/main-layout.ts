@@ -115,22 +115,34 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
           <h3 class="text-white font-medium mb-4">Spécialités</h3>
           <ul class="space-y-2">
             <li>
-              <a routerLink="/life-coach" aria-label="Coach de Vie Certifié – pied de page" class="hover:text-brand-400 transition-colors"
+              <a
+                routerLink="/life-coach"
+                aria-label="Coach de Vie Certifié – pied de page"
+                class="hover:text-brand-400 transition-colors"
                 >Coach de Vie Certifié</a
               >
             </li>
             <li>
-              <a routerLink="/personal-development" aria-label="Développement Personnel – pied de page" class="hover:text-brand-400 transition-colors"
+              <a
+                routerLink="/personal-development"
+                aria-label="Développement Personnel – pied de page"
+                class="hover:text-brand-400 transition-colors"
                 >Développement Personnel</a
               >
             </li>
             <li>
-              <a routerLink="/equine-coaching" aria-label="Coaching facilité avec le cheval – pied de page" class="hover:text-brand-400 transition-colors"
+              <a
+                routerLink="/equine-coaching"
+                aria-label="Coaching facilité avec le cheval – pied de page"
+                class="hover:text-brand-400 transition-colors"
                 >Coaching facilité avec le cheval</a
               >
             </li>
             <li>
-              <a routerLink="/neuroatypical-parents" aria-label="Parents d'enfants neuroatypiques – pied de page" class="hover:text-brand-400 transition-colors"
+              <a
+                routerLink="/neuroatypical-parents"
+                aria-label="Parents d'enfants neuroatypiques – pied de page"
+                class="hover:text-brand-400 transition-colors"
                 >Parents d'enfants neuroatypiques</a
               >
             </li>
