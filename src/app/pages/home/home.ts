@@ -127,7 +127,7 @@ const SERVICE_CARDS: readonly {
     <section
       id="services"
       aria-labelledby="services-heading"
-      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20"
+      class="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20"
     >
       <div class="text-center mb-16">
         <span
@@ -191,7 +191,7 @@ const SERVICE_CARDS: readonly {
     <section
       id="contact"
       aria-labelledby="contact-heading"
-      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20"
+      class="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20"
     >
       <div class="text-center mb-12">
         <span
@@ -328,7 +328,7 @@ export class Home {
     const id = sectionId.replace(/^#/, '');
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 }

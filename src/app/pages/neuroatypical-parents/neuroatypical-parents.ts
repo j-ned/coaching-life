@@ -4,10 +4,11 @@ import { DEFAULT_PAGES } from '../../features/content/domain/models/default-cont
 import type { PageContent } from '../../features/content/domain/models/page-content.model';
 import { Icon } from '../../shared/components/icon/icon';
 import { NgOptimizedImage } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-neuroatypical-parents',
-  imports: [Icon, NgOptimizedImage],
+  imports: [Icon, NgOptimizedImage, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24' },
   template: `
@@ -51,7 +52,8 @@ import { NgOptimizedImage } from '@angular/common';
           </ul>
           <div class="mt-6">
             <a
-              href="/contact"
+              routerLink="/"
+              fragment="contact"
               class="text-brand-500 hover:text-brand-600 font-medium inline-flex items-center gap-2 transition-colors"
             >
               Prenons le temps d'échanger

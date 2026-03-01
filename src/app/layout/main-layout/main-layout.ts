@@ -183,17 +183,11 @@ export class MainLayout {
   protected goToContact(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    const currentUrl = this.router.url.split('?')[0];
+    const currentUrl = this.router.url.split('?')[0].split('#')[0];
     if (currentUrl === '/' || currentUrl === '') {
-      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
-      this.router.navigate(['/']).then(() => {
-        setTimeout(() => {
-          document
-            .getElementById('contact')
-            ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-      });
+      this.router.navigate(['/'], { fragment: 'contact' });
     }
   }
 
