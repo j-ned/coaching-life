@@ -1,8 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
 import { Booking } from '../../features/booking/pages/booking';
 import { ContactForm } from '../../features/contact/contact-form';
 import { Reviews } from '../../features/reviews/reviews';
@@ -20,7 +18,10 @@ import type {
   HomeCTASettings,
   HomeServicesSettings,
 } from '../../features/content/domain/models/site-settings.model';
-import type { PageSlug } from '../../features/content/domain/models/page-content.model';
+import type {
+  PageContent,
+  PageSlug,
+} from '../../features/content/domain/models/page-content.model';
 
 const SERVICE_CARDS: readonly {
   slug: PageSlug;
@@ -278,28 +279,29 @@ export class Home {
   private readonly getAllPages = inject(GetAllPagesUseCase);
   private readonly platformId = inject(PLATFORM_ID);
 
-  protected readonly hero = toSignal(
-    this.getSiteSetting.execute<HeroSettings>('home_hero').pipe(map((v) => v ?? DEFAULT_HERO)),
-    { initialValue: DEFAULT_HERO },
-  );
-
-  protected readonly services = toSignal(
-    this.getSiteSetting
-      .execute<HomeServicesSettings>('home_services')
-      .pipe(map((v) => v ?? DEFAULT_HOME_SERVICES)),
-    { initialValue: DEFAULT_HOME_SERVICES },
-  );
-
-  protected readonly ctaSettings = toSignal(
-    this.getSiteSetting
-      .execute<HomeCTASettings>('home_cta')
-      .pipe(map((v) => v ?? DEFAULT_HOME_CTA)),
-    { initialValue: DEFAULT_HOME_CTA },
-  );
-
-  protected readonly pages = toSignal(this.getAllPages.execute(), { initialValue: [] });
+  protected readonly hero = signal<HeroSettings>(DEFAULT_HERO);
+  protected readonly services = signal<HomeServicesSettings>(DEFAULT_HOME_SERVICES);
+  protected readonly ctaSettings = signal<HomeCTASettings>(DEFAULT_HOME_CTA);
+  protected readonly pages = signal<readonly PageContent[]>([]);
   protected readonly serviceCards = SERVICE_CARDS;
   protected readonly activePanel = signal<'booking' | 'contact' | null>(null);
+
+  constructor() {
+    this.loadContent();
+  }
+
+  private async loadContent(): Promise<void> {
+    const [hero, services, cta, pages] = await Promise.all([
+      this.getSiteSetting.execute<HeroSettings>('home_hero'),
+      this.getSiteSetting.execute<HomeServicesSettings>('home_services'),
+      this.getSiteSetting.execute<HomeCTASettings>('home_cta'),
+      this.getAllPages.execute(),
+    ]);
+    this.hero.set(hero ?? DEFAULT_HERO);
+    this.services.set(services ?? DEFAULT_HOME_SERVICES);
+    this.ctaSettings.set(cta ?? DEFAULT_HOME_CTA);
+    this.pages.set(pages);
+  }
 
   protected getPageTitle(slug: PageSlug): string {
     const page = this.pages().find((p) => p.slug === slug);

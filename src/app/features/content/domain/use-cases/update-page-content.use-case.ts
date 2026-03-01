@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import type { Observable } from 'rxjs';
 import { PageContentGateway } from '../gateways/page-content.gateway';
 import type { PageContent, PageSlug } from '../models/page-content.model';
 
@@ -10,7 +9,7 @@ export class UpdatePageContentUseCase {
   execute(
     slug: PageSlug,
     data: Partial<Omit<PageContent, 'id' | 'slug' | 'updatedAt'>>,
-  ): Observable<PageContent> {
+  ): Promise<PageContent> {
     return this.gateway.update(slug, data);
   }
 }

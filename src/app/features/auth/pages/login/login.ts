@@ -163,7 +163,7 @@ export class Login {
     this.closed.emit();
   }
 
-  submitLogin(): void {
+  async submitLogin(): Promise<void> {
     if (this.loginForm.invalid) return;
 
     this.isLoading.set(true);
@@ -171,20 +171,19 @@ export class Login {
 
     const { email, password } = this.loginForm.getRawValue();
 
-    this.loginUseCase.execute({ email, password }).subscribe({
-      next: () => {
-        this.isLoading.set(false);
-        this.closed.emit();
-        this.router.navigate(['/dashboard']);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.error.set(
-          err.message === 'Invalid login credentials'
-            ? 'Email ou mot de passe incorrect.'
-            : err.message || 'Erreur de connexion.',
-        );
-      },
-    });
+    try {
+      await this.loginUseCase.execute({ email, password });
+      this.isLoading.set(false);
+      this.closed.emit();
+      this.router.navigate(['/dashboard']);
+    } catch (err: unknown) {
+      this.isLoading.set(false);
+      const message = err instanceof Error ? err.message : '';
+      this.error.set(
+        message === 'Invalid login credentials'
+          ? 'Email ou mot de passe incorrect.'
+          : message || 'Erreur de connexion.',
+      );
+    }
   }
 }

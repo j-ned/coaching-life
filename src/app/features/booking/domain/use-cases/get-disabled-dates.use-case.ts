@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import type { Observable } from 'rxjs';
 import { AppointmentGateway } from '../gateways/appointment.gateway';
 import type { DisabledDate } from '../models/appointment.model';
 
@@ -7,7 +6,7 @@ import type { DisabledDate } from '../models/appointment.model';
 export class GetDisabledDatesUseCase {
   private readonly gateway = inject(AppointmentGateway);
 
-  execute(): Observable<readonly DisabledDate[]> {
+  execute(): Promise<readonly DisabledDate[]> {
     return this.gateway.getDisabledDates();
   }
 }

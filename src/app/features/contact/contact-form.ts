@@ -138,7 +138,7 @@ export class ContactForm {
     message: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
 
-  protected submitContact(): void {
+  protected async submitContact(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -149,21 +149,19 @@ export class ContactForm {
 
     const { name, email, subject, message } = this.form.getRawValue();
 
-    this.sendMessage.execute({ name, email, subject, message }).subscribe({
-      next: (result) => {
-        this.isSubmitting.set(false);
-        if (result.success) {
-          this.submitSuccess.set(true);
-          this.form.reset();
-          setTimeout(() => this.submitSuccess.set(false), 5000);
-        } else {
-          this.submitError.set(result.message);
-        }
-      },
-      error: () => {
-        this.isSubmitting.set(false);
-        this.submitError.set('Une erreur est survenue. Veuillez réessayer.');
-      },
-    });
+    try {
+      const result = await this.sendMessage.execute({ name, email, subject, message });
+      this.isSubmitting.set(false);
+      if (result.success) {
+        this.submitSuccess.set(true);
+        this.form.reset();
+        setTimeout(() => this.submitSuccess.set(false), 5000);
+      } else {
+        this.submitError.set(result.message);
+      }
+    } catch {
+      this.isSubmitting.set(false);
+      this.submitError.set('Une erreur est survenue. Veuillez réessayer.');
+    }
   }
 }

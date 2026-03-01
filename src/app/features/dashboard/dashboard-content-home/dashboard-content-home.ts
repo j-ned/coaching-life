@@ -16,7 +16,6 @@ import type {
 } from '../../content/domain/models/site-settings.model';
 import { ImageDropzone } from '../../../shared/components/image-dropzone/image-dropzone';
 import { Icon } from '../../../shared/components/icon/icon';
-import { forkJoin } from 'rxjs';
 
 type HeroFormShape = {
   title: FormControl<string>;
@@ -387,47 +386,47 @@ export class DashboardContentHome {
     this.loadSettings();
   }
 
-  private loadSettings(): void {
-    forkJoin({
-      hero: this.getSiteSetting.execute<HeroSettings>('home_hero'),
-      services: this.getSiteSetting.execute<HomeServicesSettings>('home_services'),
-      cta: this.getSiteSetting.execute<HomeCTASettings>('home_cta'),
-    }).subscribe(({ hero, services, cta }) => {
-      const h = hero ?? DEFAULT_HERO;
-      this.heroForm.patchValue({
-        title: h.title,
-        subtitle: h.subtitle,
-        ctaPrimaryText: h.ctaPrimaryText,
-        ctaPrimaryLink: h.ctaPrimaryLink,
-        ctaSecondaryText: h.ctaSecondaryText,
-        ctaSecondaryLink: h.ctaSecondaryLink,
-        imageAlt: h.imageAlt,
-      });
-      this.heroImageUrl.set(h.imageUrl || null);
+  private async loadSettings(): Promise<void> {
+    const [hero, services, cta] = await Promise.all([
+      this.getSiteSetting.execute<HeroSettings>('home_hero'),
+      this.getSiteSetting.execute<HomeServicesSettings>('home_services'),
+      this.getSiteSetting.execute<HomeCTASettings>('home_cta'),
+    ]);
 
-      const s = services ?? DEFAULT_HOME_SERVICES;
-      this.servicesForm.patchValue({
-        badge: s.badge,
-        title: s.title,
-        subtitle: s.subtitle,
-      });
-
-      const c = cta ?? DEFAULT_HOME_CTA;
-      this.ctaForm.patchValue({
-        badge: c.badge,
-        title: c.title,
-        subtitle: c.subtitle,
-      });
-
-      this.isLoading.set(false);
+    const h = hero ?? DEFAULT_HERO;
+    this.heroForm.patchValue({
+      title: h.title,
+      subtitle: h.subtitle,
+      ctaPrimaryText: h.ctaPrimaryText,
+      ctaPrimaryLink: h.ctaPrimaryLink,
+      ctaSecondaryText: h.ctaSecondaryText,
+      ctaSecondaryLink: h.ctaSecondaryLink,
+      imageAlt: h.imageAlt,
     });
+    this.heroImageUrl.set(h.imageUrl || null);
+
+    const s = services ?? DEFAULT_HOME_SERVICES;
+    this.servicesForm.patchValue({
+      badge: s.badge,
+      title: s.title,
+      subtitle: s.subtitle,
+    });
+
+    const c = cta ?? DEFAULT_HOME_CTA;
+    this.ctaForm.patchValue({
+      badge: c.badge,
+      title: c.title,
+      subtitle: c.subtitle,
+    });
+
+    this.isLoading.set(false);
   }
 
   protected onHeroImageSelected(file: File): void {
     this._pendingHeroImageFile.set(file);
   }
 
-  protected saveAll(): void {
+  protected async saveAll(): Promise<void> {
     this.isSaving.set(true);
     this.saveSuccess.set(false);
     this.saveError.set(null);
@@ -436,25 +435,23 @@ export class DashboardContentHome {
     if (pendingFile) {
       this.isUploadingHeroImage.set(true);
       const path = `home/hero-${Date.now()}-${pendingFile.name}`;
-      this.uploadImage.execute(pendingFile, path).subscribe({
-        next: (result) => {
-          this.isUploadingHeroImage.set(false);
-          this._pendingHeroImageFile.set(null);
-          this.heroImageUrl.set(result.publicUrl);
-          this.saveAllSettings(result.publicUrl);
-        },
-        error: () => {
-          this.isUploadingHeroImage.set(false);
-          this.isSaving.set(false);
-          this.saveError.set("Erreur lors de l'upload de l'image.");
-        },
-      });
+      try {
+        const result = await this.uploadImage.execute(pendingFile, path);
+        this.isUploadingHeroImage.set(false);
+        this._pendingHeroImageFile.set(null);
+        this.heroImageUrl.set(result.publicUrl);
+        await this.saveAllSettings(result.publicUrl);
+      } catch {
+        this.isUploadingHeroImage.set(false);
+        this.isSaving.set(false);
+        this.saveError.set("Erreur lors de l'upload de l'image.");
+      }
     } else {
-      this.saveAllSettings(this.heroImageUrl() ?? '');
+      await this.saveAllSettings(this.heroImageUrl() ?? '');
     }
   }
 
-  private saveAllSettings(heroImageUrl: string): void {
+  private async saveAllSettings(heroImageUrl: string): Promise<void> {
     const heroValue = this.heroForm.getRawValue();
     const heroSettings: HeroSettings = {
       ...heroValue,
@@ -464,20 +461,18 @@ export class DashboardContentHome {
     const servicesSettings: HomeServicesSettings = this.servicesForm.getRawValue();
     const ctaSettings: HomeCTASettings = this.ctaForm.getRawValue();
 
-    forkJoin({
-      hero: this.updateSiteSetting.execute('home_hero', heroSettings),
-      services: this.updateSiteSetting.execute('home_services', servicesSettings),
-      cta: this.updateSiteSetting.execute('home_cta', ctaSettings),
-    }).subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.saveSuccess.set(true);
-        setTimeout(() => this.saveSuccess.set(false), 4000);
-      },
-      error: () => {
-        this.isSaving.set(false);
-        this.saveError.set('Erreur lors de la sauvegarde.');
-      },
-    });
+    try {
+      await Promise.all([
+        this.updateSiteSetting.execute('home_hero', heroSettings),
+        this.updateSiteSetting.execute('home_services', servicesSettings),
+        this.updateSiteSetting.execute('home_cta', ctaSettings),
+      ]);
+      this.isSaving.set(false);
+      this.saveSuccess.set(true);
+      setTimeout(() => this.saveSuccess.set(false), 4000);
+    } catch {
+      this.isSaving.set(false);
+      this.saveError.set('Erreur lors de la sauvegarde.');
+    }
   }
 }

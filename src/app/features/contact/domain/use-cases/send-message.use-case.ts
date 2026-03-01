@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import type { Observable } from 'rxjs';
 import { MessageGateway } from '../gateways/message.gateway';
 import type { MessageSubmission, SendMessageData } from '../models/message.model';
 
@@ -7,7 +6,7 @@ import type { MessageSubmission, SendMessageData } from '../models/message.model
 export class SendMessageUseCase {
   private readonly gateway = inject(MessageGateway);
 
-  execute(data: SendMessageData): Observable<MessageSubmission> {
+  execute(data: SendMessageData): Promise<MessageSubmission> {
     return this.gateway.send(data);
   }
 }

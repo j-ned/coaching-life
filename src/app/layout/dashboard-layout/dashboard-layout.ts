@@ -93,9 +93,8 @@ export class DashboardLayout {
   private readonly logoutUseCase = inject(LogoutUseCase);
   private readonly router = inject(Router);
 
-  protected logout(): void {
-    this.logoutUseCase.execute().subscribe(() => {
-      this.router.navigate(['/']);
-    });
+  protected async logout(): Promise<void> {
+    await this.logoutUseCase.execute();
+    this.router.navigate(['/']);
   }
 }

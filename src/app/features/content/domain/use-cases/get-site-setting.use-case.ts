@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import type { Observable } from 'rxjs';
 import { SiteSettingsGateway } from '../gateways/site-settings.gateway';
 import type { SiteSettingKey, SiteSettingValue } from '../models/site-settings.model';
 
@@ -7,7 +6,7 @@ import type { SiteSettingKey, SiteSettingValue } from '../models/site-settings.m
 export class GetSiteSettingUseCase {
   private readonly gateway = inject(SiteSettingsGateway);
 
-  execute<T extends SiteSettingValue>(key: SiteSettingKey): Observable<T | null> {
+  execute<T extends SiteSettingValue>(key: SiteSettingKey): Promise<T | null> {
     return this.gateway.get<T>(key);
   }
 }

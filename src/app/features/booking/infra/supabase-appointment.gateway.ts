@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, from, map, of, catchError } from 'rxjs';
 import { AppointmentGateway } from '../domain/gateways/appointment.gateway';
 import type {
   Appointment,
@@ -15,109 +14,80 @@ import { toAppointment, toDisabledDate, toSupabaseInsert } from './appointment.a
 export class SupabaseAppointmentGateway implements AppointmentGateway {
   private readonly supabase = inject(Supabase);
 
-  getBookedSlots(month: string): Observable<readonly Appointment[]> {
+  async getBookedSlots(month: string): Promise<readonly Appointment[]> {
     const [year, m] = month.split('-').map(Number);
     const startDate = `${year}-${String(m).padStart(2, '0')}-01`;
     const lastDay = new Date(year, m, 0).getDate();
     const endDate = `${year}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
 
-    return from(
-      this.supabase.client
-        .from('appointments')
-        .select('*')
-        .gte('appointment_date', startDate)
-        .lte('appointment_date', endDate)
-        .neq('status', 'cancelled'),
-    ).pipe(
-      map(({ data, error }) => {
-        if (error) throw error;
-        return (data ?? []).map(toAppointment);
-      }),
-      catchError(() => of([])),
-    );
+    const { data, error } = await this.supabase.client
+      .from('appointments')
+      .select('*')
+      .gte('appointment_date', startDate)
+      .lte('appointment_date', endDate)
+      .neq('status', 'cancelled');
+    if (error) return [];
+    return (data ?? []).map(toAppointment);
   }
 
-  submitAppointment(data: AppointmentFormData): Observable<AppointmentSubmission> {
-    return from(
-      this.supabase.client.from('appointments').insert(toSupabaseInsert(data)).select().single(),
-    ).pipe(
-      map(({ error }) => {
-        if (error) throw error;
-        return { success: true, message: 'Votre rendez-vous a été réservé avec succès !' };
-      }),
-      catchError(() =>
-        of({
-          success: false,
-          message: 'Une erreur est survenue lors de la réservation. Veuillez réessayer.',
-        }),
-      ),
-    );
+  async submitAppointment(data: AppointmentFormData): Promise<AppointmentSubmission> {
+    const { error } = await this.supabase.client
+      .from('appointments')
+      .insert(toSupabaseInsert(data))
+      .select()
+      .single();
+    if (error) {
+      return {
+        success: false,
+        message: 'Une erreur est survenue lors de la réservation. Veuillez réessayer.',
+      };
+    }
+    return { success: true, message: 'Votre rendez-vous a été réservé avec succès !' };
   }
 
-  getDisabledDates(): Observable<readonly DisabledDate[]> {
-    return from(this.supabase.client.from('disabled_dates').select('*')).pipe(
-      map(({ data, error }) => {
-        if (error) throw error;
-        return (data ?? []).map(toDisabledDate);
-      }),
-      catchError(() => of([])),
-    );
+  async getDisabledDates(): Promise<readonly DisabledDate[]> {
+    const { data, error } = await this.supabase.client.from('disabled_dates').select('*');
+    if (error) return [];
+    return (data ?? []).map(toDisabledDate);
   }
 
-  getAllAppointments(): Observable<readonly Appointment[]> {
-    return from(
-      this.supabase.client
-        .from('appointments')
-        .select('*')
-        .order('appointment_date', { ascending: true }),
-    ).pipe(
-      map(({ data, error }) => {
-        if (error) throw error;
-        return (data ?? []).map(toAppointment);
-      }),
-      catchError(() => of([])),
-    );
+  async getAllAppointments(): Promise<readonly Appointment[]> {
+    const { data, error } = await this.supabase.client
+      .from('appointments')
+      .select('*')
+      .order('appointment_date', { ascending: true });
+    if (error) return [];
+    return (data ?? []).map(toAppointment);
   }
 
-  updateStatus(id: string, status: AppointmentStatus): Observable<Appointment> {
-    return from(
-      this.supabase.client.from('appointments').update({ status }).eq('id', id).select().single(),
-    ).pipe(
-      map(({ data, error }) => {
-        if (error) throw error;
-        return toAppointment(data!);
-      }),
-    );
+  async updateStatus(id: string, status: AppointmentStatus): Promise<Appointment> {
+    const { data, error } = await this.supabase.client
+      .from('appointments')
+      .update({ status })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return toAppointment(data!);
   }
 
-  deleteAppointment(id: string): Observable<void> {
-    return from(this.supabase.client.from('appointments').delete().eq('id', id)).pipe(
-      map(({ error }) => {
-        if (error) throw error;
-      }),
-    );
+  async deleteAppointment(id: string): Promise<void> {
+    const { error } = await this.supabase.client.from('appointments').delete().eq('id', id);
+    if (error) throw error;
   }
 
-  addDisabledDate(date: Omit<DisabledDate, 'id'>): Observable<DisabledDate> {
-    return from(
-      this.supabase.client
-        .from('disabled_dates')
-        .insert({ date: date.date, reason: date.reason ?? null })
-        .select()
-        .single(),
-    ).pipe(
-      map(({ data, error }) => {
-        if (error) throw error;
-        return toDisabledDate(data!);
-      }),
-    );
+  async addDisabledDate(date: Omit<DisabledDate, 'id'>): Promise<DisabledDate> {
+    const { data, error } = await this.supabase.client
+      .from('disabled_dates')
+      .insert({ date: date.date, reason: date.reason ?? null })
+      .select()
+      .single();
+    if (error) throw error;
+    return toDisabledDate(data!);
   }
 
-  removeDisabledDate(id: string): Observable<void> {
-    return from(this.supabase.client.from('disabled_dates').delete().eq('id', id)).pipe(
-      map(({ error }) => {
-        if (error) throw error;
-      }),
-    );
+  async removeDisabledDate(id: string): Promise<void> {
+    const { error } = await this.supabase.client.from('disabled_dates').delete().eq('id', id);
+    if (error) throw error;
   }
 }

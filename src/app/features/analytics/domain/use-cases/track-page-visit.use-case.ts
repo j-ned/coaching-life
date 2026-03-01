@@ -6,6 +6,6 @@ export class TrackPageVisitUseCase {
   private readonly gateway = inject(PageVisitGateway);
 
   execute(pagePath: string, referrer: string, userAgent: string): void {
-    this.gateway.trackVisit(pagePath, referrer, userAgent).subscribe();
+    void this.gateway.trackVisit(pagePath, referrer, userAgent);
   }
 }

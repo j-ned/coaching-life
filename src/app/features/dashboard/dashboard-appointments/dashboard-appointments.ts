@@ -448,16 +448,14 @@ export class DashboardAppointments {
     return `${dateStr}, ${appt.appointmentTime}`;
   }
 
-  protected updateStatus(id: string, status: AppointmentStatus): void {
-    this.updateAppointmentStatus.execute(id, status).subscribe({
-      next: () => this.loadAppointments(),
-    });
+  protected async updateStatus(id: string, status: AppointmentStatus): Promise<void> {
+    await this.updateAppointmentStatus.execute(id, status);
+    this.loadAppointments();
   }
 
-  protected deleteAppointment(id: string): void {
-    this.deleteAppointmentUseCase.execute(id).subscribe({
-      next: () => this.loadAppointments(),
-    });
+  protected async deleteAppointment(id: string): Promise<void> {
+    await this.deleteAppointmentUseCase.execute(id);
+    this.loadAppointments();
   }
 
   // ── Availability ──
@@ -483,39 +481,32 @@ export class DashboardAppointments {
     this.reasonInput = '';
   }
 
-  protected disableDate(): void {
+  protected async disableDate(): Promise<void> {
     const date = this.selectedDate();
     if (!date) return;
 
-    this.addDisabledDateUseCase
-      .execute({
-        date,
-        reason: this.reasonInput || undefined,
-      })
-      .subscribe({
-        next: () => {
-          this.reasonInput = '';
-          this.loadDisabledDates();
-        },
-      });
+    await this.addDisabledDateUseCase.execute({
+      date,
+      reason: this.reasonInput || undefined,
+    });
+    this.reasonInput = '';
+    this.loadDisabledDates();
   }
 
-  protected enableDate(): void {
+  protected async enableDate(): Promise<void> {
     const date = this.selectedDate();
     if (!date) return;
 
     const dd = this.disabledDateSet().get(date);
     if (!dd) return;
 
-    this.removeDisabledDateUseCase.execute(dd.id).subscribe({
-      next: () => this.loadDisabledDates(),
-    });
+    await this.removeDisabledDateUseCase.execute(dd.id);
+    this.loadDisabledDates();
   }
 
-  protected removeDate(dd: DisabledDate): void {
-    this.removeDisabledDateUseCase.execute(dd.id).subscribe({
-      next: () => this.loadDisabledDates(),
-    });
+  protected async removeDate(dd: DisabledDate): Promise<void> {
+    await this.removeDisabledDateUseCase.execute(dd.id);
+    this.loadDisabledDates();
   }
 
   protected formatDate(dateStr: string): string {
@@ -554,15 +545,13 @@ export class DashboardAppointments {
 
   // ── Data loading ──
 
-  private loadAppointments(): void {
-    this.getAllAppointments.execute().subscribe((appts) => {
-      this.appointments.set(appts);
-    });
+  private async loadAppointments(): Promise<void> {
+    const appts = await this.getAllAppointments.execute();
+    this.appointments.set(appts);
   }
 
-  private loadDisabledDates(): void {
-    this.getDisabledDatesUseCase.execute().subscribe((dates) => {
-      this.disabledDates.set(dates);
-    });
+  private async loadDisabledDates(): Promise<void> {
+    const dates = await this.getDisabledDatesUseCase.execute();
+    this.disabledDates.set(dates);
   }
 }

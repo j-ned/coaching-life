@@ -1,5 +1,4 @@
 import { inject, Injectable } from '@angular/core';
-import { forkJoin, map, type Observable } from 'rxjs';
 import { PageVisitGateway } from '../gateways/page-visit.gateway';
 import { AppointmentGateway } from '../../../booking/domain/gateways/appointment.gateway';
 import { MessageGateway } from '../../../contact/domain/gateways/message.gateway';
@@ -11,47 +10,45 @@ export class GetWeeklyActivityUseCase {
   private readonly appointmentGateway = inject(AppointmentGateway);
   private readonly messageGateway = inject(MessageGateway);
 
-  execute(period: PeriodFilter): Observable<WeeklyDataPoint[]> {
+  async execute(period: PeriodFilter): Promise<WeeklyDataPoint[]> {
     const { year, month } = period;
     const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
     const lastDay = new Date(year, month, 0).getDate();
     const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
 
-    return forkJoin({
-      visits: this.pageVisitGateway.getVisitsBetween(
+    const [visits, appointments, messages] = await Promise.all([
+      this.pageVisitGateway.getVisitsBetween(
         `${startDate}T00:00:00.000Z`,
         `${endDate}T23:59:59.999Z`,
       ),
-      appointments: this.appointmentGateway.getAllAppointments(),
-      messages: this.messageGateway.getAll(),
-    }).pipe(
-      map(({ visits, appointments, messages }) => {
-        const weeks = this.getWeekRanges(year, month, lastDay);
+      this.appointmentGateway.getAllAppointments(),
+      this.messageGateway.getAll(),
+    ]);
 
-        return weeks.map((week) => {
-          const visitCount = visits.filter((v) => {
-            const d = v.visitedAt.split('T')[0];
-            return d >= week.start && d <= week.end;
-          }).length;
+    const weeks = this.getWeekRanges(year, month, lastDay);
 
-          const appointmentCount = [...appointments].filter(
-            (a) => a.appointmentDate >= week.start && a.appointmentDate <= week.end,
-          ).length;
+    return weeks.map((week) => {
+      const visitCount = visits.filter((v) => {
+        const d = v.visitedAt.split('T')[0];
+        return d >= week.start && d <= week.end;
+      }).length;
 
-          const messageCount = [...messages].filter((m) => {
-            const d = m.createdAt.split('T')[0];
-            return d >= week.start && d <= week.end;
-          }).length;
+      const appointmentCount = [...appointments].filter(
+        (a) => a.appointmentDate >= week.start && a.appointmentDate <= week.end,
+      ).length;
 
-          return {
-            weekLabel: week.label,
-            visits: visitCount,
-            appointments: appointmentCount,
-            messages: messageCount,
-          };
-        });
-      }),
-    );
+      const messageCount = [...messages].filter((m) => {
+        const d = m.createdAt.split('T')[0];
+        return d >= week.start && d <= week.end;
+      }).length;
+
+      return {
+        weekLabel: week.label,
+        visits: visitCount,
+        appointments: appointmentCount,
+        messages: messageCount,
+      };
+    });
   }
 
   private getWeekRanges(

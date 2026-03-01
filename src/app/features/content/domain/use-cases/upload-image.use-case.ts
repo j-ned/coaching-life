@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import type { Observable } from 'rxjs';
 import { ImageStorageGateway } from '../gateways/image-storage.gateway';
 import type { ImageUploadResult } from '../models/image-upload.model';
 
@@ -7,7 +6,7 @@ import type { ImageUploadResult } from '../models/image-upload.model';
 export class UploadImageUseCase {
   private readonly gateway = inject(ImageStorageGateway);
 
-  execute(file: File, path: string): Observable<ImageUploadResult> {
+  execute(file: File, path: string): Promise<ImageUploadResult> {
     return this.gateway.upload(file, path);
   }
 }

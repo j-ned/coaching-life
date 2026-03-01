@@ -384,28 +384,27 @@ export class DashboardContentEdit {
     });
   }
 
-  private loadContent(slug: PageSlug): void {
+  private async loadContent(slug: PageSlug): Promise<void> {
     this.isLoading.set(true);
     const fallback = DEFAULT_PAGES[slug];
 
-    this.getPageContent.execute(slug).subscribe((page) => {
-      const content = page ?? fallback;
-      this.form.patchValue({
-        title: content.title,
-        introduction: content.introduction,
-        sectionTitle: content.sectionTitle,
-        extraText: content.extraText,
-        imageAlt: content.imageAlt,
-      });
-
-      this.itemsArray.clear();
-      for (const item of content.items) {
-        this.itemsArray.push(this.createItemGroup(item));
-      }
-
-      this.currentImageUrl.set(content.imageUrl || null);
-      this.isLoading.set(false);
+    const page = await this.getPageContent.execute(slug);
+    const content = page ?? fallback;
+    this.form.patchValue({
+      title: content.title,
+      introduction: content.introduction,
+      sectionTitle: content.sectionTitle,
+      extraText: content.extraText,
+      imageAlt: content.imageAlt,
     });
+
+    this.itemsArray.clear();
+    for (const item of content.items) {
+      this.itemsArray.push(this.createItemGroup(item));
+    }
+
+    this.currentImageUrl.set(content.imageUrl || null);
+    this.isLoading.set(false);
   }
 
   private createItemGroup(item: PageContentItem = { title: '', description: '' }): ItemFormGroup {
@@ -439,7 +438,7 @@ export class DashboardContentEdit {
     this._pendingImageFile.set(file);
   }
 
-  protected save(): void {
+  protected async save(): Promise<void> {
     if (this.form.invalid) return;
 
     const slug = this.slug() as PageSlug;
@@ -451,28 +450,26 @@ export class DashboardContentEdit {
     if (pendingFile) {
       this.isUploadingImage.set(true);
       const path = `pages/${slug}/${Date.now()}-${pendingFile.name}`;
-      this.uploadImage.execute(pendingFile, path).subscribe({
-        next: (result) => {
-          this.isUploadingImage.set(false);
-          this._pendingImageFile.set(null);
-          this.currentImageUrl.set(result.publicUrl);
-          this.saveContent(slug, result.publicUrl);
-        },
-        error: () => {
-          this.isUploadingImage.set(false);
-          this.isSaving.set(false);
-          this.saveError.set("Erreur lors de l'upload de l'image.");
-        },
-      });
+      try {
+        const result = await this.uploadImage.execute(pendingFile, path);
+        this.isUploadingImage.set(false);
+        this._pendingImageFile.set(null);
+        this.currentImageUrl.set(result.publicUrl);
+        await this.saveContent(slug, result.publicUrl);
+      } catch {
+        this.isUploadingImage.set(false);
+        this.isSaving.set(false);
+        this.saveError.set("Erreur lors de l'upload de l'image.");
+      }
     } else {
-      this.saveContent(slug, this.currentImageUrl() ?? undefined);
+      await this.saveContent(slug, this.currentImageUrl() ?? undefined);
     }
   }
 
-  private saveContent(slug: PageSlug, imageUrl?: string): void {
+  private async saveContent(slug: PageSlug, imageUrl?: string): Promise<void> {
     const formValue = this.form.getRawValue();
-    this.updatePageContent
-      .execute(slug, {
+    try {
+      await this.updatePageContent.execute(slug, {
         title: formValue.title,
         introduction: formValue.introduction,
         sectionTitle: formValue.sectionTitle,
@@ -480,17 +477,13 @@ export class DashboardContentEdit {
         extraText: formValue.extraText,
         imageUrl: imageUrl ?? '',
         imageAlt: formValue.imageAlt,
-      })
-      .subscribe({
-        next: () => {
-          this.isSaving.set(false);
-          this.saveSuccess.set(true);
-          setTimeout(() => this.saveSuccess.set(false), 4000);
-        },
-        error: () => {
-          this.isSaving.set(false);
-          this.saveError.set('Erreur lors de la sauvegarde du contenu.');
-        },
       });
+      this.isSaving.set(false);
+      this.saveSuccess.set(true);
+      setTimeout(() => this.saveSuccess.set(false), 4000);
+    } catch {
+      this.isSaving.set(false);
+      this.saveError.set('Erreur lors de la sauvegarde du contenu.');
+    }
   }
 }

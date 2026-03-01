@@ -265,32 +265,25 @@ export class DashboardMessages {
     }
   }
 
-  protected changeStatus(id: string, status: MessageStatus): void {
-    this.updateMessageStatus.execute(id, status).subscribe({
-      next: (updated) => {
-        this._messages.update((msgs) => msgs.map((m) => (m.id === id ? updated : m)));
-        if (this.selectedMessage()?.id === id) {
-          this.selectedMessage.set(updated);
-        }
-      },
-    });
+  protected async changeStatus(id: string, status: MessageStatus): Promise<void> {
+    const updated = await this.updateMessageStatus.execute(id, status);
+    this._messages.update((msgs) => msgs.map((m) => (m.id === id ? updated : m)));
+    if (this.selectedMessage()?.id === id) {
+      this.selectedMessage.set(updated);
+    }
   }
 
-  protected deleteMessage(id: string): void {
-    this.deleteMessageUseCase.execute(id).subscribe({
-      next: () => {
-        this._messages.update((msgs) => msgs.filter((m) => m.id !== id));
-        if (this.selectedMessage()?.id === id) {
-          this.selectedMessage.set(null);
-        }
-        this.confirmDeleteId.set(null);
-      },
-    });
+  protected async deleteMessage(id: string): Promise<void> {
+    await this.deleteMessageUseCase.execute(id);
+    this._messages.update((msgs) => msgs.filter((m) => m.id !== id));
+    if (this.selectedMessage()?.id === id) {
+      this.selectedMessage.set(null);
+    }
+    this.confirmDeleteId.set(null);
   }
 
-  private loadMessages(): void {
-    this.getMessages.execute().subscribe((messages) => {
-      this._messages.set(messages);
-    });
+  private async loadMessages(): Promise<void> {
+    const messages = await this.getMessages.execute();
+    this._messages.set(messages);
   }
 }

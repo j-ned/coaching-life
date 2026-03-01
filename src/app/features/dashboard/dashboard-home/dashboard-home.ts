@@ -6,10 +6,13 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { GetDashboardStatsUseCase } from '../../analytics/domain/use-cases/get-dashboard-stats.use-case';
 import { GetWeeklyActivityUseCase } from '../../analytics/domain/use-cases/get-weekly-activity.use-case';
-import type { PeriodFilter, WeeklyDataPoint } from '../../analytics/domain/models/analytics.model';
+import type {
+  DashboardStats,
+  PeriodFilter,
+  WeeklyDataPoint,
+} from '../../analytics/domain/models/analytics.model';
 import { COACHING_TYPE_LABELS } from '../../booking/domain/models/appointment.model';
 import { MESSAGE_SUBJECT_LABELS } from '../../contact/domain/models/message.model';
 import { StatCard } from '../../../shared/components/stat-card/stat-card';
@@ -67,7 +70,7 @@ const SERVICE_COLOR_CONFIG: Record<string, string> = {
       />
     </div>
 
-    @if (stats(); as s) {
+    @if (stats()) {
       <!-- Appointment status breakdown -->
       <section
         class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6"
@@ -169,7 +172,7 @@ export class DashboardHome {
     month: new Date().getMonth() + 1,
   });
 
-  protected readonly stats = toSignal(this.getDashboardStats.execute());
+  protected readonly stats = signal<DashboardStats | null>(null);
 
   protected readonly visitsDisplay = computed(() => {
     const s = this.stats();
@@ -222,12 +225,21 @@ export class DashboardHome {
   protected readonly weeklyData = signal<WeeklyDataPoint[] | null>(null);
 
   constructor() {
+    this.loadStats();
     effect(() => {
       const period = this.selectedPeriod();
-      this.weeklyData.set(null);
-      this.getWeeklyActivity.execute(period).subscribe((data) => {
-        this.weeklyData.set(data);
-      });
+      this.loadWeeklyActivity(period);
     });
+  }
+
+  private async loadStats(): Promise<void> {
+    const stats = await this.getDashboardStats.execute();
+    this.stats.set(stats);
+  }
+
+  private async loadWeeklyActivity(period: PeriodFilter): Promise<void> {
+    this.weeklyData.set(null);
+    const data = await this.getWeeklyActivity.execute(period);
+    this.weeklyData.set(data);
   }
 }

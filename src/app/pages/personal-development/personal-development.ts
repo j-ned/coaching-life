@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { GetPageContentUseCase } from '../../features/content/domain/use-cases/get-page-content.use-case';
 import { DEFAULT_PAGES } from '../../features/content/domain/models/default-content';
+import type { PageContent } from '../../features/content/domain/models/page-content.model';
 import { Icon } from '../../shared/components/icon/icon';
 
 @Component({
@@ -63,10 +62,14 @@ import { Icon } from '../../shared/components/icon/icon';
 export class PersonalDevelopment {
   private readonly getPageContent = inject(GetPageContentUseCase);
 
-  protected readonly content = toSignal(
-    this.getPageContent
-      .execute('personal-development')
-      .pipe(map((v) => v ?? DEFAULT_PAGES['personal-development'])),
-    { initialValue: DEFAULT_PAGES['personal-development'] },
-  );
+  protected readonly content = signal<PageContent>(DEFAULT_PAGES['personal-development']);
+
+  constructor() {
+    this.loadContent();
+  }
+
+  private async loadContent(): Promise<void> {
+    const page = await this.getPageContent.execute('personal-development');
+    this.content.set(page ?? DEFAULT_PAGES['personal-development']);
+  }
 }

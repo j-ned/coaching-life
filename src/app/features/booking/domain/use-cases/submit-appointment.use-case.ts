@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import type { Observable } from 'rxjs';
 import { AppointmentGateway } from '../gateways/appointment.gateway';
 import type { AppointmentFormData, AppointmentSubmission } from '../models/appointment.model';
 
@@ -7,7 +6,7 @@ import type { AppointmentFormData, AppointmentSubmission } from '../models/appoi
 export class SubmitAppointmentUseCase {
   private readonly gateway = inject(AppointmentGateway);
 
-  execute(data: AppointmentFormData): Observable<AppointmentSubmission> {
+  execute(data: AppointmentFormData): Promise<AppointmentSubmission> {
     return this.gateway.submitAppointment(data);
   }
 }

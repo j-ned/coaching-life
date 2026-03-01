@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, from, map, of, catchError } from 'rxjs';
 import { MessageGateway } from '../domain/gateways/message.gateway';
 import type {
   Message,
@@ -14,51 +13,43 @@ import { toMessage, toSupabaseMessageInsert } from './message.adapter';
 export class SupabaseMessageGateway implements MessageGateway {
   private readonly supabase = inject(Supabase);
 
-  getAll(): Observable<readonly Message[]> {
-    return from(
-      this.supabase.client.from('messages').select('*').order('created_at', { ascending: false }),
-    ).pipe(
-      map(({ data, error }) => {
-        if (error) throw error;
-        return (data ?? []).map(toMessage);
-      }),
-      catchError(() => of([])),
-    );
+  async getAll(): Promise<readonly Message[]> {
+    const { data, error } = await this.supabase.client
+      .from('messages')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) return [];
+    return (data ?? []).map(toMessage);
   }
 
-  send(data: SendMessageData): Observable<MessageSubmission> {
-    return from(
-      this.supabase.client.from('messages').insert(toSupabaseMessageInsert(data)).select().single(),
-    ).pipe(
-      map(({ error }) => {
-        if (error) throw error;
-        return { success: true, message: 'Votre message a été envoyé avec succès !' };
-      }),
-      catchError(() =>
-        of({
-          success: false,
-          message: "Une erreur est survenue lors de l'envoi. Veuillez réessayer.",
-        }),
-      ),
-    );
+  async send(data: SendMessageData): Promise<MessageSubmission> {
+    const { error } = await this.supabase.client
+      .from('messages')
+      .insert(toSupabaseMessageInsert(data))
+      .select()
+      .single();
+    if (error) {
+      return {
+        success: false,
+        message: "Une erreur est survenue lors de l'envoi. Veuillez réessayer.",
+      };
+    }
+    return { success: true, message: 'Votre message a été envoyé avec succès !' };
   }
 
-  updateStatus(id: string, status: MessageStatus): Observable<Message> {
-    return from(
-      this.supabase.client.from('messages').update({ status }).eq('id', id).select().single(),
-    ).pipe(
-      map(({ data, error }) => {
-        if (error) throw error;
-        return toMessage(data!);
-      }),
-    );
+  async updateStatus(id: string, status: MessageStatus): Promise<Message> {
+    const { data, error } = await this.supabase.client
+      .from('messages')
+      .update({ status })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return toMessage(data!);
   }
 
-  delete(id: string): Observable<void> {
-    return from(this.supabase.client.from('messages').delete().eq('id', id)).pipe(
-      map(({ error }) => {
-        if (error) throw error;
-      }),
-    );
+  async delete(id: string): Promise<void> {
+    const { error } = await this.supabase.client.from('messages').delete().eq('id', id);
+    if (error) throw error;
   }
 }

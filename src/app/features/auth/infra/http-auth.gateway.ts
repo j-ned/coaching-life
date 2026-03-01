@@ -1,41 +1,40 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, from, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import { AuthGateway } from '../domain/gateways/auth.gateway';
-import { AuthState, AuthUser, AuthSession, LoginCredentials } from '../domain/models/auth.model';
+import type {
+  AuthState,
+  AuthUser,
+  AuthSession,
+  LoginCredentials,
+} from '../domain/models/auth.model';
 import { Supabase } from '../../../core/services/supabase/supabase';
 
 @Injectable()
 export class HttpAuthGateway implements AuthGateway {
   private readonly supabase = inject(Supabase);
 
-  login(credentials: LoginCredentials): Observable<AuthSession | null> {
-    return from(
-      this.supabase.client.auth.signInWithPassword({
-        email: credentials.email,
-        password: credentials.password,
-      }),
-    ).pipe(
-      map(({ data, error }) => {
-        if (error) throw error;
-        return data.session;
-      }),
-    );
+  async login(credentials: LoginCredentials): Promise<AuthSession | null> {
+    const { data, error } = await this.supabase.client.auth.signInWithPassword({
+      email: credentials.email,
+      password: credentials.password,
+    });
+    if (error) throw error;
+    return data.session;
   }
 
-  logout(): Observable<void> {
-    return from(this.supabase.client.auth.signOut()).pipe(
-      map(({ error }) => {
-        if (error) throw error;
-      }),
-    );
+  async logout(): Promise<void> {
+    const { error } = await this.supabase.client.auth.signOut();
+    if (error) throw error;
   }
 
-  getSession(): Observable<AuthSession | null> {
-    return from(this.supabase.client.auth.getSession()).pipe(map(({ data }) => data.session));
+  async getSession(): Promise<AuthSession | null> {
+    const { data } = await this.supabase.client.auth.getSession();
+    return data.session;
   }
 
-  getUser(): Observable<AuthUser | null> {
-    return from(this.supabase.client.auth.getUser()).pipe(map(({ data }) => data.user));
+  async getUser(): Promise<AuthUser | null> {
+    const { data } = await this.supabase.client.auth.getUser();
+    return data.user;
   }
 
   authStateChanges(): Observable<AuthState> {

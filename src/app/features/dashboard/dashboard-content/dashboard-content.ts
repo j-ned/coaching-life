@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Icon } from '../../../shared/components/icon/icon';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { GetAllPagesUseCase } from '../../content/domain/use-cases/get-all-pages.use-case';
 import { DEFAULT_PAGES } from '../../content/domain/models/default-content';
-import type { PageSlug } from '../../content/domain/models/page-content.model';
+import type { PageContent, PageSlug } from '../../content/domain/models/page-content.model';
 
 const PAGE_LABELS: Record<PageSlug, string> = {
   'life-coach': 'Coach de Vie',
@@ -73,8 +72,17 @@ const ALL_SLUGS: readonly PageSlug[] = [
 })
 export class DashboardContent {
   private readonly getAllPages = inject(GetAllPagesUseCase);
-  protected readonly pages = toSignal(this.getAllPages.execute(), { initialValue: [] });
+  protected readonly pages = signal<readonly PageContent[]>([]);
   protected readonly slugs = ALL_SLUGS;
+
+  constructor() {
+    this.loadPages();
+  }
+
+  private async loadPages(): Promise<void> {
+    const pages = await this.getAllPages.execute();
+    this.pages.set(pages);
+  }
 
   protected getLabel(slug: PageSlug): string {
     return PAGE_LABELS[slug];

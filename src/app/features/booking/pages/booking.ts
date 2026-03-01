@@ -153,7 +153,7 @@ export class Booking {
     this.selectedSlot.set(slot);
   }
 
-  protected onFormSubmitted(payload: BookingFormPayload): void {
+  protected async onFormSubmitted(payload: BookingFormPayload): Promise<void> {
     const formRef = this.bookingFormRef();
     if (!formRef) return;
 
@@ -170,38 +170,34 @@ export class Booking {
       ...payload,
     };
 
-    this.submitAppointmentUseCase.execute(data).subscribe({
-      next: (result) => {
-        formRef.setSubmitting(false);
-        this.submissionMessage.set(result);
-        if (result.success) {
-          this.selectedDate.set(null);
-          this.selectedSlot.set(null);
-          formRef.resetForm();
-          const calendarMonth =
-            this.calendarRef()?.currentMonthString() ?? new Date().toISOString().substring(0, 7);
-          this.loadBookedSlots(calendarMonth);
-        }
-      },
-      error: () => {
-        formRef.setSubmitting(false);
-        this.submissionMessage.set({
-          success: false,
-          message: 'Une erreur est survenue. Veuillez réessayer.',
-        });
-      },
-    });
+    try {
+      const result = await this.submitAppointmentUseCase.execute(data);
+      formRef.setSubmitting(false);
+      this.submissionMessage.set(result);
+      if (result.success) {
+        this.selectedDate.set(null);
+        this.selectedSlot.set(null);
+        formRef.resetForm();
+        const calendarMonth =
+          this.calendarRef()?.currentMonthString() ?? new Date().toISOString().substring(0, 7);
+        this.loadBookedSlots(calendarMonth);
+      }
+    } catch {
+      formRef.setSubmitting(false);
+      this.submissionMessage.set({
+        success: false,
+        message: 'Une erreur est survenue. Veuillez réessayer.',
+      });
+    }
   }
 
-  private loadBookedSlots(month: string): void {
-    this.getBookedSlotsUseCase.execute(month).subscribe((slots) => {
-      this.bookedSlots.set(slots);
-    });
+  private async loadBookedSlots(month: string): Promise<void> {
+    const slots = await this.getBookedSlotsUseCase.execute(month);
+    this.bookedSlots.set(slots);
   }
 
-  private loadDisabledDates(): void {
-    this.getDisabledDatesUseCase.execute().subscribe((dates) => {
-      this.disabledDates.set(dates);
-    });
+  private async loadDisabledDates(): Promise<void> {
+    const dates = await this.getDisabledDatesUseCase.execute();
+    this.disabledDates.set(dates);
   }
 }

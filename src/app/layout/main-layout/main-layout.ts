@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthGateway } from '../../features/auth/domain/gateways/auth.gateway';
 import { filter, map } from 'rxjs';
 import { Login } from '../../features/auth/pages/login/login';
@@ -159,19 +159,21 @@ export class MainLayout {
     { initialValue: false },
   );
 
-  private readonly _tracking = toSignal(
-    this.router.events.pipe(
-      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-      filter(() => isPlatformBrowser(this.platformId)),
-      map((e) => {
+  constructor() {
+    this.router.events
+      .pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        filter(() => isPlatformBrowser(this.platformId)),
+        takeUntilDestroyed(),
+      )
+      .subscribe((e) => {
         this.trackPageVisit.execute(
           e.urlAfterRedirects,
           document.referrer ?? '',
           navigator.userAgent ?? '',
         );
-      }),
-    ),
-  );
+      });
+  }
 
   protected goToTop(): void {
     if (!isPlatformBrowser(this.platformId)) return;
