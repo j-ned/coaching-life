@@ -109,7 +109,7 @@ export type BookingFormPayload = {
                   >L'email est obligatoire</small
                 >
               } @else if (
-                form.controls.clientEmail.touched && form.controls.clientEmail.errors?.['pattern']
+                form.controls.clientEmail.touched && form.controls.clientEmail.errors?.['email']
               ) {
                 <small class="text-red-500 text-xs mt-1 block" role="alert"
                   >Le format de l'email est invalide</small
@@ -260,7 +260,7 @@ export class BookingForm {
     }),
     clientEmail: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)],
+      validators: [Validators.required, Validators.email],
     }),
     clientPhone: new FormControl('', {
       nonNullable: true,

@@ -1,8 +1,13 @@
 import { Component, ChangeDetectionStrategy, inject, signal, output } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoginUseCase } from '../../domain/use-cases/login.use-case';
 import { Icon } from '../../../../shared/components/icon/icon';
+
+type LoginFormShape = {
+  email: FormControl<string>;
+  password: FormControl<string>;
+};
 
 @Component({
   selector: 'app-login',
@@ -133,13 +138,17 @@ import { Icon } from '../../../../shared/components/icon/icon';
 export class Login {
   private readonly router = inject(Router);
   private readonly loginUseCase = inject(LoginUseCase);
-  private readonly fb = inject(FormBuilder);
-
   readonly closed = output<void>();
 
-  protected readonly loginForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+  protected readonly loginForm = new FormGroup<LoginFormShape>({
+    email: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email],
+    }),
+    password: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(6)],
+    }),
   });
 
   protected readonly isLoading = signal(false);
@@ -162,7 +171,7 @@ export class Login {
 
     const { email, password } = this.loginForm.getRawValue();
 
-    this.loginUseCase.execute({ email: email!, password: password! }).subscribe({
+    this.loginUseCase.execute({ email, password }).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.closed.emit();
