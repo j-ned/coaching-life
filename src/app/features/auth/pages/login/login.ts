@@ -23,7 +23,7 @@ type LoginFormShape = {
     >
       <button
         (click)="closeModal()"
-        class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+        class="absolute top-4 right-4 text-slate-500 hover:text-slate-600 transition-colors"
         aria-label="Fermer"
       >
         <app-icon name="x" size="lg" />
@@ -31,7 +31,7 @@ type LoginFormShape = {
 
       <div class="text-center mb-8">
         <div
-          class="w-14 h-14 bg-brand-50 rounded-full flex items-center justify-center text-brand-500 mx-auto mb-4"
+          class="w-14 h-14 bg-brand-50 rounded-full flex items-center justify-center text-brand-700 mx-auto mb-4"
         >
           <app-icon name="lock" size="xl" />
         </div>
@@ -107,7 +107,7 @@ type LoginFormShape = {
         <button
           type="submit"
           [disabled]="loginForm.invalid || isLoading()"
-          class="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl text-sm font-medium text-white bg-brand-500 hover:bg-brand-600 shadow-lg shadow-brand-500/25 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:-translate-y-0.5 active:translate-y-0"
+          class="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl text-sm font-medium text-white bg-brand-700 hover:bg-brand-800 shadow-lg shadow-brand-500/25 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:-translate-y-0.5 active:translate-y-0"
         >
           @if (isLoading()) {
             <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">

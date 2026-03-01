@@ -54,7 +54,7 @@ const PAGE_ICONS: Record<string, string> = {
     <div class="mb-8 flex items-center gap-4">
       <a
         routerLink="/dashboard/content"
-        class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+        class="p-2 rounded-lg text-slate-500 hover:text-slate-600 hover:bg-slate-100 transition-all"
       >
         <app-icon name="chevron-left" size="lg" />
       </a>
@@ -168,7 +168,7 @@ const PAGE_ICONS: Record<string, string> = {
                 <button
                   type="button"
                   (click)="addItem()"
-                  class="inline-flex items-center gap-1.5 text-sm text-brand-500 hover:text-brand-600 font-medium transition-colors cursor-pointer"
+                  class="inline-flex items-center gap-1.5 text-sm text-brand-700 hover:text-brand-800 font-medium transition-colors cursor-pointer"
                 >
                   <app-icon name="check" size="xs" />
                   Ajouter
@@ -184,7 +184,7 @@ const PAGE_ICONS: Record<string, string> = {
                     <!-- Numéro -->
                     <div class="flex items-start gap-4">
                       <span
-                        class="shrink-0 w-7 h-7 rounded-full bg-brand-100 text-brand-600 text-xs font-bold flex items-center justify-center mt-1"
+                        class="shrink-0 w-7 h-7 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center mt-1"
                       >
                         {{ i + 1 }}
                       </span>
@@ -209,7 +209,7 @@ const PAGE_ICONS: Record<string, string> = {
                           <button
                             type="button"
                             (click)="moveItem(i, -1)"
-                            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-white transition-all cursor-pointer"
+                            class="p-1.5 rounded-lg text-slate-500 hover:text-slate-600 hover:bg-white transition-all cursor-pointer"
                             aria-label="Monter"
                           >
                             <app-icon name="chevron-up" size="sm" />
@@ -219,7 +219,7 @@ const PAGE_ICONS: Record<string, string> = {
                           <button
                             type="button"
                             (click)="moveItem(i, 1)"
-                            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-white transition-all cursor-pointer"
+                            class="p-1.5 rounded-lg text-slate-500 hover:text-slate-600 hover:bg-white transition-all cursor-pointer"
                             aria-label="Descendre"
                           >
                             <app-icon name="chevron-down" size="sm" />
@@ -237,7 +237,7 @@ const PAGE_ICONS: Record<string, string> = {
                     </div>
                   </div>
                 } @empty {
-                  <div class="text-center py-8 text-slate-400 text-sm">
+                  <div class="text-center py-8 text-slate-500 text-sm">
                     Aucun élément. Cliquez sur « Ajouter » pour commencer.
                   </div>
                 }
@@ -293,7 +293,7 @@ const PAGE_ICONS: Record<string, string> = {
                 class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                 aria-required="true"
               />
-              <p class="text-xs text-slate-400 mt-1">
+              <p class="text-xs text-slate-500 mt-1">
                 Important pour l'accessibilité et le référencement
               </p>
             </div>
@@ -316,7 +316,7 @@ const PAGE_ICONS: Record<string, string> = {
             type="button"
             (click)="save()"
             [disabled]="form.invalid || isSaving()"
-            class="px-8 py-2.5 bg-brand-500 text-white rounded-xl font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg cursor-pointer"
+            class="px-8 py-2.5 bg-brand-700 text-white rounded-xl font-medium hover:bg-brand-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg cursor-pointer"
           >
             @if (isSaving()) {
               <span class="flex items-center gap-2">

@@ -153,7 +153,7 @@ type CalendarDay = {
           <div class="flex items-center justify-between mb-6">
             <button
               (click)="previousMonth()"
-              class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center hover:border-brand-300 hover:text-brand-500 transition-colors"
+              class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center hover:border-brand-300 hover:text-brand-700 transition-colors"
               aria-label="Mois précédent"
             >
               <app-icon name="chevron-left" size="md" />
@@ -161,7 +161,7 @@ type CalendarDay = {
             <h3 class="text-lg font-bold text-slate-800 capitalize">{{ monthLabel() }}</h3>
             <button
               (click)="nextMonth()"
-              class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center hover:border-brand-300 hover:text-brand-500 transition-colors"
+              class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center hover:border-brand-300 hover:text-brand-700 transition-colors"
               aria-label="Mois suivant"
             >
               <app-icon name="chevron-right" size="md" />
@@ -170,7 +170,7 @@ type CalendarDay = {
 
           <div class="grid grid-cols-7 gap-1 mb-2">
             @for (day of weekDays; track day) {
-              <div class="text-center text-xs font-medium text-slate-400 py-2">{{ day }}</div>
+              <div class="text-center text-xs font-medium text-slate-500 py-2">{{ day }}</div>
             }
           </div>
 
@@ -204,19 +204,19 @@ type CalendarDay = {
           </div>
 
           <div class="flex items-center gap-6 mt-4 pt-4 border-t border-slate-100">
-            <div class="flex items-center gap-2 text-xs text-slate-400">
+            <div class="flex items-center gap-2 text-xs text-slate-500">
               <span class="w-3 h-3 rounded bg-slate-50 border border-slate-200"></span>
               Disponible
             </div>
-            <div class="flex items-center gap-2 text-xs text-slate-400">
+            <div class="flex items-center gap-2 text-xs text-slate-500">
               <span class="w-3 h-3 rounded bg-red-50 border border-red-200"></span>
               Désactivé
             </div>
-            <div class="flex items-center gap-2 text-xs text-slate-400">
+            <div class="flex items-center gap-2 text-xs text-slate-500">
               <span class="w-3 h-3 rounded bg-amber-50 border border-amber-200"></span>
               Weekend / Férié
             </div>
-            <div class="flex items-center gap-2 text-xs text-slate-400">
+            <div class="flex items-center gap-2 text-xs text-slate-500">
               <span class="w-3 h-3 rounded bg-brand-50 border border-brand-200"></span>
               Aujourd'hui
             </div>
@@ -267,7 +267,7 @@ type CalendarDay = {
             </div>
           } @else {
             <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
-              <p class="text-sm text-slate-400 text-center">
+              <p class="text-sm text-slate-500 text-center">
                 Cliquez sur une date pour la désactiver ou la réactiver
               </p>
             </div>
@@ -297,7 +297,7 @@ type CalendarDay = {
                   </button>
                 </div>
               } @empty {
-                <p class="text-xs text-slate-400 text-center py-4">Aucune date désactivée</p>
+                <p class="text-xs text-slate-500 text-center py-4">Aucune date désactivée</p>
               }
             </div>
           </div>
@@ -540,7 +540,7 @@ export class DashboardAppointments {
     if (day.isToday) {
       return `${base} bg-brand-50 text-brand-600 border border-brand-200 hover:bg-brand-100`;
     }
-    return `${base} text-slate-700 hover:bg-slate-50 hover:text-brand-500`;
+    return `${base} text-slate-700 hover:bg-slate-50 hover:text-brand-700`;
   }
 
   // ── Data loading ──

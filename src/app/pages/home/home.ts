@@ -34,7 +34,7 @@ const SERVICE_CARDS: readonly {
     slug: 'life-coach',
     route: '/life-coach',
     iconBg: 'bg-brand-100',
-    iconColor: 'text-brand-500',
+    iconColor: 'text-brand-700',
     iconName: 'sparkles',
   },
   {
@@ -76,7 +76,7 @@ const SERVICE_CARDS: readonly {
       >
         <div class="text-left z-10">
           <span
-            class="inline-block py-1 px-3 rounded-full bg-brand-100 text-brand-600 font-semibold tracking-wider text-sm mb-6"
+            class="inline-block py-1 px-3 rounded-full bg-brand-100 text-brand-700 font-semibold tracking-wider text-sm mb-6"
             >COACHING LIFE</span
           >
           <h1
@@ -90,7 +90,7 @@ const SERVICE_CARDS: readonly {
             <button
               type="button"
               (click)="scrollTo('contact')"
-              class="bg-brand-500 text-white px-8 py-4 rounded-full font-medium hover:bg-brand-600 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 cursor-pointer"
+              class="bg-brand-700 text-white px-8 py-4 rounded-full font-medium hover:bg-brand-800 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 cursor-pointer"
             >
               {{ h.ctaPrimaryText }}
             </button>
@@ -131,7 +131,7 @@ const SERVICE_CARDS: readonly {
     >
       <div class="text-center mb-16">
         <span
-          class="inline-block py-1 px-3 rounded-full bg-brand-100 text-brand-600 font-semibold tracking-wider text-sm mb-4"
+          class="inline-block py-1 px-3 rounded-full bg-brand-100 text-brand-700 font-semibold tracking-wider text-sm mb-4"
           >{{ svc.badge }}</span
         >
         <h2 id="services-heading" class="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
@@ -167,7 +167,7 @@ const SERVICE_CARDS: readonly {
               <p class="text-slate-600 text-sm mb-4 line-clamp-3">{{ getPageIntro(card.slug) }}</p>
               <a
                 [routerLink]="card.route"
-                class="inline-flex items-center gap-1 text-brand-500 font-medium text-sm hover:text-brand-600 transition-colors"
+                class="inline-flex items-center gap-1 text-brand-700 font-medium text-sm hover:text-brand-800 transition-colors"
               >
                 En savoir plus
                 <app-icon
@@ -195,7 +195,7 @@ const SERVICE_CARDS: readonly {
     >
       <div class="text-center mb-12">
         <span
-          class="inline-block py-1 px-3 rounded-full bg-brand-100 text-brand-600 font-semibold tracking-wider text-sm mb-4"
+          class="inline-block py-1 px-3 rounded-full bg-brand-100 text-brand-700 font-semibold tracking-wider text-sm mb-4"
           >{{ cta.badge }}</span
         >
         <h2 id="contact-heading" class="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
@@ -213,7 +213,7 @@ const SERVICE_CARDS: readonly {
           class="group bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-left hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
         >
           <div
-            class="w-14 h-14 rounded-2xl bg-brand-50 text-brand-500 flex items-center justify-center mb-5"
+            class="w-14 h-14 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center mb-5"
           >
             <app-icon name="calendar" size="lg" />
           </div>
@@ -222,7 +222,7 @@ const SERVICE_CARDS: readonly {
             Choisissez une date et un créneau pour votre séance de coaching personnalisée.
           </p>
           <span
-            class="inline-flex items-center gap-1 text-brand-500 font-medium text-sm mt-4 group-hover:gap-2 transition-all"
+            class="inline-flex items-center gap-1 text-brand-700 font-medium text-sm mt-4 group-hover:gap-2 transition-all"
           >
             Ouvrir le calendrier
             <app-icon name="chevron-right" size="sm" />
@@ -246,7 +246,7 @@ const SERVICE_CARDS: readonly {
             Une question ? Envoyez-moi un message et je vous répondrai rapidement.
           </p>
           <span
-            class="inline-flex items-center gap-1 text-brand-500 font-medium text-sm mt-4 group-hover:gap-2 transition-all"
+            class="inline-flex items-center gap-1 text-brand-700 font-medium text-sm mt-4 group-hover:gap-2 transition-all"
           >
             Ouvrir le formulaire
             <app-icon name="chevron-right" size="sm" />

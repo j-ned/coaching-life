@@ -20,7 +20,7 @@ import { BookingForm, type BookingFormPayload } from '../components/booking-form
     <section aria-labelledby="booking-heading">
       <div class="text-center mb-10">
         <div
-          class="w-16 h-16 bg-brand-50 rounded-full flex items-center justify-center text-brand-500 mx-auto mb-4"
+          class="w-16 h-16 bg-brand-50 rounded-full flex items-center justify-center text-brand-700 mx-auto mb-4"
         >
           <svg
             width="32"
@@ -92,7 +92,7 @@ import { BookingForm, type BookingFormPayload } from '../components/booking-form
                   <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
                 <p class="text-slate-500 text-lg font-medium mb-2">Sélectionnez un créneau</p>
-                <p class="text-slate-400 text-sm max-w-xs">
+                <p class="text-slate-500 text-sm max-w-xs">
                   Choisissez une date dans le calendrier puis un horaire pour accéder au formulaire
                   de réservation.
                 </p>

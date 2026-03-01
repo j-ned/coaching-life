@@ -14,7 +14,7 @@ import { Icon } from '../../shared/components/icon/icon';
     <div class="grid lg:grid-cols-2 gap-12 items-center">
       <div>
         <h1 class="text-4xl lg:text-5xl font-bold text-slate-800 mb-6 flex items-center gap-4">
-          <span class="p-3 bg-brand-100 text-brand-500 rounded-2xl">
+          <span class="p-3 bg-brand-100 text-brand-700 rounded-2xl">
             <app-icon name="sparkles" size="xl" />
           </span>
           {{ c.title }}
@@ -25,7 +25,7 @@ import { Icon } from '../../shared/components/icon/icon';
           <ul class="space-y-4">
             @for (item of c.items; track $index) {
               <li class="flex items-start gap-3 text-slate-700">
-                <app-icon name="check" size="lg" class="text-brand-500 shrink-0 mt-0.5" />
+                <app-icon name="check" size="lg" class="text-brand-700 shrink-0 mt-0.5" />
                 <span>
                   @if (item.title) {
                     <strong>{{ item.title }} :</strong>

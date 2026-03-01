@@ -48,7 +48,7 @@ type CTAFormShape = {
     <div class="mb-8 flex items-center gap-4">
       <a
         routerLink="/dashboard/content"
-        class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+        class="p-2 rounded-lg text-slate-500 hover:text-slate-600 hover:bg-slate-100 transition-all"
       >
         <app-icon name="chevron-left" size="lg" />
       </a>
@@ -146,7 +146,7 @@ type CTAFormShape = {
                   placeholder="Ex : Prendre rendez-vous"
                   class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                 />
-                <p class="text-xs text-slate-400 mt-1">Scrolle vers la section contact</p>
+                <p class="text-xs text-slate-500 mt-1">Scrolle vers la section contact</p>
               </div>
               <div>
                 <label
@@ -161,7 +161,7 @@ type CTAFormShape = {
                   placeholder="Ex : Découvrir les services"
                   class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                 />
-                <p class="text-xs text-slate-400 mt-1">Scrolle vers les accompagnements</p>
+                <p class="text-xs text-slate-500 mt-1">Scrolle vers les accompagnements</p>
               </div>
             </div>
 
@@ -185,7 +185,7 @@ type CTAFormShape = {
                 placeholder="Ex : Cabinet de coaching apaisant"
                 class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
               />
-              <p class="text-xs text-slate-400 mt-1">
+              <p class="text-xs text-slate-500 mt-1">
                 Important pour l'accessibilité et le référencement
               </p>
             </div>
@@ -219,7 +219,7 @@ type CTAFormShape = {
                 placeholder="Ex : MES ACCOMPAGNEMENTS"
                 class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
               />
-              <p class="text-xs text-slate-400 mt-1">Petit texte affiché au-dessus du titre</p>
+              <p class="text-xs text-slate-500 mt-1">Petit texte affiché au-dessus du titre</p>
             </div>
 
             <div>
@@ -329,7 +329,7 @@ type CTAFormShape = {
             type="button"
             (click)="saveAll()"
             [disabled]="isSaving()"
-            class="px-8 py-2.5 bg-brand-500 text-white rounded-xl font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg cursor-pointer"
+            class="px-8 py-2.5 bg-brand-700 text-white rounded-xl font-medium hover:bg-brand-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg cursor-pointer"
           >
             @if (isSaving()) {
               <span class="flex items-center gap-2">

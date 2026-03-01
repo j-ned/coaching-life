@@ -54,7 +54,7 @@ import { RouterLink } from '@angular/router';
             <a
               routerLink="/"
               fragment="contact"
-              class="text-brand-500 hover:text-brand-600 font-medium inline-flex items-center gap-2 transition-colors"
+              class="text-brand-700 hover:text-brand-800 font-medium inline-flex items-center gap-2 transition-colors"
             >
               Prenons le temps d'échanger
               <app-icon name="arrow-right" size="sm" />

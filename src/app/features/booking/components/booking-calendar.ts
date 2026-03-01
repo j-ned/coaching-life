@@ -24,7 +24,7 @@ type CalendarDay = {
       <header class="flex items-center justify-between mb-6">
         <button
           (click)="previousMonth()"
-          class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center hover:border-brand-300 hover:text-brand-500 transition-colors"
+          class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center hover:border-brand-300 hover:text-brand-700 transition-colors"
           aria-label="Mois précédent"
         >
           <app-icon name="chevron-left" size="md" />
@@ -32,7 +32,7 @@ type CalendarDay = {
         <h2 class="text-lg font-bold text-slate-800 capitalize">{{ monthLabel() }}</h2>
         <button
           (click)="nextMonth()"
-          class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center hover:border-brand-300 hover:text-brand-500 transition-colors"
+          class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center hover:border-brand-300 hover:text-brand-700 transition-colors"
           aria-label="Mois suivant"
         >
           <app-icon name="chevron-right" size="md" />
@@ -41,7 +41,7 @@ type CalendarDay = {
 
       <div class="grid grid-cols-7 gap-1 mb-2">
         @for (day of weekDays; track day) {
-          <div class="text-center text-xs font-medium text-slate-400 py-2">{{ day }}</div>
+          <div class="text-center text-xs font-medium text-slate-500 py-2">{{ day }}</div>
         }
       </div>
 
@@ -179,13 +179,13 @@ export class BookingCalendar {
     }
 
     if (this.selectedDate() === day.date) {
-      return `${base} bg-brand-500 text-white ring-2 ring-brand-500 shadow-lg shadow-brand-500/25`;
+      return `${base} bg-brand-700 text-white ring-2 ring-brand-500 shadow-lg shadow-brand-500/25`;
     }
 
     if (day.isToday) {
       return `${base} bg-brand-50 text-brand-600 border border-brand-200 hover:bg-brand-100 cursor-pointer`;
     }
 
-    return `${base} text-slate-700 hover:bg-slate-50 hover:text-brand-500 cursor-pointer`;
+    return `${base} text-slate-700 hover:bg-slate-50 hover:text-brand-700 cursor-pointer`;
   }
 }

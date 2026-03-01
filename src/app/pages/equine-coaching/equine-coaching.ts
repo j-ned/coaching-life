@@ -26,7 +26,7 @@ import { Icon } from '../../shared/components/icon/icon';
             @for (item of c.items; track $index) {
               <li class="flex items-center gap-4">
                 <div
-                  class="w-10 h-10 rounded-full bg-brand-50 text-brand-500 flex items-center justify-center shrink-0"
+                  class="w-10 h-10 rounded-full bg-brand-50 text-brand-700 flex items-center justify-center shrink-0"
                 >
                   {{ $index + 1 }}
                 </div>

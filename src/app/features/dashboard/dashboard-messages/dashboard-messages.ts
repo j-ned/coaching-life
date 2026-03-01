@@ -55,7 +55,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
         >
           {{ tab.label }}
           @if (tab.key === 'unread' && unreadCount() > 0) {
-            <span class="ml-1.5 bg-brand-500 text-white text-xs px-1.5 py-0.5 rounded-full">{{
+            <span class="ml-1.5 bg-brand-700 text-white text-xs px-1.5 py-0.5 rounded-full">{{
               unreadCount()
             }}</span>
           }
@@ -69,7 +69,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
       <!-- Sidebar: Message List -->
       <div class="w-1/3 border-r border-slate-100 overflow-y-auto">
         @if (filteredMessages().length === 0) {
-          <div class="p-8 text-center text-slate-400">
+          <div class="p-8 text-center text-slate-500">
             <svg
               class="w-12 h-12 mx-auto mb-3 text-slate-200"
               viewBox="0 0 24 24"
@@ -113,7 +113,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
                 </p>
                 <p class="text-xs text-slate-500 truncate pr-12">{{ msg.content }}</p>
                 <time
-                  class="text-[10px] text-slate-400 absolute bottom-4 right-4"
+                  class="text-[10px] text-slate-500 absolute bottom-4 right-4"
                   [attr.datetime]="msg.createdAt"
                   >{{ msg.createdAt | date: 'dd/MM/yy HH:mm' }}</time
                 >
@@ -209,7 +209,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
             {{ msg.content }}
           </div>
         } @else {
-          <div class="grow flex flex-col items-center justify-center text-slate-400">
+          <div class="grow flex flex-col items-center justify-center text-slate-500">
             <svg
               class="w-16 h-16 mb-4 text-slate-200"
               viewBox="0 0 24 24"

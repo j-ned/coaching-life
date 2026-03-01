@@ -30,12 +30,12 @@ export type BookingFormPayload = {
       <output
         class="mb-6 p-4 rounded-xl bg-brand-50 border border-brand-100 flex items-center gap-3 block"
       >
-        <app-icon name="calendar" size="md" class="text-brand-500 shrink-0" />
+        <app-icon name="calendar" size="md" class="text-brand-700 shrink-0" />
         <div class="text-sm">
           <span class="font-medium text-slate-800">{{ formattedDate() }}</span>
-          <span class="text-slate-400 mx-1">&middot;</span>
+          <span class="text-slate-500 mx-1">&middot;</span>
           <span class="text-slate-700">{{ selectedTime() }}</span>
-          <span class="text-slate-400 mx-1">&middot;</span>
+          <span class="text-slate-500 mx-1">&middot;</span>
           <span class="text-slate-500">{{ selectedDuration() }} min</span>
         </div>
       </output>
@@ -212,7 +212,7 @@ export type BookingFormPayload = {
         <button
           type="submit"
           [disabled]="form.invalid || isSubmitting()"
-          class="w-full py-3 px-6 rounded-lg bg-brand-500 text-white font-medium hover:bg-brand-600 hover:-translate-y-0.5 shadow-lg shadow-brand-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2"
+          class="w-full py-3 px-6 rounded-lg bg-brand-700 text-white font-medium hover:bg-brand-800 hover:-translate-y-0.5 shadow-lg shadow-brand-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2"
         >
           @if (isSubmitting()) {
             <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">

@@ -113,7 +113,7 @@ type ContactFormShape = {
         <button
           type="submit"
           [disabled]="form.invalid || isSubmitting()"
-          class="w-full bg-brand-500 hover:bg-brand-600 focus-visible:ring-4 focus-visible:ring-brand-500/20 text-white font-medium rounded-lg px-5 py-3 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+          class="w-full bg-brand-700 hover:bg-brand-800 focus-visible:ring-4 focus-visible:ring-brand-500/20 text-white font-medium rounded-lg px-5 py-3 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {{ isSubmitting() ? 'Envoi en cours...' : 'Envoyer le message' }}
         </button>

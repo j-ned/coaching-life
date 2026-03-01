@@ -108,7 +108,7 @@ const SERVICE_COLOR_CONFIG: Record<string, string> = {
               {{ entry.label }}: {{ entry.count }}
             </span>
           } @empty {
-            <p class="text-slate-400 text-sm">Aucun rendez-vous</p>
+            <p class="text-slate-500 text-sm">Aucun rendez-vous</p>
           }
         </div>
       </section>
@@ -130,7 +130,7 @@ const SERVICE_COLOR_CONFIG: Record<string, string> = {
               {{ entry.label }}: {{ entry.count }}
             </span>
           } @empty {
-            <p class="text-slate-400 text-sm">Aucun message</p>
+            <p class="text-slate-500 text-sm">Aucun message</p>
           }
         </div>
       </section>
@@ -155,7 +155,7 @@ const SERVICE_COLOR_CONFIG: Record<string, string> = {
           <p class="text-slate-400 text-sm text-center py-12">Aucune donnée pour cette période</p>
         }
       } @else {
-        <div class="flex items-center justify-center py-12 text-slate-400">
+        <div class="flex items-center justify-center py-12 text-slate-500">
           <app-icon name="loader" size="lg" />
           <span class="ml-2 text-sm">Chargement...</span>
         </div>

@@ -15,7 +15,7 @@ type SlotSelection = {
   template: `
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 h-full">
       <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-        <app-icon name="clock" size="md" class="text-brand-500" />
+        <app-icon name="clock" size="md" class="text-brand-700" />
         Choisissez un créneau
       </h2>
 
@@ -25,7 +25,7 @@ type SlotSelection = {
           (click)="setDuration(30)"
           [class]="
             selectedDuration() === 30
-              ? 'px-4 py-2 rounded-lg text-sm font-medium bg-brand-500 text-white transition-colors'
+              ? 'px-4 py-2 rounded-lg text-sm font-medium bg-brand-700 text-white transition-colors'
               : 'px-4 py-2 rounded-lg text-sm font-medium bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-800 hover:border-brand-300 transition-colors'
           "
         >
@@ -35,7 +35,7 @@ type SlotSelection = {
           (click)="setDuration(60)"
           [class]="
             selectedDuration() === 60
-              ? 'px-4 py-2 rounded-lg text-sm font-medium bg-brand-500 text-white transition-colors'
+              ? 'px-4 py-2 rounded-lg text-sm font-medium bg-brand-700 text-white transition-colors'
               : 'px-4 py-2 rounded-lg text-sm font-medium bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-800 hover:border-brand-300 transition-colors'
           "
         >
@@ -56,7 +56,7 @@ type SlotSelection = {
       </div>
 
       @if (availableSlots().length === 0) {
-        <p class="text-slate-400 text-sm text-center py-4">
+        <p class="text-slate-500 text-sm text-center py-4">
           Aucun créneau disponible pour cette date.
         </p>
       }
@@ -120,10 +120,10 @@ export class BookingTimePicker {
     }
 
     if (this.selectedTime() === slot.time) {
-      return `${base} bg-brand-500 text-white ring-2 ring-brand-500 shadow-lg shadow-brand-500/25`;
+      return `${base} bg-brand-700 text-white ring-2 ring-brand-500 shadow-lg shadow-brand-500/25`;
     }
 
-    return `${base} bg-slate-50 border border-slate-200 text-slate-700 hover:border-brand-300 hover:text-brand-500 cursor-pointer`;
+    return `${base} bg-slate-50 border border-slate-200 text-slate-700 hover:border-brand-300 hover:text-brand-700 cursor-pointer`;
   }
 
   private timeToMinutes(time: string): number {

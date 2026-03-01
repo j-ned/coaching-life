@@ -58,11 +58,11 @@ const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
       } @else {
         <div class="flex flex-col items-center gap-3 py-4">
           <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
-            <app-icon name="image" size="lg" class="text-slate-400" />
+            <app-icon name="image" size="lg" class="text-slate-500" />
           </div>
           <div>
             <p class="text-sm font-medium text-slate-700">Glissez-déposez une image ici</p>
-            <p class="text-xs text-slate-400 mt-1">
+            <p class="text-xs text-slate-500 mt-1">
               ou cliquez pour parcourir (JPEG, PNG, WebP, AVIF — max {{ maxSizeMb }} Mo)
             </p>
           </div>

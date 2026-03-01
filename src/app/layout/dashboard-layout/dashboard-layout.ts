@@ -19,7 +19,7 @@ import { Icon } from '../../shared/components/icon/icon';
       <nav class="grow py-6 px-4 space-y-1">
         <a
           routerLink="/dashboard"
-          routerLinkActive="bg-brand-500 text-white"
+          routerLinkActive="bg-brand-700 text-white"
           [routerLinkActiveOptions]="{ exact: true }"
           class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
         >
@@ -28,7 +28,7 @@ import { Icon } from '../../shared/components/icon/icon';
         </a>
         <a
           routerLink="/dashboard/appointments"
-          routerLinkActive="bg-brand-500 text-white"
+          routerLinkActive="bg-brand-700 text-white"
           class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
         >
           <app-icon name="calendar" size="md" />
@@ -36,7 +36,7 @@ import { Icon } from '../../shared/components/icon/icon';
         </a>
         <a
           routerLink="/dashboard/messages"
-          routerLinkActive="bg-brand-500 text-white"
+          routerLinkActive="bg-brand-700 text-white"
           class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
         >
           <app-icon name="mail" size="md" />
@@ -44,7 +44,7 @@ import { Icon } from '../../shared/components/icon/icon';
         </a>
         <a
           routerLink="/dashboard/content"
-          routerLinkActive="bg-brand-500 text-white"
+          routerLinkActive="bg-brand-700 text-white"
           class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
         >
           <app-icon name="pencil" size="md" />

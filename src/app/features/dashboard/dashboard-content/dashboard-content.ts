@@ -44,7 +44,7 @@ const ALL_SLUGS: readonly PageSlug[] = [
         class="group bg-white rounded-2xl shadow-sm border border-slate-100 p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
       >
         <div
-          class="w-12 h-12 rounded-xl bg-brand-100 text-brand-500 flex items-center justify-center mb-4"
+          class="w-12 h-12 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center mb-4"
         >
           <app-icon name="home" size="lg" />
         </div>

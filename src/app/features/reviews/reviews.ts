@@ -103,7 +103,7 @@ import { Icon } from '../../shared/components/icon/icon';
           href="https://g.page/r/your-google-business-link"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 text-brand-600 font-medium hover:text-brand-700 transition-colors"
+          class="inline-flex items-center gap-2 text-brand-700 font-medium hover:text-brand-800 transition-colors"
         >
           Voir tous les avis sur Google
           <app-icon name="arrow-right" size="sm" />

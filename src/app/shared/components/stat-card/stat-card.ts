@@ -22,5 +22,5 @@ export class StatCard {
   readonly label = input.required<string>();
   readonly value = input.required<string | number>();
   readonly icon = input.required<string>();
-  readonly iconBgClass = input('bg-brand-50 text-brand-500');
+  readonly iconBgClass = input('bg-brand-50 text-brand-700');
 }

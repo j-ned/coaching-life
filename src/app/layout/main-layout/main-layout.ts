@@ -31,7 +31,7 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
             class="flex justify-center items-center gap-2 group"
           >
             <!-- Inline SVG for Logo or Brand mark -->
-            <div class="text-brand-500 transition-transform group-hover:scale-105">
+            <div class="text-brand-700 transition-transform group-hover:scale-105">
               <svg
                 width="40"
                 height="40"
@@ -56,28 +56,32 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
         <nav class="hidden md:flex gap-8">
           <a
             routerLink="/life-coach"
-            class="text-slate-600 hover:text-brand-500 font-medium transition-colors"
+            aria-label="Coach de Vie – navigation principale"
+            class="text-slate-600 hover:text-brand-700 font-medium transition-colors"
             >Coach de Vie</a
           >
           <a
             routerLink="/personal-development"
-            class="text-slate-600 hover:text-brand-500 font-medium transition-colors"
+            aria-label="Dev. Personnel – navigation principale"
+            class="text-slate-600 hover:text-brand-700 font-medium transition-colors"
             >Dev. Personnel</a
           >
           <a
             routerLink="/equine-coaching"
-            class="text-slate-600 hover:text-brand-500 font-medium transition-colors"
+            aria-label="Coaching Equin – navigation principale"
+            class="text-slate-600 hover:text-brand-700 font-medium transition-colors"
             >Coaching Equin</a
           >
           <a
             routerLink="/neuroatypical-parents"
-            class="text-slate-600 hover:text-brand-500 font-medium transition-colors"
+            aria-label="Parents Neuroatypiques – navigation principale"
+            class="text-slate-600 hover:text-brand-700 font-medium transition-colors"
             >Parents Neuroatypiques</a
           >
           @if (isAuthenticated()) {
             <a
               routerLink="/dashboard"
-              class="text-brand-600 hover:text-brand-700 font-bold transition-colors"
+              class="text-brand-700 hover:text-brand-800 font-bold transition-colors"
               >Dashboard</a
             >
           }
@@ -87,7 +91,7 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
           <button
             type="button"
             (click)="goToContact()"
-            class="bg-brand-500 hover:bg-brand-600 text-white px-5 py-2.5 rounded-full font-medium transition-all shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30 transform hover:-translate-y-0.5 cursor-pointer"
+            class="bg-brand-700 hover:bg-brand-800 text-white px-5 py-2.5 rounded-full font-medium transition-all shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30 transform hover:-translate-y-0.5 cursor-pointer"
           >
             Contact
           </button>
@@ -111,22 +115,22 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
           <h3 class="text-white font-medium mb-4">Spécialités</h3>
           <ul class="space-y-2">
             <li>
-              <a routerLink="/life-coach" class="hover:text-brand-400 transition-colors"
+              <a routerLink="/life-coach" aria-label="Coach de Vie Certifié – pied de page" class="hover:text-brand-400 transition-colors"
                 >Coach de Vie Certifié</a
               >
             </li>
             <li>
-              <a routerLink="/personal-development" class="hover:text-brand-400 transition-colors"
+              <a routerLink="/personal-development" aria-label="Développement Personnel – pied de page" class="hover:text-brand-400 transition-colors"
                 >Développement Personnel</a
               >
             </li>
             <li>
-              <a routerLink="/equine-coaching" class="hover:text-brand-400 transition-colors"
+              <a routerLink="/equine-coaching" aria-label="Coaching facilité avec le cheval – pied de page" class="hover:text-brand-400 transition-colors"
                 >Coaching facilité avec le cheval</a
               >
             </li>
             <li>
-              <a routerLink="/neuroatypical-parents" class="hover:text-brand-400 transition-colors"
+              <a routerLink="/neuroatypical-parents" aria-label="Parents d'enfants neuroatypiques – pied de page" class="hover:text-brand-400 transition-colors"
                 >Parents d'enfants neuroatypiques</a
               >
             </li>
