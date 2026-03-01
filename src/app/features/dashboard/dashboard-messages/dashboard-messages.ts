@@ -78,7 +78,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
               stroke-width="1.5"
               aria-hidden="true"
             >
-              <use href="/icons/sprite.svg#mail" />
+              <use href="icons/sprite.svg#mail" />
             </svg>
             <p class="text-sm">Aucun message</p>
           </div>
@@ -218,7 +218,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
               stroke-width="1.5"
               aria-hidden="true"
             >
-              <use href="/icons/sprite.svg#mail" />
+              <use href="icons/sprite.svg#mail" />
             </svg>
             <p>Sélectionnez un message pour le lire</p>
           </div>

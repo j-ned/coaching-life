@@ -33,5 +33,5 @@ export class Icon {
   readonly filled = input(false);
 
   protected readonly sizeClass = computed(() => SIZE_CLASSES[this.size()]);
-  protected readonly iconHref = computed(() => `/icons/sprite.svg#${this.name()}`);
+  protected readonly iconHref = computed(() => `icons/sprite.svg#${this.name()}`);
 }
