@@ -1,3 +1,27 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+@theme {
+  --color-brand-50: #fdf3f3;
+  --color-brand-100: #fce4e4;
+  --color-brand-200: #facaca;
+  --color-brand-300: #f5a6a6;
+  --color-brand-400: #eb7c7b;
+  --color-brand-500: #d97b7a;
+  --color-brand-600: #c25e5d;
+  --color-brand-700: #a34847;
+  --color-brand-800: #873d3c;
+  --color-brand-900: #723635;
+  --color-brand-950: #3d1918;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-slate-50);
+    color: var(--color-slate-800);
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      sans-serif;
+  }
+}

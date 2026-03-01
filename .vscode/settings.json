@@ -1,0 +1,18 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "json.schemas": [
+    {
+      "fileMatch": ["/.vscode/mcp.json"],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "mcpServers": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  ]
+}
