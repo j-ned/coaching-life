@@ -6,7 +6,7 @@ import { Supabase } from '../../../core/services/supabase/supabase';
 import { toPageVisit } from './page-visit.adapter';
 
 @Injectable()
-export class SupabasePageVisitGateway extends PageVisitGateway {
+export class SupabasePageVisitGateway implements PageVisitGateway {
   private readonly supabase = inject(Supabase);
 
   trackVisit(pagePath: string, referrer: string, userAgent: string): Observable<void> {

@@ -6,7 +6,7 @@ import { Supabase } from '../../../core/services/supabase/supabase';
 import { toSiteSetting } from './site-settings.adapter';
 
 @Injectable()
-export class SupabaseSiteSettingsGateway extends SiteSettingsGateway {
+export class SupabaseSiteSettingsGateway implements SiteSettingsGateway {
   private readonly supabase = inject(Supabase);
 
   get<T extends SiteSettingValue>(key: SiteSettingKey): Observable<T | null> {

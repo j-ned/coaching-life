@@ -12,7 +12,7 @@ import { Supabase } from '../../../core/services/supabase/supabase';
 import { toAppointment, toDisabledDate, toSupabaseInsert } from './appointment.adapter';
 
 @Injectable()
-export class SupabaseAppointmentGateway extends AppointmentGateway {
+export class SupabaseAppointmentGateway implements AppointmentGateway {
   private readonly supabase = inject(Supabase);
 
   getBookedSlots(month: string): Observable<readonly Appointment[]> {

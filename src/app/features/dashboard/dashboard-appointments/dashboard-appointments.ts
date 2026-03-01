@@ -1,13 +1,18 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Icon } from '../../../shared/components/icon/icon';
-import { AppointmentGateway } from '../../booking/domain/gateways/appointment.gateway';
 import type {
   Appointment,
   AppointmentStatus,
   DisabledDate,
 } from '../../booking/domain/models/appointment.model';
 import { COACHING_TYPE_LABELS } from '../../booking/domain/models/appointment.model';
+import { GetAllAppointmentsUseCase } from '../../booking/domain/use-cases/get-all-appointments.use-case';
+import { GetDisabledDatesUseCase } from '../../booking/domain/use-cases/get-disabled-dates.use-case';
+import { UpdateAppointmentStatusUseCase } from '../../booking/domain/use-cases/update-appointment-status.use-case';
+import { DeleteAppointmentUseCase } from '../../booking/domain/use-cases/delete-appointment.use-case';
+import { AddDisabledDateUseCase } from '../../booking/domain/use-cases/add-disabled-date.use-case';
+import { RemoveDisabledDateUseCase } from '../../booking/domain/use-cases/remove-disabled-date.use-case';
 import { getFrenchHolidays, getUnavailableReason } from '../../../shared/calendar/french-holidays';
 
 type Tab = 'appointments' | 'availability';
@@ -302,7 +307,12 @@ type CalendarDay = {
   `,
 })
 export class DashboardAppointments {
-  private readonly appointmentGateway = inject(AppointmentGateway);
+  private readonly getAllAppointments = inject(GetAllAppointmentsUseCase);
+  private readonly getDisabledDatesUseCase = inject(GetDisabledDatesUseCase);
+  private readonly updateAppointmentStatus = inject(UpdateAppointmentStatusUseCase);
+  private readonly deleteAppointmentUseCase = inject(DeleteAppointmentUseCase);
+  private readonly addDisabledDateUseCase = inject(AddDisabledDateUseCase);
+  private readonly removeDisabledDateUseCase = inject(RemoveDisabledDateUseCase);
 
   // Shared state
   protected readonly appointments = signal<readonly Appointment[]>([]);
@@ -439,13 +449,13 @@ export class DashboardAppointments {
   }
 
   protected updateStatus(id: string, status: AppointmentStatus): void {
-    this.appointmentGateway.updateStatus(id, status).subscribe({
+    this.updateAppointmentStatus.execute(id, status).subscribe({
       next: () => this.loadAppointments(),
     });
   }
 
   protected deleteAppointment(id: string): void {
-    this.appointmentGateway.deleteAppointment(id).subscribe({
+    this.deleteAppointmentUseCase.execute(id).subscribe({
       next: () => this.loadAppointments(),
     });
   }
@@ -477,8 +487,8 @@ export class DashboardAppointments {
     const date = this.selectedDate();
     if (!date) return;
 
-    this.appointmentGateway
-      .addDisabledDate({
+    this.addDisabledDateUseCase
+      .execute({
         date,
         reason: this.reasonInput || undefined,
       })
@@ -497,13 +507,13 @@ export class DashboardAppointments {
     const dd = this.disabledDateSet().get(date);
     if (!dd) return;
 
-    this.appointmentGateway.removeDisabledDate(dd.id).subscribe({
+    this.removeDisabledDateUseCase.execute(dd.id).subscribe({
       next: () => this.loadDisabledDates(),
     });
   }
 
   protected removeDate(dd: DisabledDate): void {
-    this.appointmentGateway.removeDisabledDate(dd.id).subscribe({
+    this.removeDisabledDateUseCase.execute(dd.id).subscribe({
       next: () => this.loadDisabledDates(),
     });
   }
@@ -545,13 +555,13 @@ export class DashboardAppointments {
   // ── Data loading ──
 
   private loadAppointments(): void {
-    this.appointmentGateway.getAllAppointments().subscribe((appts) => {
+    this.getAllAppointments.execute().subscribe((appts) => {
       this.appointments.set(appts);
     });
   }
 
   private loadDisabledDates(): void {
-    this.appointmentGateway.getDisabledDates().subscribe((dates) => {
+    this.getDisabledDatesUseCase.execute().subscribe((dates) => {
       this.disabledDates.set(dates);
     });
   }

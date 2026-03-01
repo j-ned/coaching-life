@@ -6,7 +6,7 @@ import { Supabase } from '../../../core/services/supabase/supabase';
 import { toPageContent, toSupabasePageUpdate } from './page-content.adapter';
 
 @Injectable()
-export class SupabasePageContentGateway extends PageContentGateway {
+export class SupabasePageContentGateway implements PageContentGateway {
   private readonly supabase = inject(Supabase);
 
   getBySlug(slug: PageSlug): Observable<PageContent | null> {

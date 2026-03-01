@@ -7,7 +7,7 @@ import { Supabase } from '../../../core/services/supabase/supabase';
 const BUCKET = 'coaching-img';
 
 @Injectable()
-export class SupabaseImageStorageGateway extends ImageStorageGateway {
+export class SupabaseImageStorageGateway implements ImageStorageGateway {
   private readonly supabase = inject(Supabase);
 
   upload(file: File, path: string): Observable<ImageUploadResult> {

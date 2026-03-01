@@ -5,7 +5,7 @@ import { AuthState, AuthUser, AuthSession, LoginCredentials } from '../domain/mo
 import { Supabase } from '../../../core/services/supabase/supabase';
 
 @Injectable()
-export class HttpAuthGateway extends AuthGateway {
+export class HttpAuthGateway implements AuthGateway {
   private readonly supabase = inject(Supabase);
 
   login(credentials: LoginCredentials): Observable<AuthSession | null> {

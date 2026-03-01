@@ -162,8 +162,13 @@ export class MainLayout {
   private readonly _tracking = toSignal(
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      filter(() => isPlatformBrowser(this.platformId)),
       map((e) => {
-        this.trackPageVisit.execute(e.urlAfterRedirects);
+        this.trackPageVisit.execute(
+          e.urlAfterRedirects,
+          document.referrer ?? '',
+          navigator.userAgent ?? '',
+        );
       }),
     ),
   );

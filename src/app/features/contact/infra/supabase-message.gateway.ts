@@ -11,7 +11,7 @@ import { Supabase } from '../../../core/services/supabase/supabase';
 import { toMessage, toSupabaseMessageInsert } from './message.adapter';
 
 @Injectable()
-export class SupabaseMessageGateway extends MessageGateway {
+export class SupabaseMessageGateway implements MessageGateway {
   private readonly supabase = inject(Supabase);
 
   getAll(): Observable<readonly Message[]> {

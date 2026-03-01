@@ -1,10 +1,12 @@
 import { Component, ChangeDetectionStrategy, inject, signal, viewChild } from '@angular/core';
-import { AppointmentGateway } from '../domain/gateways/appointment.gateway';
 import type {
   Appointment,
   AppointmentFormData,
   DisabledDate,
 } from '../domain/models/appointment.model';
+import { GetBookedSlotsUseCase } from '../domain/use-cases/get-booked-slots.use-case';
+import { GetDisabledDatesUseCase } from '../domain/use-cases/get-disabled-dates.use-case';
+import { SubmitAppointmentUseCase } from '../domain/use-cases/submit-appointment.use-case';
 import { BookingCalendar } from '../components/booking-calendar';
 import { BookingTimePicker } from '../components/booking-time-picker';
 import { BookingForm, type BookingFormPayload } from '../components/booking-form';
@@ -119,7 +121,9 @@ import { BookingForm, type BookingFormPayload } from '../components/booking-form
   `,
 })
 export class Booking {
-  private readonly appointmentGateway = inject(AppointmentGateway);
+  private readonly getBookedSlotsUseCase = inject(GetBookedSlotsUseCase);
+  private readonly getDisabledDatesUseCase = inject(GetDisabledDatesUseCase);
+  private readonly submitAppointmentUseCase = inject(SubmitAppointmentUseCase);
   private readonly bookingFormRef = viewChild(BookingForm);
   private readonly calendarRef = viewChild(BookingCalendar);
 
@@ -166,7 +170,7 @@ export class Booking {
       ...payload,
     };
 
-    this.appointmentGateway.submitAppointment(data).subscribe({
+    this.submitAppointmentUseCase.execute(data).subscribe({
       next: (result) => {
         formRef.setSubmitting(false);
         this.submissionMessage.set(result);
@@ -190,13 +194,13 @@ export class Booking {
   }
 
   private loadBookedSlots(month: string): void {
-    this.appointmentGateway.getBookedSlots(month).subscribe((slots) => {
+    this.getBookedSlotsUseCase.execute(month).subscribe((slots) => {
       this.bookedSlots.set(slots);
     });
   }
 
   private loadDisabledDates(): void {
-    this.appointmentGateway.getDisabledDates().subscribe((dates) => {
+    this.getDisabledDatesUseCase.execute().subscribe((dates) => {
       this.disabledDates.set(dates);
     });
   }
