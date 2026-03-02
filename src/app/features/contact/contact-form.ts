@@ -15,9 +15,11 @@ type ContactFormShape = {
   selector: 'app-contact-form',
   imports: [ReactiveFormsModule, Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'block bg-white rounded-2xl shadow-sm border border-slate-100 p-8' },
+  host: { class: 'block bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-md:p-5' },
   template: `
-    <h3 class="text-2xl font-semibold text-slate-800 mb-6">Contactez-moi</h3>
+    <h3 class="text-2xl font-semibold text-slate-800 mb-6 max-md:mb-4 max-md:text-xl">
+      Contactez-moi
+    </h3>
 
     @if (submitSuccess()) {
       <div class="bg-emerald-50 text-emerald-700 p-4 rounded-lg mb-6 flex items-start gap-3">

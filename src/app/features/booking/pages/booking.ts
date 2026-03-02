@@ -60,7 +60,7 @@ import { BookingForm, type BookingFormPayload } from '../components/booking-form
 
       @defer (on viewport) {
         <div class="flex flex-col gap-6 max-w-5xl mx-auto">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-md:gap-4 items-start">
             <app-booking-calendar
               [bookedSlots]="bookedSlots()"
               [disabledDates]="disabledDates()"

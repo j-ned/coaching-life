@@ -27,7 +27,7 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
         <div class="flex items-center gap-3">
           <a
             routerLink="/"
-            (click)="goToTop()"
+            (click)="goToTop(); closeMobileMenu()"
             class="flex justify-center items-center gap-2 group"
           >
             <!-- Inline SVG for Logo or Brand mark -->
@@ -96,7 +96,85 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
             Contact
           </button>
         </div>
+
+        <!-- Mobile menu button -->
+        <div class="md:hidden flex items-center">
+          <button
+            type="button"
+            (click)="toggleMobileMenu()"
+            class="text-slate-600 hover:text-brand-700 p-2 focus:outline-none cursor-pointer"
+            aria-label="Toggle mobile menu"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              @if (isMobileMenuOpen()) {
+                <path d="M18 6L6 18M6 6l12 12"></path>
+              } @else {
+                <path d="M3 12h18M3 6h18M3 18h18"></path>
+              }
+            </svg>
+          </button>
+        </div>
       </div>
+
+      <!-- Mobile Navigation Menu -->
+      @if (isMobileMenuOpen()) {
+        <div
+          class="md:hidden border-t border-slate-100 bg-white/95 backdrop-blur-md absolute w-full left-0 shadow-lg"
+        >
+          <div class="px-4 pt-2 pb-6 space-y-1">
+            <a
+              routerLink="/life-coach"
+              (click)="closeMobileMenu()"
+              class="block px-3 py-3 text-base font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 rounded-md"
+              >Coach de Vie</a
+            >
+            <a
+              routerLink="/personal-development"
+              (click)="closeMobileMenu()"
+              class="block px-3 py-3 text-base font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 rounded-md"
+              >Dev. Personnel</a
+            >
+            <a
+              routerLink="/equine-coaching"
+              (click)="closeMobileMenu()"
+              class="block px-3 py-3 text-base font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 rounded-md"
+              >Coaching Equin</a
+            >
+            <a
+              routerLink="/neuroatypical-parents"
+              (click)="closeMobileMenu()"
+              class="block px-3 py-3 text-base font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 rounded-md"
+              >Parents Neuroatypiques</a
+            >
+            @if (isAuthenticated()) {
+              <a
+                routerLink="/dashboard"
+                (click)="closeMobileMenu()"
+                class="block px-3 py-3 text-base font-bold text-brand-700 hover:text-brand-800 hover:bg-slate-50 rounded-md"
+                >Dashboard</a
+              >
+            }
+            <div class="pt-4 pb-2">
+              <button
+                type="button"
+                (click)="closeMobileMenu(); goToContact()"
+                class="w-full bg-brand-700 hover:bg-brand-800 text-white px-5 py-3 rounded-xl font-medium shadow-md transition-colors cursor-pointer"
+              >
+                Contact
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     </header>
 
     <main class="grow">
@@ -169,6 +247,15 @@ export class MainLayout {
 
   protected readonly currentYear = new Date().getFullYear();
   protected readonly showLogin = signal(false);
+  protected readonly isMobileMenuOpen = signal(false);
+
+  protected toggleMobileMenu(): void {
+    this.isMobileMenuOpen.update((v) => !v);
+  }
+
+  protected closeMobileMenu(): void {
+    this.isMobileMenuOpen.set(false);
+  }
 
   protected readonly isAuthenticated = toSignal(
     this.authGateway.authStateChanges().pipe(map((state) => state === 'authenticated')),
