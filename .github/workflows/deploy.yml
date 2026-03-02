@@ -59,15 +59,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Inject Environment Variables
+        run: |
+          cat <<EOF > src/environments/environment.ts
+          export const environment = {
+            production: true,
+            supabase: {
+              url: '${{ secrets.SUPABASE_URL }}',
+              key: '${{ secrets.SUPABASE_ANON_KEY }}'
+            }
+          };
+          EOF
+
       - name: Build production
         run: pnpm ng build --base-href /coaching-life/
 
       - name: Prepare SPA fallback
-        run: |
-          if [ -f dist/coaching-life/browser/index.csr.html ]; then
-            cp dist/coaching-life/browser/index.csr.html dist/coaching-life/browser/index.html
-          fi
-          cp dist/coaching-life/browser/index.html dist/coaching-life/browser/404.html
+        run: cp dist/coaching-life/browser/index.html dist/coaching-life/browser/404.html
 
       - uses: actions/upload-pages-artifact@v3
         with:
