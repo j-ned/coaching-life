@@ -1,60 +1,143 @@
-# CoachingLife
+# Coaching Life
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.0.
+![Coaching Life App Preview](public/screen/image.png)
 
-## Development server
+*(English version available [below](#english-version))*
 
-To start a local development server, run:
+Bienvenue sur **Coaching Life** ! Ce projet est une Single Page Application (SPA) moderne et réactive conçue pour la gestion personnelle, offrant des espaces visuels distincts pour la gestion budgétaire personnelle et la gestion d'activités en freelance (Dash Money).
 
+## 🚀 Fonctionnalités Clés
+
+*   **Architecture Moderne** : Construit avec Angular 21, principes de clean architecture et fonctionnalités Angular modernes (zoneless, signals).
+*   **Authentification** : Connexion sans mot de passe utilisant Supabase Magic Link.
+*   **Interface Réactive** : Design entièrement réactif basé sur Tailwind CSS 4, incluant des carrousels horizontaux adaptés aux mobiles.
+*   **Visualisation de Données** : Graphiques interactifs propulsés par Chart.js.
+*   **Rendu Côté Serveur (SSR)** : Pages optimisées pour le SEO avec Angular SSR.
+
+## 🛠️ Stack Technique
+
+*   **Frontend** : Angular 21.2.0, TypeScript
+*   **Style** : Tailwind CSS 4, PostCSS
+*   **Backend & DB** : Supabase (PostgreSQL, Auth, SSR)
+*   **Graphiques** : Chart.js / ng2-charts
+*   **Tests** : Vitest (Tests Unitaires) & JSDOM
+*   **Gestionnaire de Paquets** : pnpm 10
+*   **Formatage** : Prettier & Husky
+
+## 📦 Démarrage Rapide
+
+### Prérequis
+
+Assurez-vous d'avoir `pnpm` installé et configuré sur votre système.
+
+### Installation
+
+1. Clonez le dépôt et installez les dépendances :
 ```bash
-ng serve
+pnpm install
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+2. Configurez vos variables d'environnement Supabase dans `src/environments/environment.ts` et `src/environments/environment.development.ts`.
 
-## Code scaffolding
+### Serveur de Développement
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+Lancez le serveur de développement local :
 ```bash
-ng generate component component-name
+pnpm start
+```
+Naviguez vers `http://localhost:4200/`. L'application se rechargera automatiquement si vous modifiez l'un des fichiers sources.
+
+## 🏗️ Build
+
+Exécutez la commande suivante pour compiler le projet :
+```bash
+pnpm build
+```
+Les fichiers compilés seront stockés dans le répertoire `dist/`.
+
+## 🧪 Tests et Formatage
+
+Pour lancer les tests unitaires avec Vitest :
+```bash
+pnpm test
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
+Pour formater et vérifier votre code :
 ```bash
-ng generate --help
+pnpm format
+pnpm format:check
 ```
 
-## Building
+---
 
-To build the project run:
+<br>
 
+<a name="english-version"></a>
+# English Version
+
+Welcome to **Coaching Life**! This project is a modern, responsive Single Page Application (SPA) designed for personal management, featuring distinct visual spaces for personal budgeting and freelance management (Dash Money). 
+
+## 🚀 Key Features
+
+*   **Modern Architecture**: Built with Angular 21, clean architecture principles, and modern Angular features (zoneless, signals).
+*   **Authentication**: Passwordless login using Supabase Magic Link.
+*   **Responsive UI**: Fully responsive design leveraging Tailwind CSS 4, including mobile-adapted horizontal carousels.
+*   **Data Visualization**: Interactive charts powered by Chart.js.
+*   **Server-Side Rendering:** SEO-friendly pages with Angular SSR.
+
+## 🛠️ Tech Stack
+
+*   **Frontend**: Angular 21.2.0, TypeScript
+*   **Styling**: Tailwind CSS 4, PostCSS
+*   **Backend & DB**: Supabase (PostgreSQL, Auth, SSR)
+*   **Charts**: Chart.js / ng2-charts
+*   **Testing**: Vitest (Unit Tests) & JSDOM
+*   **Package Manager**: pnpm 10
+*   **Formatting**: Prettier & Husky
+
+## 📦 Getting Started
+
+### Prerequisites
+
+Make sure you have `pnpm` installed and configured on your system.
+
+### Installation
+
+1. Clone the repository and install the dependencies:
 ```bash
-ng build
+pnpm install
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+2. Set up your Supabase environment variables in `src/environments/environment.ts` and `src/environments/environment.development.ts`.
 
-## Running unit tests
+### Development Server
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
+Run the local development server:
 ```bash
-ng test
+pnpm start
+```
+Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+
+## 🏗️ Build
+
+Run the following command to build the project:
+```bash
+pnpm build
+```
+The build artifacts will be stored in the `dist/` directory.
+
+## 🧪 Testing and Formatting
+
+To run the unit tests leveraging Vitest:
+```bash
+pnpm test
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
+To format and check your code:
 ```bash
-ng e2e
+pnpm format
+pnpm format:check
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-# coaching-life
+---
+*Créé avec ❤️ pour une meilleure gestion de coaching et financière. / Created with ❤️ for better coaching and financial management.*
