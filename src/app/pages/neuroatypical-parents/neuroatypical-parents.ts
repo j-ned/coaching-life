@@ -17,13 +17,15 @@ import { RouterLink } from '@angular/router';
       <div
         class="order-2 lg:order-1 rounded-3xl overflow-hidden shadow-xl lg:h-175 max-lg:h-96 max-md:h-72"
       >
-        <img
-          [ngSrc]="c.imageUrl"
-          width="800"
-          height="800"
-          [alt]="c.imageAlt"
-          class="object-cover w-full h-full"
-        />
+        @if (c.imageUrl) {
+          <img
+            [ngSrc]="c.imageUrl"
+            width="800"
+            height="800"
+            [alt]="c.imageAlt"
+            class="object-cover w-full h-full"
+          />
+        }
       </div>
       <div class="order-1 lg:order-2">
         <h1

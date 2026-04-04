@@ -1,5 +1,5 @@
-import { toMessage, toSupabaseMessageInsert } from './message.adapter';
-import type { SupabaseMessageRow } from './message.adapter';
+import { toMessage, toMessageInsert } from './message.adapter';
+import type { MessageRow } from './message.adapter';
 import { SendMessageDataBuilder } from '../test-utils/message.builder';
 
 describe('message.adapter', () => {
@@ -9,13 +9,13 @@ describe('message.adapter', () => {
         label: 'un message complet',
         row: {
           id: 'msg-001',
+          created_at: '2026-03-01T14:30:00.000Z',
           sender_name: 'Jean Martin',
           sender_email: 'jean@email.fr',
           subject: 'life_coach',
           content: 'Bonjour, je souhaite un coaching.',
           status: 'unread',
-          created_at: '2026-03-01T14:30:00.000Z',
-        } satisfies SupabaseMessageRow,
+        } satisfies MessageRow,
         expected: {
           id: 'msg-001',
           senderName: 'Jean Martin',
@@ -30,13 +30,13 @@ describe('message.adapter', () => {
         label: 'un message sans sujet',
         row: {
           id: 'msg-002',
+          created_at: '2026-02-15T08:00:00.000Z',
           sender_name: 'Sophie Lefèvre',
           sender_email: 'sophie@email.fr',
           subject: '',
           content: 'Question générale.',
           status: 'read',
-          created_at: '2026-02-15T08:00:00.000Z',
-        } satisfies SupabaseMessageRow,
+        } satisfies MessageRow,
         expected: {
           id: 'msg-002',
           senderName: 'Sophie Lefèvre',
@@ -48,17 +48,12 @@ describe('message.adapter', () => {
         },
       },
     ])('should convert $label from snake_case to camelCase', ({ row, expected }) => {
-      // When
-      const result = toMessage(row);
-
-      // Then
-      expect(result).toEqual(expected);
+      expect(toMessage(row)).toEqual(expected);
     });
   });
 
-  describe('toSupabaseMessageInsert', () => {
+  describe('toMessageInsert', () => {
     it('should convert send data to snake_case with unread status', () => {
-      // Given
       const data = SendMessageDataBuilder.default()
         .with('name', 'Claire Petit')
         .with('email', 'claire@email.fr')
@@ -66,11 +61,7 @@ describe('message.adapter', () => {
         .with('message', 'Intéressée par le coaching équin.')
         .build();
 
-      // When
-      const result = toSupabaseMessageInsert(data);
-
-      // Then
-      expect(result).toEqual({
+      expect(toMessageInsert(data)).toEqual({
         sender_name: 'Claire Petit',
         sender_email: 'claire@email.fr',
         subject: 'equine',

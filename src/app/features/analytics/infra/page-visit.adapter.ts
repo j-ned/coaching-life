@@ -1,6 +1,6 @@
 import type { PageVisit } from '../domain/models/analytics.model';
 
-export type SupabasePageVisitRow = {
+export type PageVisitRow = {
   readonly id: string;
   readonly page_path: string;
   readonly visited_at: string;
@@ -8,7 +8,7 @@ export type SupabasePageVisitRow = {
   readonly user_agent: string | null;
 };
 
-export function toPageVisit(raw: SupabasePageVisitRow): PageVisit {
+export function toPageVisit(raw: PageVisitRow): PageVisit {
   return {
     id: raw.id,
     pagePath: raw.page_path,

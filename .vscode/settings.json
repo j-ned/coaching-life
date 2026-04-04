@@ -14,5 +14,6 @@
         "additionalProperties": true
       }
     }
-  ]
+  ],
+  "cSpell.words": ["appwrite", "lmdb", "msgpackr", "SUPABASE"]
 }

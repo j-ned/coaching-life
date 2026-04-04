@@ -120,13 +120,15 @@ const SERVICE_CARDS: readonly {
         <div
           class="relative z-10 lg:h-150 rounded-3xl overflow-hidden shadow-2xl transform lg:rotate-2 hover:rotate-0 transition-transform duration-500 max-lg:h-96 max-md:h-72"
         >
-          <img
-            [ngSrc]="h.imageUrl"
-            width="800"
-            height="800"
-            [alt]="h.imageAlt"
-            class="object-cover w-full h-full"
-          />
+          @if (h.imageUrl) {
+            <img
+              [ngSrc]="h.imageUrl"
+              width="800"
+              height="800"
+              [alt]="h.imageAlt"
+              class="object-cover w-full h-full"
+            />
+          }
         </div>
       </div>
 
@@ -163,13 +165,15 @@ const SERVICE_CARDS: readonly {
             class="group relative bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 max-md:min-w-[85vw] max-md:snap-center"
           >
             <div class="h-48 overflow-hidden">
-              <img
-                [ngSrc]="getPageImage(card.slug)"
-                width="400"
-                height="300"
-                [alt]="getPageTitle(card.slug)"
-                class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-              />
+              @if (getPageImage(card.slug)) {
+                <img
+                  [ngSrc]="getPageImage(card.slug)"
+                  width="400"
+                  height="300"
+                  [alt]="getPageTitle(card.slug)"
+                  class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                />
+              }
             </div>
             <div class="p-6">
               <div

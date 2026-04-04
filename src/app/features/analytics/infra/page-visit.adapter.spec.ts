@@ -1,5 +1,5 @@
 import { toPageVisit } from './page-visit.adapter';
-import type { SupabasePageVisitRow } from './page-visit.adapter';
+import type { PageVisitRow } from './page-visit.adapter';
 
 describe('page-visit.adapter', () => {
   describe('toPageVisit', () => {
@@ -12,7 +12,7 @@ describe('page-visit.adapter', () => {
           visited_at: '2026-03-01T10:30:00.000Z',
           referrer: 'https://google.com',
           user_agent: 'Mozilla/5.0',
-        } satisfies SupabasePageVisitRow,
+        } satisfies PageVisitRow,
         expected: {
           id: 'visit-001',
           pagePath: '/life-coach',
@@ -29,7 +29,7 @@ describe('page-visit.adapter', () => {
           visited_at: '2026-03-02T14:00:00.000Z',
           referrer: null,
           user_agent: null,
-        } satisfies SupabasePageVisitRow,
+        } satisfies PageVisitRow,
         expected: {
           id: 'visit-002',
           pagePath: '/booking',
@@ -39,10 +39,7 @@ describe('page-visit.adapter', () => {
         },
       },
     ])('should convert $label from snake_case to camelCase', ({ row, expected }) => {
-      // When
       const result = toPageVisit(row);
-
-      // Then
       expect(result).toEqual(expected);
     });
   });

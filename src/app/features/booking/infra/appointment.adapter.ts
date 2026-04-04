@@ -4,8 +4,9 @@ import type {
   DisabledDate,
 } from '../domain/models/appointment.model';
 
-export type SupabaseAppointmentRow = {
+export type AppointmentRow = {
   id: string;
+  created_at: string;
   client_name: string;
   client_email: string;
   client_phone: string;
@@ -15,16 +16,15 @@ export type SupabaseAppointmentRow = {
   duration: number;
   message: string;
   status: string;
-  created_at: string;
 };
 
-export type SupabaseDisabledDateRow = {
+export type DisabledDateRow = {
   id: string;
   date: string;
   reason: string | null;
 };
 
-export function toAppointment(raw: SupabaseAppointmentRow): Appointment {
+export function toAppointment(raw: AppointmentRow): Appointment {
   return {
     id: raw.id,
     clientName: raw.client_name,
@@ -40,7 +40,7 @@ export function toAppointment(raw: SupabaseAppointmentRow): Appointment {
   };
 }
 
-export function toDisabledDate(raw: SupabaseDisabledDateRow): DisabledDate {
+export function toDisabledDate(raw: DisabledDateRow): DisabledDate {
   return {
     id: raw.id,
     date: raw.date,
@@ -48,7 +48,7 @@ export function toDisabledDate(raw: SupabaseDisabledDateRow): DisabledDate {
   };
 }
 
-export function toSupabaseInsert(data: AppointmentFormData) {
+export function toInsert(data: AppointmentFormData) {
   return {
     client_name: data.clientName,
     client_email: data.clientEmail,

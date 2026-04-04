@@ -1,19 +1,11 @@
 import { inject } from '@angular/core';
 import { CanMatchFn, Router } from '@angular/router';
-import { Supabase } from '../services/supabase/supabase';
+import { AuthGateway } from '../../features/auth/domain/gateways/auth.gateway';
 
 export const authGuard: CanMatchFn = async () => {
-  const supabase = inject(Supabase);
+  const auth = inject(AuthGateway);
   const router = inject(Router);
-
-  const {
-    data: { user },
-    error,
-  } = await supabase.client.auth.getUser();
-
-  if (error || !user) {
-    return router.parseUrl('/');
-  }
-
+  const user = await auth.getUser();
+  if (!user) return router.parseUrl('/');
   return true;
 };

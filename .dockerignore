@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+*.log
+backend/node_modules
+backend/dist
+src
+public
+angular.json
+postcss.config.js
+tsconfig.*

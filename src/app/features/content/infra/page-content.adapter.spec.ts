@@ -1,5 +1,5 @@
-import { toPageContent, toSupabasePageUpdate } from './page-content.adapter';
-import type { SupabasePageRow } from './page-content.adapter';
+import { toPageContent, toPageUpdate } from './page-content.adapter';
+import type { PageRow } from './page-content.adapter';
 
 describe('page-content.adapter', () => {
   describe('toPageContent', () => {
@@ -8,6 +8,7 @@ describe('page-content.adapter', () => {
         label: 'une page complète',
         row: {
           id: 'page-001',
+          updated_at: '2026-02-28T10:00:00.000Z',
           slug: 'life-coach',
           title: 'Coaching de Vie',
           introduction: 'Bienvenue dans notre espace coaching.',
@@ -16,8 +17,7 @@ describe('page-content.adapter', () => {
           extra_text: 'Contactez-nous.',
           image_url: 'https://example.com/img.jpg',
           image_alt: 'Coaching de vie',
-          updated_at: '2026-02-28T10:00:00.000Z',
-        } satisfies SupabasePageRow,
+        } satisfies PageRow,
         expected: {
           id: 'page-001',
           slug: 'life-coach',
@@ -35,6 +35,7 @@ describe('page-content.adapter', () => {
         label: 'une page avec champs null',
         row: {
           id: 'page-002',
+          updated_at: '2026-01-15T08:00:00.000Z',
           slug: 'equine-coaching',
           title: 'Coaching Équin',
           introduction: 'Découvrez le coaching équin.',
@@ -43,8 +44,7 @@ describe('page-content.adapter', () => {
           extra_text: null,
           image_url: null,
           image_alt: '',
-          updated_at: '2026-01-15T08:00:00.000Z',
-        } satisfies SupabasePageRow,
+        } satisfies PageRow,
         expected: {
           id: 'page-002',
           slug: 'equine-coaching',
@@ -59,45 +59,18 @@ describe('page-content.adapter', () => {
         },
       },
     ])('should convert $label from snake_case to camelCase', ({ row, expected }) => {
-      // When
-      const result = toPageContent(row);
-
-      // Then
-      expect(result).toEqual(expected);
+      expect(toPageContent(row)).toEqual(expected);
     });
   });
 
-  describe('toSupabasePageUpdate', () => {
-    beforeAll(() => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date('2026-03-01T12:00:00.000Z'));
-    });
-
-    afterAll(() => {
-      vi.useRealTimers();
-    });
-
+  describe('toPageUpdate', () => {
     it('should convert only provided fields to snake_case', () => {
-      // Given
-      const data = { title: 'Nouveau Titre', introduction: 'Nouvelle intro' };
-
-      // When
-      const result = toSupabasePageUpdate(data);
-
-      // Then
-      expect(result).toEqual({
-        title: 'Nouveau Titre',
-        introduction: 'Nouvelle intro',
-        updated_at: '2026-03-01T12:00:00.000Z',
-      });
+      const result = toPageUpdate({ title: 'Nouveau Titre', introduction: 'Nouvelle intro' });
+      expect(result).toEqual({ title: 'Nouveau Titre', introduction: 'Nouvelle intro' });
     });
 
-    it('should include updated_at timestamp', () => {
-      // When
-      const result = toSupabasePageUpdate({ sectionTitle: 'Titre de section' });
-
-      // Then
-      expect(result['updated_at']).toBe('2026-03-01T12:00:00.000Z');
+    it('should include section_title when sectionTitle is provided', () => {
+      const result = toPageUpdate({ sectionTitle: 'Titre de section' });
       expect(result['section_title']).toBe('Titre de section');
     });
   });

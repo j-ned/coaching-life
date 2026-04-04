@@ -1,7 +1,8 @@
 import type { PageContent, PageContentItem } from '../domain/models/page-content.model';
 
-export type SupabasePageRow = {
+export type PageRow = {
   id: string;
+  updated_at: string;
   slug: string;
   title: string;
   introduction: string;
@@ -10,10 +11,9 @@ export type SupabasePageRow = {
   extra_text: string | null;
   image_url: string | null;
   image_alt: string;
-  updated_at: string;
 };
 
-export function toPageContent(raw: SupabasePageRow): PageContent {
+export function toPageContent(raw: PageRow): PageContent {
   return {
     id: raw.id,
     slug: raw.slug as PageContent['slug'],
@@ -28,9 +28,7 @@ export function toPageContent(raw: SupabasePageRow): PageContent {
   };
 }
 
-export function toSupabasePageUpdate(
-  data: Partial<Omit<PageContent, 'id' | 'slug' | 'updatedAt'>>,
-) {
+export function toPageUpdate(data: Partial<Omit<PageContent, 'id' | 'slug' | 'updatedAt'>>) {
   const result: Record<string, unknown> = {};
   if (data.title !== undefined) result['title'] = data.title;
   if (data.introduction !== undefined) result['introduction'] = data.introduction;
@@ -39,6 +37,5 @@ export function toSupabasePageUpdate(
   if (data.extraText !== undefined) result['extra_text'] = data.extraText;
   if (data.imageUrl !== undefined) result['image_url'] = data.imageUrl;
   if (data.imageAlt !== undefined) result['image_alt'] = data.imageAlt;
-  result['updated_at'] = new Date().toISOString();
   return result;
 }

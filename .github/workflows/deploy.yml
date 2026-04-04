@@ -61,15 +61,7 @@ jobs:
 
       - name: Inject Environment Variables
         run: |
-          cat <<EOF > src/environments/environment.ts
-          export const environment = {
-            production: true,
-            supabase: {
-              url: '${{ secrets.SUPABASE_URL }}',
-              key: '${{ secrets.SUPABASE_ANON_KEY }}'
-            }
-          };
-          EOF
+          echo "export const API_URL = '${{ secrets.API_URL }}';" > src/app/core/config.ts
 
       - name: Build production
         run: pnpm ng build --base-href /coaching-life/

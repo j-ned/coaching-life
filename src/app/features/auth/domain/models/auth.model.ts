@@ -1,7 +1,13 @@
-import { User, Session } from '@supabase/supabase-js';
+export type AuthUser = {
+  id: string;
+  email: string;
+  name: string;
+};
 
-export type AuthUser = User;
-export type AuthSession = Session;
+export type AuthSession = {
+  userId: string;
+  expire: string;
+};
 
 export type LoginCredentials = {
   email: string;

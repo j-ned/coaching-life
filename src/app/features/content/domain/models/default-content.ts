@@ -28,8 +28,7 @@ export const DEFAULT_PAGES: Record<PageSlug, PageContent> = {
       },
     ],
     extraText: '',
-    imageUrl:
-      'https://exrvdgdutzwogazpbnhw.supabase.co/storage/v1/object/public/coaching-img/pages/life-coach/1772370686948-life_coach_1772273986071.png',
+    imageUrl: '',
     imageAlt: 'Séance de coaching de vie',
     updatedAt: '',
   },
@@ -47,8 +46,7 @@ export const DEFAULT_PAGES: Record<PageSlug, PageContent> = {
       { title: '', description: 'Meilleure appréhension des changements de vie.' },
     ],
     extraText: 'Investir en soi-même est le meilleur investissement que vous puissiez faire.',
-    imageUrl:
-      'https://exrvdgdutzwogazpbnhw.supabase.co/storage/v1/object/public/coaching-img/pages/personal-development/1772370764966-dev_personnel_1772274008072.png',
+    imageUrl: '',
     imageAlt: 'Carnet de développement personnel',
     updatedAt: '',
   },
@@ -75,8 +73,7 @@ export const DEFAULT_PAGES: Record<PageSlug, PageContent> = {
     ],
     extraText:
       "Aucune connaissance ou pratique préalable de l'équitation n'est requise. Tout le travail s'effectue au sol, en toute sécurité.",
-    imageUrl:
-      'https://exrvdgdutzwogazpbnhw.supabase.co/storage/v1/object/public/coaching-img/pages/equine-coaching/1772370780962-equine_coaching_1772274022062.png',
+    imageUrl: '',
     imageAlt: "Séance d'équicoaching",
     updatedAt: '',
   },
@@ -104,8 +101,7 @@ export const DEFAULT_PAGES: Record<PageSlug, PageContent> = {
       },
     ],
     extraText: '',
-    imageUrl:
-      'https://exrvdgdutzwogazpbnhw.supabase.co/storage/v1/object/public/coaching-img/pages/neuroatypical-parents/1772370793962-neuroatypical_parents_1772274045431.png',
+    imageUrl: '',
     imageAlt: "Soutien aux parents d'enfants neuroatypiques",
     updatedAt: '',
   },
@@ -119,8 +115,7 @@ export const DEFAULT_HERO: HeroSettings = {
   ctaPrimaryLink: 'contact',
   ctaSecondaryText: 'Découvrir les services',
   ctaSecondaryLink: 'services',
-  imageUrl:
-    'https://exrvdgdutzwogazpbnhw.supabase.co/storage/v1/object/public/coaching-img/home/hero-1772370735691-home_hero_1772273972612.png',
+  imageUrl: '',
   imageAlt: 'Cabinet de coaching apaisant',
 };
 

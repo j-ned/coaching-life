@@ -1,5 +1,5 @@
-import { toAppointment, toDisabledDate, toSupabaseInsert } from './appointment.adapter';
-import type { SupabaseAppointmentRow, SupabaseDisabledDateRow } from './appointment.adapter';
+import { toAppointment, toDisabledDate, toInsert } from './appointment.adapter';
+import type { AppointmentRow, DisabledDateRow } from './appointment.adapter';
 import { AppointmentFormDataBuilder } from '../test-utils/appointment.builder';
 
 describe('appointment.adapter', () => {
@@ -9,6 +9,7 @@ describe('appointment.adapter', () => {
         label: 'un rendez-vous complet',
         row: {
           id: 'apt-001',
+          created_at: '2026-03-01T09:00:00.000Z',
           client_name: 'Marie Dupont',
           client_email: 'marie@email.fr',
           client_phone: '06 12 34 56 78',
@@ -18,8 +19,7 @@ describe('appointment.adapter', () => {
           duration: 60,
           message: 'Coaching de vie',
           status: 'pending',
-          created_at: '2026-03-01T09:00:00.000Z',
-        } satisfies SupabaseAppointmentRow,
+        } satisfies AppointmentRow,
         expected: {
           id: 'apt-001',
           clientName: 'Marie Dupont',
@@ -38,6 +38,7 @@ describe('appointment.adapter', () => {
         label: 'un rendez-vous avec message null',
         row: {
           id: 'apt-002',
+          created_at: '2026-03-10T11:00:00.000Z',
           client_name: 'Jean Martin',
           client_email: 'jean@email.fr',
           client_phone: '07 98 76 54 32',
@@ -47,8 +48,7 @@ describe('appointment.adapter', () => {
           duration: 90,
           message: null as unknown as string,
           status: 'confirmed',
-          created_at: '2026-03-10T11:00:00.000Z',
-        } satisfies SupabaseAppointmentRow,
+        } satisfies AppointmentRow,
         expected: {
           id: 'apt-002',
           clientName: 'Jean Martin',
@@ -64,49 +64,28 @@ describe('appointment.adapter', () => {
         },
       },
     ])('should convert $label from snake_case to camelCase', ({ row, expected }) => {
-      // When
-      const result = toAppointment(row);
-
-      // Then
-      expect(result).toEqual(expected);
+      expect(toAppointment(row)).toEqual(expected);
     });
   });
 
   describe('toDisabledDate', () => {
     it('should convert a disabled date with reason', () => {
-      // Given
-      const row: SupabaseDisabledDateRow = {
+      const row: DisabledDateRow = { id: 'dd-001', date: '2026-03-20', reason: 'Jour férié' };
+      expect(toDisabledDate(row)).toEqual({
         id: 'dd-001',
         date: '2026-03-20',
         reason: 'Jour férié',
-      };
-
-      // When
-      const result = toDisabledDate(row);
-
-      // Then
-      expect(result).toEqual({ id: 'dd-001', date: '2026-03-20', reason: 'Jour férié' });
+      });
     });
 
-    it('should convert a disabled date with null reason to undefined', () => {
-      // Given
-      const row: SupabaseDisabledDateRow = {
-        id: 'dd-002',
-        date: '2026-12-25',
-        reason: null,
-      };
-
-      // When
-      const result = toDisabledDate(row);
-
-      // Then
-      expect(result).toEqual({ id: 'dd-002', date: '2026-12-25', reason: undefined });
+    it('should convert null reason to undefined', () => {
+      const row: DisabledDateRow = { id: 'dd-002', date: '2026-12-25', reason: null };
+      expect(toDisabledDate(row)).toEqual({ id: 'dd-002', date: '2026-12-25', reason: undefined });
     });
   });
 
-  describe('toSupabaseInsert', () => {
-    it('should convert form data to snake_case insert format', () => {
-      // Given
+  describe('toInsert', () => {
+    it('should convert form data to snake_case', () => {
       const formData = AppointmentFormDataBuilder.default()
         .with('clientName', 'Sophie Lefèvre')
         .with('clientEmail', 'sophie@email.fr')
@@ -116,11 +95,7 @@ describe('appointment.adapter', () => {
         .with('duration', 45)
         .build();
 
-      // When
-      const result = toSupabaseInsert(formData);
-
-      // Then
-      expect(result).toEqual({
+      expect(toInsert(formData)).toEqual({
         client_name: 'Sophie Lefèvre',
         client_email: 'sophie@email.fr',
         client_phone: '06 12 34 56 78',

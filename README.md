@@ -4,7 +4,7 @@
 
 *(English version available [below](#english-version))*
 
-Bienvenue sur **Coaching Life** ! Ce projet est une Single Page Application (SPA) moderne et réactive conçue pour la gestion personnelle, offrant des espaces visuels distincts pour la gestion budgétaire personnelle et la gestion d'activités en freelance (Dash Money).
+Bienvenue sur **Coaching Life** ! Ce projet est une Single Page Application (SPA) moderne et réactive conçue pour vous accompagner dans votre développement personnel et professionnel.
 
 ## 🚀 Fonctionnalités Clés
 
@@ -75,7 +75,7 @@ pnpm format:check
 <a name="english-version"></a>
 # English Version
 
-Welcome to **Coaching Life**! This project is a modern, responsive Single Page Application (SPA) designed for personal management, featuring distinct visual spaces for personal budgeting and freelance management (Dash Money). 
+Welcome to **Coaching Life**! This project is a modern, responsive Single Page Application (SPA) designed to support your personal and professional development.
 
 ## 🚀 Key Features
 
@@ -140,4 +140,4 @@ pnpm format:check
 ```
 
 ---
-*Créé avec ❤️ pour une meilleure gestion de coaching et financière. / Created with ❤️ for better coaching and financial management.*
+*Créé avec ❤️ pour un meilleur accompagnement. / Created with ❤️ for better coaching and development.*

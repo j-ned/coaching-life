@@ -1,16 +1,16 @@
 import type { Message, SendMessageData } from '../domain/models/message.model';
 
-export type SupabaseMessageRow = {
+export type MessageRow = {
   id: string;
+  created_at: string;
   sender_name: string;
   sender_email: string;
   subject: string;
   content: string;
   status: string;
-  created_at: string;
 };
 
-export function toMessage(raw: SupabaseMessageRow): Message {
+export function toMessage(raw: MessageRow): Message {
   return {
     id: raw.id,
     senderName: raw.sender_name,
@@ -22,7 +22,7 @@ export function toMessage(raw: SupabaseMessageRow): Message {
   };
 }
 
-export function toSupabaseMessageInsert(data: SendMessageData) {
+export function toMessageInsert(data: SendMessageData) {
   return {
     sender_name: data.name,
     sender_email: data.email,

@@ -8,19 +8,17 @@ import { routes } from './app.routes';
 import { AuthGateway } from './features/auth/domain/gateways/auth.gateway';
 import { HttpAuthGateway } from './features/auth/infra/http-auth.gateway';
 import { AppointmentGateway } from './features/booking/domain/gateways/appointment.gateway';
-import { SupabaseAppointmentGateway } from './features/booking/infra/supabase-appointment.gateway';
+import { HttpAppointmentGateway } from './features/booking/infra/http-appointment.gateway';
 import { MessageGateway } from './features/contact/domain/gateways/message.gateway';
-import { SupabaseMessageGateway } from './features/contact/infra/supabase-message.gateway';
+import { HttpMessageGateway } from './features/contact/infra/http-message.gateway';
 import { PageContentGateway } from './features/content/domain/gateways/page-content.gateway';
-import { SupabasePageContentGateway } from './features/content/infra/supabase-page-content.gateway';
+import { HttpPageContentGateway } from './features/content/infra/http-page-content.gateway';
 import { SiteSettingsGateway } from './features/content/domain/gateways/site-settings.gateway';
-import { SupabaseSiteSettingsGateway } from './features/content/infra/supabase-site-settings.gateway';
+import { HttpSiteSettingsGateway } from './features/content/infra/http-site-settings.gateway';
 import { ImageStorageGateway } from './features/content/domain/gateways/image-storage.gateway';
-import { SupabaseImageStorageGateway } from './features/content/infra/supabase-image-storage.gateway';
+import { HttpImageStorageGateway } from './features/content/infra/http-image-storage.gateway';
 import { PageVisitGateway } from './features/analytics/domain/gateways/page-visit.gateway';
-import { SupabasePageVisitGateway } from './features/analytics/infra/supabase-page-visit.gateway';
-import { Supabase } from './core/services/supabase/supabase';
-import { SupabaseBrowser } from './core/services/supabase/supabase-browser';
+import { HttpPageVisitGateway } from './features/analytics/infra/http-page-visit.gateway';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -33,13 +31,12 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch()),
     provideClientHydration(withEventReplay()),
     provideCharts(withDefaultRegisterables()),
-    { provide: Supabase, useClass: SupabaseBrowser },
     { provide: AuthGateway, useClass: HttpAuthGateway },
-    { provide: AppointmentGateway, useClass: SupabaseAppointmentGateway },
-    { provide: MessageGateway, useClass: SupabaseMessageGateway },
-    { provide: PageContentGateway, useClass: SupabasePageContentGateway },
-    { provide: SiteSettingsGateway, useClass: SupabaseSiteSettingsGateway },
-    { provide: ImageStorageGateway, useClass: SupabaseImageStorageGateway },
-    { provide: PageVisitGateway, useClass: SupabasePageVisitGateway },
+    { provide: AppointmentGateway, useClass: HttpAppointmentGateway },
+    { provide: MessageGateway, useClass: HttpMessageGateway },
+    { provide: PageContentGateway, useClass: HttpPageContentGateway },
+    { provide: SiteSettingsGateway, useClass: HttpSiteSettingsGateway },
+    { provide: ImageStorageGateway, useClass: HttpImageStorageGateway },
+    { provide: PageVisitGateway, useClass: HttpPageVisitGateway },
   ],
 };

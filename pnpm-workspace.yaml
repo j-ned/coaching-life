@@ -1,3 +1,7 @@
+packages:
+  - '.'
+  - 'backend'
+
 ignoredBuiltDependencies:
   - '@parcel/watcher'
   - esbuild
