@@ -17,8 +17,11 @@ const s3 = new S3Client({
   forcePathStyle: true, // requis pour Garage / MinIO
 });
 
-const BUCKET = process.env['S3_BUCKET']!;
-const PUBLIC_URL = process.env['S3_PUBLIC_URL']!; // ex: https://s3.j-ned.dev/coaching-img
+const BUCKET = process.env['S3_BUCKET'];
+const PUBLIC_URL = process.env['S3_PUBLIC_URL']; // ex: https://s3.j-ned.dev/coaching-img
+
+if (!BUCKET) throw new Error('Missing env var: S3_BUCKET');
+if (!PUBLIC_URL) throw new Error('Missing env var: S3_PUBLIC_URL');
 
 const MIME_TYPES: Record<string, string> = {
   '.jpg': 'image/jpeg',
