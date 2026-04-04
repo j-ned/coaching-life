@@ -10,7 +10,7 @@ RUN corepack enable
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY backend/package.json ./backend/
 
-# Install backend dependencies only (no Angular frontend)
+# Install all workspace dependencies
 RUN pnpm install --frozen-lockfile --filter @coaching-life/backend
 
 # Copy backend source
@@ -21,6 +21,9 @@ RUN cd backend && pnpm build
 
 # Copy SQL migration files into dist (tsc only copies .ts)
 RUN cp -r backend/src/db/migrations backend/dist/db/migrations
+
+# Deploy: flatten prod deps (resolves pnpm workspace symlinks)
+RUN pnpm deploy --filter @coaching-life/backend --prod /app/deploy
 
 
 # ─── Stage 2: Runner ─────────────────────────────────────────────────────────
@@ -33,8 +36,8 @@ ENV NODE_ENV=production
 # Copy compiled output
 COPY --from=builder /app/backend/dist ./dist
 
-# Copy production node_modules
-COPY --from=builder /app/backend/node_modules ./node_modules
+# Copy flattened production node_modules (no broken symlinks)
+COPY --from=builder /app/deploy/node_modules ./node_modules
 
 # Copy entrypoint
 COPY --from=builder /app/backend/start.sh ./start.sh
