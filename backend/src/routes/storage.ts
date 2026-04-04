@@ -10,7 +10,7 @@ export const storageRoutes = new Hono()
   .post('/upload', requireAdmin, async (c) => {
     const body = await c.req.formData();
     const file = body.get('file');
-    const prefix = (body.get('prefix') as string | null) ?? '';
+    const prefix = (body.get('path') as string | null) ?? '';
 
     if (!file || typeof file === 'string') {
       return c.json({ error: 'Fichier manquant' }, 400);
