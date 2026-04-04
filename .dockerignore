@@ -1,11 +1,6 @@
 node_modules
+backend/node_modules
 dist
+backend/dist
 .env
 *.log
-backend/node_modules
-backend/dist
-src
-public
-angular.json
-postcss.config.js
-tsconfig.*
