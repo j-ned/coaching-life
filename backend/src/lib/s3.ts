@@ -3,6 +3,7 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   HeadObjectCommand,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -24,7 +25,6 @@ function requireEnv(name: string): string {
 }
 
 const BUCKET = requireEnv('S3_BUCKET');
-const PUBLIC_URL = requireEnv('S3_PUBLIC_URL'); // ex: https://s3.j-ned.dev/coaching-img
 
 const MIME_TYPES: Record<string, string> = {
   '.jpg': 'image/jpeg',
@@ -38,10 +38,10 @@ const MIME_TYPES: Record<string, string> = {
 export async function uploadFile(
   buffer: ArrayBuffer,
   originalName: string,
-  prefix = '',
-): Promise<{ key: string; publicUrl: string }> {
+  path = '',
+): Promise<string> {
   const ext = extname(originalName).toLowerCase() || '.bin';
-  const key = prefix ? `${prefix}/${randomUUID()}${ext}` : `${randomUUID()}${ext}`;
+  const key = path || `${randomUUID()}${ext}`;
   const contentType = MIME_TYPES[ext] ?? 'application/octet-stream';
 
   await s3.send(
@@ -53,7 +53,7 @@ export async function uploadFile(
     }),
   );
 
-  return { key, publicUrl: getPublicUrl(key) };
+  return key;
 }
 
 export async function deleteFile(key: string): Promise<void> {
@@ -69,6 +69,13 @@ export async function fileExists(key: string): Promise<boolean> {
   }
 }
 
-export function getPublicUrl(key: string): string {
-  return `${PUBLIC_URL.replace(/\/$/, '')}/${key}`;
+export async function getFileStream(
+  key: string,
+): Promise<{ body: ReadableStream; contentType: string }> {
+  const res = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }));
+  if (!res.Body) throw new Error('Empty body from S3');
+  return {
+    body: res.Body.transformToWebStream(),
+    contentType: res.ContentType ?? 'application/octet-stream',
+  };
 }

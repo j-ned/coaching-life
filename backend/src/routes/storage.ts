@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import { uploadFile, deleteFile, getPublicUrl } from '../lib/s3.js';
+import { uploadFile, deleteFile, getFileStream } from '../lib/s3.js';
 import { requireAdmin } from '../middleware/auth.js';
 
 export const storageRoutes = new Hono()
@@ -10,14 +10,16 @@ export const storageRoutes = new Hono()
   .post('/upload', requireAdmin, async (c) => {
     const body = await c.req.formData();
     const file = body.get('file');
-    const prefix = (body.get('path') as string | null) ?? '';
+    const path = (body.get('path') as string | null) ?? '';
 
     if (!file || typeof file === 'string') {
       return c.json({ error: 'Fichier manquant' }, 400);
     }
 
     const buffer = await file.arrayBuffer();
-    const { key, publicUrl } = await uploadFile(buffer, file.name, prefix);
+    const key = await uploadFile(buffer, file.name, path);
+    const origin = new URL(c.req.url).origin;
+    const publicUrl = `${origin}/api/storage/files/${key}`;
 
     return c.json({ publicUrl, path: key }, 201);
   })
@@ -34,8 +36,18 @@ export const storageRoutes = new Hono()
     },
   )
 
-  // GET /api/storage/files/:key  (public — redirige vers S3)
-  .get('/files/:key{.+}', (c) => {
+  // GET /api/storage/files/:key  (public — proxy depuis S3)
+  .get('/files/:key{.+}', async (c) => {
     const key = c.req.param('key');
-    return c.redirect(getPublicUrl(key), 302);
+    try {
+      const { body, contentType } = await getFileStream(key);
+      return new Response(body, {
+        headers: {
+          'Content-Type': contentType,
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
+      });
+    } catch {
+      return c.json({ error: 'Fichier introuvable' }, 404);
+    }
   });
