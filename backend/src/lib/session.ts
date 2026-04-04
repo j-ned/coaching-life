@@ -50,7 +50,16 @@ export function sessionCookieHeader(token: string): string {
 }
 
 export function clearSessionCookieHeader(): string {
-  return `${COOKIE_NAME}=; HttpOnly; Path=/; Max-Age=0; SameSite=None`;
+  const isProduction = process.env['NODE_ENV'] === 'production';
+  const parts = [
+    `${COOKIE_NAME}=`,
+    'HttpOnly',
+    'Path=/',
+    'Max-Age=0',
+    'SameSite=None',
+    ...(isProduction ? ['Secure'] : []),
+  ];
+  return parts.join('; ');
 }
 
 export { COOKIE_NAME };
