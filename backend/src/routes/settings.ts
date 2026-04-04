@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { db, site_settings } from '../db/index.js';
 import { requireAdmin } from '../middleware/auth.js';
 
-const settingKeySchema = z.enum(['hero', 'home_services', 'home_cta']);
+const settingKeySchema = z.enum(['home_hero', 'home_services', 'home_cta']);
 
 const updateSettingSchema = z.object({
   value: z.record(z.unknown()),

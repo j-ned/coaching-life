@@ -95,7 +95,7 @@ async function seed() {
     .insert(site_settings)
     .values([
       {
-        key: 'hero',
+        key: 'home_hero',
         value: {
           title: 'Révélez votre plein potentiel intérieur',
           subtitle:
