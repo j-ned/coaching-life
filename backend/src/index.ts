@@ -20,7 +20,7 @@ import { storageRoutes } from './routes/storage.js';
 
 // Angular index.html mis en cache au démarrage (fallback SPA)
 // outputMode: 'server' → index.html | outputMode: 'static' CSR → index.csr.html
-const indexPath = ['./browser/index.html', './browser/index.csr.html'].map(resolve).find(existsSync) ?? null;
+const indexPath = ['./browser/index.html', './browser/index.csr.html'].map((p) => resolve(p)).find(existsSync) ?? null;
 const indexHtml = indexPath ? readFileSync(indexPath, 'utf-8') : null;
 
 const app = new Hono();
