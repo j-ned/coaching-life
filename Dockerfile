@@ -23,7 +23,7 @@ RUN cd backend && pnpm build
 RUN cp -r backend/src/db/migrations backend/dist/db/migrations
 
 # Deploy: flatten prod deps (resolves pnpm workspace symlinks)
-RUN pnpm deploy --filter @coaching-life/backend --prod /app/deploy
+RUN pnpm deploy --filter @coaching-life/backend --prod --legacy /app/deploy
 
 
 # ─── Stage 2: Runner ─────────────────────────────────────────────────────────
