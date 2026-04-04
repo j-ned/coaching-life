@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 
 // Charge le .env racine du monorepo (../../ depuis backend/src/)
 config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../.env') });
@@ -19,7 +19,9 @@ import { analyticsRoutes } from './routes/analytics.js';
 import { storageRoutes } from './routes/storage.js';
 
 // Angular index.html mis en cache au démarrage (fallback SPA)
-const indexHtml = readFileSync(resolve('./browser/index.html'), 'utf-8');
+// outputMode: 'server' → index.html | outputMode: 'static' CSR → index.csr.html
+const indexPath = ['./browser/index.html', './browser/index.csr.html'].map(resolve).find(existsSync) ?? null;
+const indexHtml = indexPath ? readFileSync(indexPath, 'utf-8') : null;
 
 const app = new Hono();
 
@@ -54,8 +56,10 @@ app.get('/health', (c) => c.json({ status: 'ok', ts: new Date().toISOString() })
 
 // ─── Frontend Angular (static) ─────────────────────────────────────────────
 
-app.use(serveStatic({ root: './browser' }));
-app.get('*', (c) => c.html(indexHtml));
+if (indexHtml) {
+  app.use(serveStatic({ root: './browser' }));
+  app.get('*', (c) => c.html(indexHtml));
+}
 
 app.notFound((c) => c.json({ error: 'Route introuvable' }, 404));
 
