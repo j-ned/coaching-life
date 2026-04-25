@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm format:check:*)",
+      "Bash(pnpm format:*)",
+      "Bash(pnpm build:*)",
+      "Bash(ls:*)",
+      "Bash(pnpm prettier:*)",
+      "Bash(npx prettier:*)",
+      "Bash(npm ls:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm exec:*)",
+      "Bash(bash:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm info:*)",
+      "Bash(python3:*)",
+      "Bash(pnpm install:*)",
+      "Bash([ -f /home/djoudj/dev/coaching-life/backend/.env ])",
+      "Bash(ssh vps:*)"
+    ]
+  }
+}

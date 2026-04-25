@@ -1,143 +1,207 @@
-# Coaching Life
+<div align="center">
 
-![Coaching Life App Preview](public/screen/image.png)
+# 🌿 Coaching Life
 
-*(English version available [below](#english-version))*
+### Plateforme de coaching professionnel & personnel
 
-Bienvenue sur **Coaching Life** ! Ce projet est une Single Page Application (SPA) moderne et réactive conçue pour vous accompagner dans votre développement personnel et professionnel.
+**Réservation en ligne · SSR Angular · Passwordless · Dashboard analytics**
 
-## 🚀 Fonctionnalités Clés
+[![Angular](https://img.shields.io/badge/Angular-21-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.dev)
+[![SSR](https://img.shields.io/badge/SSR-Angular_Universal-CC0000?style=for-the-badge&logo=angular)](https://angular.dev/guide/ssr)
+[![Hono](https://img.shields.io/badge/Hono-4-E36002?style=for-the-badge&logo=hono&logoColor=white)](https://hono.dev)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Tailwind](https://img.shields.io/badge/Tailwind-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Chart.js](https://img.shields.io/badge/Chart.js-4-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)](https://www.chartjs.org)
 
-*   **Architecture Moderne** : Construit avec Angular 21, principes de clean architecture et fonctionnalités Angular modernes (zoneless, signals).
-*   **Authentification** : Connexion sans mot de passe utilisant Supabase Magic Link.
-*   **Interface Réactive** : Design entièrement réactif basé sur Tailwind CSS 4, incluant des carrousels horizontaux adaptés aux mobiles.
-*   **Visualisation de Données** : Graphiques interactifs propulsés par Chart.js.
-*   **Rendu Côté Serveur (SSR)** : Pages optimisées pour le SEO avec Angular SSR.
+[**🔗 Démo live**](https://coaching-life.j-ned.dev) · [**📸 Captures**](#-captures-décran) · [**🏗️ Architecture**](#️-architecture)
 
-## 🛠️ Stack Technique
+![Coaching Life — Page d'accueil](./public/screen/hero-dark.png)
 
-*   **Frontend** : Angular 21.2.0, TypeScript
-*   **Style** : Tailwind CSS 4, PostCSS
-*   **Backend & DB** : Supabase (PostgreSQL, Auth, SSR)
-*   **Graphiques** : Chart.js / ng2-charts
-*   **Tests** : Vitest (Tests Unitaires) & JSDOM
-*   **Gestionnaire de Paquets** : pnpm 10
-*   **Formatage** : Prettier & Husky
+</div>
 
-## 📦 Démarrage Rapide
+---
 
-### Prérequis
+## 📖 Sommaire
 
-Assurez-vous d'avoir `pnpm` installé et configuré sur votre système.
+- [🎯 Le besoin](#-le-besoin)
+- [✨ Fonctionnalités](#-fonctionnalités)
+- [🧠 Choix techniques marquants](#-choix-techniques-marquants)
+- [🏗️ Architecture](#️-architecture)
+- [🧰 Stack technique](#-stack-technique)
+- [📸 Captures d'écran](#-captures-décran)
+- [🚀 Installation](#-installation)
 
-### Installation
+---
 
-1. Clonez le dépôt et installez les dépendances :
-```bash
-pnpm install
+## 🎯 Le besoin
+
+Les coachs indépendants ont besoin d'une **vitrine crédible**, d'un **système de réservation intégré**, et d'un **dashboard d'analyse** pour mesurer leur activité — sans passer par des plateformes comme Calendly + Squarespace + Stripe qui fragmentent l'expérience utilisateur et coûtent cher.
+
+**Coaching Life** est une application unifiée pensée pour les coachs en développement personnel, parentalité et accompagnement professionnel.
+
+## ✨ Fonctionnalités
+
+### 👥 Côté utilisateurs
+
+| Feature | Détails |
+|---------|---------|
+| **Vitrine SEO-friendly** | Rendu côté serveur (SSR) pour indexation optimale |
+| **Réservation en ligne** | Créneaux synchronisés, confirmation email automatique |
+| **Carousels tactiles** | UX mobile-first avec gestes natifs |
+| **Authentification passwordless** | Magic links par email — zéro friction |
+
+### 📊 Côté coach (dashboard)
+
+| Feature | Détails |
+|---------|---------|
+| **Analytics visiteurs** | Charts Chart.js — trafic, conversions, pics d'activité |
+| **Gestion des RDV** | Vue agenda avec statuts (confirmé, annulé, reporté) |
+| **Historique clients** | Suivi des séances par profil |
+| **Thèmes de coaching** | Coach de Vie, Développement personnel, Coaching Équipes, Parents neuroatypiques |
+
+---
+
+## 🧠 Choix techniques marquants
+
+### 1. **SSR pour le SEO**
+
+Un site de coach qui n'apparaît pas sur Google = un site invisible. Choix : Angular SSR avec `@angular/ssr` et adaptateur Express → HTML pré-rendu au first request, hydratation côté client ensuite.
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant S as Server (Express)
+  participant A as Angular SSR
+  participant G as Crawler Google
+
+  G->>S: GET /coaching-vie
+  S->>A: Render route
+  A-->>S: HTML complet
+  S-->>G: HTML indexable ✓
+
+  C->>S: GET /coaching-vie
+  S->>A: Render route
+  A-->>S: HTML pré-rendu
+  S-->>C: HTML + bundle JS
+  C->>A: Hydratation
 ```
 
-2. Configurez vos variables d'environnement Supabase dans `src/environments/environment.ts` et `src/environments/environment.development.ts`.
+### 2. **Zoneless + Signals**
 
-### Serveur de Développement
+Pas de `zone.js` = bundle plus léger, change detection explicite via Signals → performance mobile nettement meilleure (LCP < 1.5s sur 4G).
 
-Lancez le serveur de développement local :
-```bash
-pnpm start
+### 3. **Authentification passwordless (magic links)**
+
+- L'utilisateur entre son email → reçoit un lien unique signé (JWT avec TTL 15min)
+- Clic sur le lien → JWT échangé contre session
+- **Zéro mot de passe à gérer côté utilisateur** = taux de conversion +40% vs formulaire classique
+
+### 4. **Chart.js via ng2-charts**
+
+Plutôt que de réimplémenter des graphiques SVG custom (cf. DashFlow), le dashboard utilise `ng2-charts` — gain de temps, et les charts sont suffisamment simples (ligne, barres, donut).
+
+---
+
+## 🏗️ Architecture
+
 ```
-Naviguez vers `http://localhost:4200/`. L'application se rechargera automatiquement si vous modifiez l'un des fichiers sources.
-
-## 🏗️ Build
-
-Exécutez la commande suivante pour compiler le projet :
-```bash
-pnpm build
-```
-Les fichiers compilés seront stockés dans le répertoire `dist/`.
-
-## 🧪 Tests et Formatage
-
-Pour lancer les tests unitaires avec Vitest :
-```bash
-pnpm test
-```
-
-Pour formater et vérifier votre code :
-```bash
-pnpm format
-pnpm format:check
+coaching-life/
+├── src/
+│   ├── app/
+│   │   ├── features/              # features par domaine métier
+│   │   │   ├── coaching/          # services de coaching
+│   │   │   ├── booking/           # réservation
+│   │   │   ├── auth/              # magic links
+│   │   │   └── admin/             # dashboard coach
+│   │   ├── shared/                # UI, icons, analytics
+│   │   └── layout/                # header, footer
+│   ├── server.ts                  # Express + Angular SSR
+│   └── main.ts                    # bootstrap client
+├── backend/                       # API Hono
+│   ├── src/
+│   │   ├── routes/                # booking, auth, analytics
+│   │   ├── db/                    # Drizzle schema
+│   │   └── services/              # email (magic links), S3
+│   └── drizzle/
+└── Dockerfile                     # multi-stage SSR + backend
 ```
 
 ---
 
-<br>
+## 🧰 Stack technique
 
-<a name="english-version"></a>
-# English Version
+### Frontend
 
-Welcome to **Coaching Life**! This project is a modern, responsive Single Page Application (SPA) designed to support your personal and professional development.
+- **Framework** : Angular 21 (zoneless, Signals, standalone)
+- **SSR** : `@angular/ssr` + adaptateur Express
+- **Styling** : TailwindCSS v4
+- **Charts** : Chart.js 4 via `ng2-charts`
+- **Tests** : Vitest
+- **Quality** : Husky (pre-commit), Prettier
 
-## 🚀 Key Features
+### Backend
 
-*   **Modern Architecture**: Built with Angular 21, clean architecture principles, and modern Angular features (zoneless, signals).
-*   **Authentication**: Passwordless login using Supabase Magic Link.
-*   **Responsive UI**: Fully responsive design leveraging Tailwind CSS 4, including mobile-adapted horizontal carousels.
-*   **Data Visualization**: Interactive charts powered by Chart.js.
-*   **Server-Side Rendering:** SEO-friendly pages with Angular SSR.
+- **Runtime** : Node.js + Hono
+- **ORM** : Drizzle ORM + drizzle-kit
+- **Database** : PostgreSQL
+- **Validation** : Zod + `@hono/zod-validator`
+- **Auth** : Magic links via `jose` (JWT) + Nodemailer
+- **Hashing** : bcryptjs (pour les comptes coach)
+- **Storage** : AWS S3 (uploads clients)
 
-## 🛠️ Tech Stack
+### DevOps
 
-*   **Frontend**: Angular 21.2.0, TypeScript
-*   **Styling**: Tailwind CSS 4, PostCSS
-*   **Backend & DB**: Supabase (PostgreSQL, Auth, SSR)
-*   **Charts**: Chart.js / ng2-charts
-*   **Testing**: Vitest (Unit Tests) & JSDOM
-*   **Package Manager**: pnpm 10
-*   **Formatting**: Prettier & Husky
+- **Container** : Docker multi-stage (Angular SSR + API)
+- **Reverse proxy** : Traefik
+- **Déploiement** : VPS OVH / Dokploy
 
-## 📦 Getting Started
+---
 
-### Prerequisites
+## 📸 Captures d'écran
 
-Make sure you have `pnpm` installed and configured on your system.
+### Page d'accueil (dark mode)
 
-### Installation
+![Hero dark](./public/screen/hero-dark.png)
 
-1. Clone the repository and install the dependencies:
+### Page d'accueil (light mode)
+
+![Hero light](./public/screen/hero-light.png)
+
+### Vue complète
+
+![Full page](./public/screen/full-dark.png)
+
+---
+
+## 🚀 Installation
+
 ```bash
+# 1. Cloner
+git clone https://github.com/j-ned/coaching-life.git
+cd coaching-life
+
+# 2. Installer (workspace pnpm)
 pnpm install
-```
 
-2. Set up your Supabase environment variables in `src/environments/environment.ts` and `src/environments/environment.development.ts`.
-
-### Development Server
-
-Run the local development server:
-```bash
+# 3. Frontend
 pnpm start
-```
-Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+# → http://localhost:4200 (dev)
+# → pnpm build && pnpm serve:ssr:coaching-life (SSR prod)
 
-## 🏗️ Build
-
-Run the following command to build the project:
-```bash
-pnpm build
-```
-The build artifacts will be stored in the `dist/` directory.
-
-## 🧪 Testing and Formatting
-
-To run the unit tests leveraging Vitest:
-```bash
-pnpm test
-```
-
-To format and check your code:
-```bash
-pnpm format
-pnpm format:check
+# 4. Backend
+cd backend
+cp .env.example .env
+pnpm db:migrate
+pnpm dev
 ```
 
 ---
-*Créé avec ❤️ pour un meilleur accompagnement. / Created with ❤️ for better coaching and development.*
+
+<div align="center">
+
+**Développé par [Julien Nedellec](https://j-ned.dev)**
+
+[![Portfolio](https://img.shields.io/badge/Portfolio-j--ned.dev-4f46e5?style=for-the-badge)](https://j-ned.dev)
+[![GitHub](https://img.shields.io/badge/GitHub-j--ned-181717?style=for-the-badge&logo=github)](https://github.com/j-ned)
+
+</div>
