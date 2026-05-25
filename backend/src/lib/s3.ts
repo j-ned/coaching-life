@@ -8,21 +8,25 @@ import {
 import { extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
 
-const s3 = new S3Client({
-  endpoint: process.env['S3_ENDPOINT']!,
-  region: process.env['S3_REGION'] ?? 'garage',
-  credentials: {
-    accessKeyId: process.env['S3_ACCESS_KEY_ID']!,
-    secretAccessKey: process.env['S3_SECRET_ACCESS_KEY']!,
-  },
-  forcePathStyle: true, // requis pour Garage / MinIO
-});
-
 function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`Missing env var: ${name}`);
   return value;
 }
+
+// Cloudflare R2 — compatible S3. Endpoint : https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+const s3 = new S3Client({
+  endpoint: requireEnv('S3_ENDPOINT'),
+  region: process.env['S3_REGION'] ?? 'auto', // R2 : 'auto'
+  credentials: {
+    accessKeyId: requireEnv('S3_ACCESS_KEY'),
+    secretAccessKey: requireEnv('S3_SECRET_KEY'),
+  },
+  forcePathStyle: true, // R2 / Garage / MinIO : URL en path-style
+  // R2 rejette les checksums CRC32 ajoutés par défaut par le SDK récent (>= 3.729)
+  requestChecksumCalculation: 'WHEN_REQUIRED',
+  responseChecksumValidation: 'WHEN_REQUIRED',
+});
 
 const BUCKET = requireEnv('S3_BUCKET');
 
