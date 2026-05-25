@@ -5,7 +5,7 @@ import { Icon } from '../../shared/components/icon/icon';
   selector: 'app-reviews',
   imports: [Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'block py-16 max-md:py-10 bg-slate-50' },
+  host: { class: 'block section-y bg-slate-50' },
   template: `
     <section aria-labelledby="reviews-heading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2

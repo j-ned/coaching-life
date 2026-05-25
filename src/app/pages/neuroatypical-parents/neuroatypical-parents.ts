@@ -10,7 +10,7 @@ import { RouterLink } from '@angular/router';
   selector: 'app-neuroatypical-parents',
   imports: [Icon, NgOptimizedImage, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 max-md:py-10' },
+  host: { class: 'block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 section-y' },
   template: `
     @let c = content();
     <div class="grid lg:grid-cols-2 gap-12 max-md:gap-8 items-center">
@@ -42,7 +42,7 @@ import { RouterLink } from '@angular/router';
         >
           {{ c.introduction }}
         </p>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-md:p-6 mt-8">
+        <div class="bg-brand-50/60 rounded-2xl border border-brand-100 p-8 max-md:p-6 mt-8">
           <h2 class="text-2xl font-semibold text-slate-800 mb-6 max-md:mb-4 max-md:text-xl">
             {{ c.sectionTitle }}
           </h2>

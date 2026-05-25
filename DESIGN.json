@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-25T00:00:00.000Z",
+  "title": "Design System: Coaching Life",
+  "extensions": {
+    "colorMeta": {
+      "brand-primary": {
+        "role": "primary",
+        "displayName": "Terracotta Profond",
+        "canonical": "oklch(51.9% 0.121 22.8)",
+        "tonalRamp": [
+          "oklch(26.7% 0.057 23.3)",
+          "oklch(41.2% 0.085 22.5)",
+          "oklch(45.7% 0.102 22.7)",
+          "oklch(51.9% 0.121 22.8)",
+          "oklch(60.3% 0.129 22.2)",
+          "oklch(68.6% 0.117 21.2)",
+          "oklch(80.2% 0.094 19.3)",
+          "oklch(97.2% 0.011 17.3)"
+        ]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Crème Slate",
+        "canonical": "#f8fafc",
+        "tonalRamp": [
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#cbd5e1",
+          "#f8fafc"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Titre hero uniquement, Bricolage Grotesque 700 fluide." },
+      "headline": { "displayName": "Headline", "purpose": "Titres de section (h2)." },
+      "body": { "displayName": "Body", "purpose": "Texte courant Hanken Grotesk, 65-75ch." },
+      "label": { "displayName": "Label", "purpose": "Badges-pilule et métadonnées, tracking ouvert." }
+    },
+    "shadows": [
+      { "name": "rest", "value": "0 1px 2px rgba(15,23,42,0.05)", "purpose": "Cartes et panneaux au repos." },
+      { "name": "hover", "value": "0 10px 15px -3px rgba(15,23,42,0.1)", "purpose": "Élévation de réponse au survol." },
+      { "name": "accent", "value": "0 10px 15px -3px oklch(68.6% 0.117 21.2 / 0.25)", "purpose": "Halo terracotta sous CTA et sélection." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Transitions de couleur/ombre, ease-out exponentiel." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "CTA vitrine, entièrement arrondi, terracotta plein.",
+      "html": "<button class=\"ds-btn-primary\">Prendre rendez-vous</button>",
+      "css": ".ds-btn-primary { background: oklch(51.9% 0.121 22.8); color: #fff; padding: 1rem 2rem; border: none; border-radius: 9999px; font-family: 'Hanken Grotesk', sans-serif; font-weight: 500; box-shadow: 0 4px 6px -1px rgba(15,23,42,0.1); transition: background 0.2s, box-shadow 0.2s; cursor: pointer; } .ds-btn-primary:hover { background: oklch(45.7% 0.102 22.7); box-shadow: 0 10px 15px -3px rgba(15,23,42,0.12); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px oklch(68.6% 0.117 21.2); }"
+    },
+    {
+      "name": "Service Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Carte service actionnable, plate au repos, monte au hover.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-icon\">✨</div><h3>Coach de Vie</h3><p>Un accompagnement pour avancer avec clarté.</p></article>",
+      "css": ".ds-card { background: #fff; border: 1px solid #f1f5f9; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 1px 2px rgba(15,23,42,0.05); transition: box-shadow 0.3s cubic-bezier(0.22,1,0.36,1); } .ds-card:hover { box-shadow: 0 10px 15px -3px rgba(15,23,42,0.1); } .ds-card-icon { width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: 0.75rem; background: oklch(93.8% 0.026 17.6); color: oklch(51.9% 0.121 22.8); margin-bottom: 1rem; } .ds-card h3 { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 600; color: #1e293b; margin: 0 0 0.5rem; } .ds-card p { font-family: 'Hanken Grotesk', sans-serif; color: #475569; font-size: 0.875rem; margin: 0; }"
+    },
+    {
+      "name": "Tinted Panel",
+      "kind": "card",
+      "refersTo": "panel-tinted",
+      "description": "Panneau tinté terracotta pour porter de la chaleur (points clés).",
+      "html": "<div class=\"ds-panel\"><h2>Pourquoi m'appeler ?</h2><p>Un espace pour souffler, comprendre, avancer.</p></div>",
+      "css": ".ds-panel { background: oklch(97.2% 0.011 17.3 / 0.6); border: 1px solid oklch(93.8% 0.026 17.6); border-radius: 1rem; padding: 2rem; } .ds-panel h2 { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; letter-spacing: -0.02em; color: #1e293b; margin: 0 0 0.75rem; } .ds-panel p { font-family: 'Hanken Grotesk', sans-serif; color: #475569; margin: 0; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Champ de formulaire, fond slate clair, focus terracotta.",
+      "html": "<label class=\"ds-label\" for=\"ds-email\">Email</label><input id=\"ds-email\" class=\"ds-input\" type=\"email\" placeholder=\"vous@exemple.fr\" />",
+      "css": ".ds-label { display: block; font-family: 'Hanken Grotesk', sans-serif; font-weight: 500; font-size: 0.875rem; color: #334155; margin-bottom: 0.375rem; } .ds-input { width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.75rem 1rem; font-family: 'Hanken Grotesk', sans-serif; color: #1e293b; transition: border-color 0.2s, box-shadow 0.2s; } .ds-input:focus { outline: none; border-color: oklch(68.6% 0.117 21.2); box-shadow: 0 0 0 3px oklch(68.6% 0.117 21.2 / 0.2); }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "button-primary",
+      "description": "Pilule de section / compteur en terracotta doux.",
+      "html": "<span class=\"ds-badge\">COACHING LIFE</span>",
+      "css": ".ds-badge { display: inline-block; background: oklch(93.8% 0.026 17.6); color: oklch(51.9% 0.121 22.8); border-radius: 9999px; padding: 0.25rem 0.75rem; font-family: 'Hanken Grotesk', sans-serif; font-weight: 600; font-size: 0.875rem; letter-spacing: 0.05em; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Le Foyer Rassurant",
+    "overview": "Coaching Life accueille des visiteurs souvent en recherche émotionnelle, majoritairement sur mobile. L'interface doit produire la sensation d'entrer dans un lieu chaleureux et sûr, pas dans un tunnel de conversion. La chaleur vient de la composition et du ton, jamais d'effets décoratifs. Le système repose sur une identité terracotta OKLCH sur neutres slate, une typographie humaniste à voix, et un rythme vertical fluide. Deux registres : vitrine (brand, Committed) et dashboard (product, Restrained).",
+    "keyCharacteristics": [
+      "Terracotta load-bearing, pas saupoudré (Committed sur la vitrine)",
+      "Typographie humaniste chaleureuse, jamais Inter par défaut",
+      "Rythme d'espacement fluide via clamp(), jamais uniforme",
+      "Une décision à la fois, zéro mouvement non sollicité",
+      "Mobile-first réel, WCAG AA, public potentiellement neuroatypique"
+    ],
+    "rules": [
+      { "name": "The Single Hue Rule", "body": "Une seule famille de teinte (terracotta) porte toute l'identité. Aucune couleur catégorielle pour différencier des cartes ou des séries.", "section": "colors" },
+      { "name": "The Committed-on-Brand Rule", "body": "Vitrine : le terracotta porte des surfaces entières. Dashboard : Restrained, la couleur ne sert que l'action et l'état.", "section": "colors" },
+      { "name": "The No-Inter Rule", "body": "Inter et les serifs réflexes (Fraunces/Lora/Playfair/Cormorant) sont interdits. Le couple Bricolage + Hanken est l'identité.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces plates au repos ; l'ombre est une réponse à l'état, pas une décoration. Pas de card qui lévite au hover.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do assumer le terracotta sur des surfaces entières côté vitrine.",
+      "Do porter la hiérarchie par l'échelle fluide et le contraste de graisse Bricolage/Hanken.",
+      "Do varier le rythme vertical (section-y / section-y-lg).",
+      "Do garder une seule couleur d'accent au dashboard.",
+      "Do fournir focus-visible, aria-label et cibles tactiles ≥44px."
+    ],
+    "donts": [
+      "Don't réintroduire Inter ni les serifs réflexes.",
+      "Don't différencier par des couleurs catégorielles (violet, ambre, teal, sky).",
+      "Don't retomber dans le template SaaS (cards répétées, hero-métrique, dégradés violet-bleu).",
+      "Don't utiliser de bordure latérale colorée >1px, gradient text, ni glassmorphism décoratif.",
+      "Don't imposer du mouvement non sollicité (auto-scroll, carrousels automatiques).",
+      "Don't mettre du texte gris sur fond coloré ni du #000/#fff purs sur de grandes surfaces."
+    ]
+  }
+}

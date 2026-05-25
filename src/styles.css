@@ -1,6 +1,9 @@
 @import 'tailwindcss';
 
 @theme {
+  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Hanken Grotesk', ui-sans-serif, sans-serif;
+
   --color-brand-50: oklch(97.2% 0.011 17.3);
   --color-brand-100: oklch(93.8% 0.026 17.6);
   --color-brand-200: oklch(88.1% 0.055 18.2);
@@ -18,10 +21,33 @@
   body {
     background-color: var(--color-slate-50);
     color: var(--color-slate-800);
-    font-family:
-      'Inter',
-      system-ui,
-      -apple-system,
-      sans-serif;
+    font-family: var(--font-sans);
+  }
+
+  /* Voix typographique : titres en display chaleureux, tracking resserré */
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Rythme vertical fluide des sections — respire en grand, se resserre sur mobile */
+@utility section-y {
+  padding-block: clamp(3.5rem, 8vw, 7rem);
+}
+@utility section-y-lg {
+  padding-block: clamp(4rem, 10vw, 9rem);
+}
+
+/* Respect des préférences de mouvement réduit — public potentiellement neuroatypique */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

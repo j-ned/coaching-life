@@ -70,7 +70,7 @@ type CTAFormShape = {
       <!-- Toast feedback -->
       @if (saveSuccess()) {
         <div
-          class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-center gap-3 animate-fade-in"
+          class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-center gap-3"
           role="alert"
         >
           <app-icon name="check-circle" size="md" />

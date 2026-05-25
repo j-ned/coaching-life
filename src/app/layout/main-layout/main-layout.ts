@@ -178,11 +178,11 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
       <router-outlet></router-outlet>
     </main>
 
-    <footer class="bg-slate-900 text-slate-300 py-12 mt-20">
+    <footer class="bg-brand-950 text-brand-100/80 section-y mt-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
           <span class="text-white text-xl font-semibold mb-4 block">COACHING LIFE</span>
-          <p class="text-slate-400">
+          <p class="text-brand-200/70">
             Accompagnement personnalisé pour révéler votre plein potentiel.
           </p>
         </div>
@@ -193,7 +193,7 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
               <a
                 routerLink="/life-coach"
                 aria-label="Coach de Vie Certifié – pied de page"
-                class="hover:text-brand-400 transition-colors"
+                class="hover:text-white transition-colors"
                 >Coach de Vie Certifié</a
               >
             </li>
@@ -201,7 +201,7 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
               <a
                 routerLink="/personal-development"
                 aria-label="Développement Personnel – pied de page"
-                class="hover:text-brand-400 transition-colors"
+                class="hover:text-white transition-colors"
                 >Développement Personnel</a
               >
             </li>
@@ -209,7 +209,7 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
               <a
                 routerLink="/equine-coaching"
                 aria-label="Coaching facilité avec le cheval – pied de page"
-                class="hover:text-brand-400 transition-colors"
+                class="hover:text-white transition-colors"
                 >Coaching facilité avec le cheval</a
               >
             </li>
@@ -217,7 +217,7 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
               <a
                 routerLink="/neuroatypical-parents"
                 aria-label="Parents d'enfants neuroatypiques – pied de page"
-                class="hover:text-brand-400 transition-colors"
+                class="hover:text-white transition-colors"
                 >Parents d'enfants neuroatypiques</a
               >
             </li>
@@ -225,8 +225,8 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
         </div>
         <div>
           <h3 class="text-white font-medium mb-4">Contact</h3>
-          <p class="text-slate-400 mb-2">Email: contact&#64;coaching-life.com</p>
-          <p class="text-slate-400">Téléphone: +33 0 00 00 00 00</p>
+          <p class="text-brand-200/70 mb-2">Email: contact&#64;coaching-life.com</p>
+          <p class="text-brand-200/70">Téléphone: +33 0 00 00 00 00</p>
         </div>
       </div>
     </footer>

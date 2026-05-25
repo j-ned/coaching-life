@@ -77,9 +77,9 @@ const SERVICE_CARDS: readonly {
     @let svc = services();
     @let cta = ctaSettings();
 
-    <section aria-labelledby="hero-heading" class="relative bg-brand-50/30 overflow-hidden">
+    <section aria-labelledby="hero-heading" class="relative bg-brand-50 overflow-hidden">
       <div
-        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 max-md:py-12 grid lg:grid-cols-2 gap-12 max-md:gap-8 items-center max-md:text-center"
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 section-y-lg grid lg:grid-cols-2 gap-12 max-md:gap-8 items-center max-md:text-center"
       >
         <div class="text-left max-md:text-center z-10">
           <span
@@ -88,7 +88,7 @@ const SERVICE_CARDS: readonly {
           >
           <h1
             id="hero-heading"
-            class="text-4xl lg:text-5xl font-bold text-slate-900 mb-6 max-md:mb-4 max-md:text-3xl leading-tight"
+            class="text-[clamp(2.25rem,4vw+1rem,4rem)] font-bold text-slate-900 mb-6 max-md:mb-4 leading-[1.05]"
           >
             {{ h.title }}
           </h1>
@@ -139,7 +139,7 @@ const SERVICE_CARDS: readonly {
     <section
       id="services"
       aria-labelledby="services-heading"
-      class="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 max-md:py-12"
+      class="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 section-y"
     >
       <div class="text-center mb-16">
         <span
@@ -201,13 +201,13 @@ const SERVICE_CARDS: readonly {
     @defer (on viewport) {
       <app-reviews />
     } @placeholder {
-      <div class="py-20"></div>
+      <div class="section-y"></div>
     }
 
     <section
       id="contact"
       aria-labelledby="contact-heading"
-      class="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 max-md:py-12"
+      class="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 section-y"
     >
       <div class="text-center mb-12">
         <span

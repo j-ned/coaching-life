@@ -9,7 +9,7 @@ import { Icon } from '../../shared/components/icon/icon';
   selector: 'app-personal-development',
   imports: [Icon, NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 max-md:py-10' },
+  host: { class: 'block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 section-y' },
   template: `
     @let c = content();
     <div class="grid lg:grid-cols-2 gap-12 max-md:gap-8 items-center">
@@ -42,9 +42,9 @@ import { Icon } from '../../shared/components/icon/icon';
           {{ c.introduction }}
         </p>
         <div
-          class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-md:p-6 mt-8 relative overflow-hidden"
+          class="bg-brand-50/60 rounded-2xl border border-brand-100 p-8 max-md:p-6 mt-8 relative overflow-hidden"
         >
-          <div class="absolute top-0 right-0 w-32 h-32 bg-brand-50 rounded-bl-full z-0"></div>
+          <div class="absolute top-0 right-0 w-32 h-32 bg-brand-100/60 rounded-bl-full z-0"></div>
           <h2
             class="text-2xl font-semibold text-slate-800 mb-6 max-md:mb-4 max-md:text-xl relative z-10"
           >
