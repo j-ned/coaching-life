@@ -31,13 +31,6 @@ type PageFormShape = {
   imageAlt: FormControl<string>;
 };
 
-const PAGE_COLORS: Record<string, { from: string; to: string }> = {
-  'life-coach': { from: 'from-brand-500', to: 'to-brand-400' },
-  'personal-development': { from: 'from-blue-500', to: 'to-blue-400' },
-  'equine-coaching': { from: 'from-amber-500', to: 'to-amber-400' },
-  'neuroatypical-parents': { from: 'from-rose-500', to: 'to-rose-400' },
-};
-
 const PAGE_ICONS: Record<string, string> = {
   'life-coach': 'sparkles',
   'personal-development': 'book-open',
@@ -94,13 +87,15 @@ const PAGE_ICONS: Record<string, string> = {
       <form [formGroup]="form" (ngSubmit)="save()" class="space-y-6 max-w-3xl pb-24">
         <!-- Content principal -->
         <section class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div class="px-6 py-4 flex items-center gap-3" [class]="headerGradient()">
-            <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white">
+          <div class="px-6 py-4 flex items-center gap-3 bg-slate-50 border-b border-slate-100">
+            <div
+              class="w-8 h-8 bg-brand-100 rounded-lg flex items-center justify-center text-brand-600"
+            >
               <app-icon [name]="pageIcon()" size="md" />
             </div>
             <div>
-              <h3 class="text-white font-semibold">Contenu principal</h3>
-              <p class="text-white/80 text-xs">Le titre et l'introduction de la page</p>
+              <h3 class="text-slate-800 font-semibold">Contenu principal</h3>
+              <p class="text-slate-500 text-xs">Le titre et l'introduction de la page</p>
             </div>
           </div>
 
@@ -137,13 +132,15 @@ const PAGE_ICONS: Record<string, string> = {
 
         <!-- Section liste -->
         <section class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div class="bg-linear-to-r from-slate-600 to-slate-500 px-6 py-4 flex items-center gap-3">
-            <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white">
+          <div class="px-6 py-4 flex items-center gap-3 bg-slate-50 border-b border-slate-100">
+            <div
+              class="w-8 h-8 bg-brand-100 rounded-lg flex items-center justify-center text-brand-600"
+            >
               <app-icon name="sliders" size="md" />
             </div>
             <div>
-              <h3 class="text-white font-semibold">Points clés</h3>
-              <p class="text-white/80 text-xs">Les bénéfices et avantages de cet accompagnement</p>
+              <h3 class="text-slate-800 font-semibold">Points clés</h3>
+              <p class="text-slate-500 text-xs">Les bénéfices et avantages de cet accompagnement</p>
             </div>
           </div>
 
@@ -261,15 +258,15 @@ const PAGE_ICONS: Record<string, string> = {
 
         <!-- Image -->
         <section class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div
-            class="bg-linear-to-r from-violet-500 to-violet-400 px-6 py-4 flex items-center gap-3"
-          >
-            <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white">
+          <div class="px-6 py-4 flex items-center gap-3 bg-slate-50 border-b border-slate-100">
+            <div
+              class="w-8 h-8 bg-brand-100 rounded-lg flex items-center justify-center text-brand-600"
+            >
               <app-icon name="image" size="md" />
             </div>
             <div>
-              <h3 class="text-white font-semibold">Image</h3>
-              <p class="text-white/80 text-xs">L'illustration principale de la page</p>
+              <h3 class="text-slate-800 font-semibold">Image</h3>
+              <p class="text-slate-500 text-xs">L'illustration principale de la page</p>
             </div>
           </div>
 
@@ -360,12 +357,6 @@ export class DashboardContentEdit {
   protected readonly pageTitle = computed(() => {
     const s = this.slug() as PageSlug;
     return DEFAULT_PAGES[s]?.title ?? 'Édition de page';
-  });
-
-  protected readonly headerGradient = computed(() => {
-    const s = this.slug();
-    const colors = PAGE_COLORS[s] ?? { from: 'from-brand-500', to: 'to-brand-400' };
-    return `bg-gradient-to-r ${colors.from} ${colors.to}`;
   });
 
   protected readonly pageIcon = computed(() => {

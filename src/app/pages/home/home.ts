@@ -1,13 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   PLATFORM_ID,
   signal,
-  viewChild,
-  afterNextRender,
-  ElementRef,
-  OnDestroy,
 } from '@angular/core';
 import { isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -50,22 +47,22 @@ const SERVICE_CARDS: readonly {
   {
     slug: 'personal-development',
     route: '/personal-development',
-    iconBg: 'bg-blue-50',
-    iconColor: 'text-blue-500',
+    iconBg: 'bg-brand-50',
+    iconColor: 'text-brand-600',
     iconName: 'book-open',
   },
   {
     slug: 'equine-coaching',
     route: '/equine-coaching',
-    iconBg: 'bg-amber-50',
-    iconColor: 'text-amber-600',
+    iconBg: 'bg-brand-100',
+    iconColor: 'text-brand-600',
     iconName: 'smile',
   },
   {
     slug: 'neuroatypical-parents',
     route: '/neuroatypical-parents',
-    iconBg: 'bg-rose-50',
-    iconColor: 'text-rose-500',
+    iconBg: 'bg-brand-50',
+    iconColor: 'text-brand-700',
     iconName: 'heart',
   },
 ];
@@ -125,6 +122,7 @@ const SERVICE_CARDS: readonly {
               [ngSrc]="h.imageUrl"
               width="800"
               height="800"
+              priority
               [alt]="h.imageAlt"
               class="object-cover w-full h-full"
             />
@@ -134,9 +132,7 @@ const SERVICE_CARDS: readonly {
 
       <div
         class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-brand-100/50 blur-3xl z-0"
-      ></div>
-      <div
-        class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-blue-50/50 blur-3xl z-0"
+        aria-hidden="true"
       ></div>
     </section>
 
@@ -157,20 +153,19 @@ const SERVICE_CARDS: readonly {
       </div>
 
       <div
-        #servicesCarousel
         class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-md:flex max-md:overflow-x-auto max-md:snap-x max-md:snap-mandatory max-md:pb-6 max-md:-mx-4 max-md:px-4 max-md:scroll-smooth max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden"
       >
-        @for (card of serviceCards; track card.slug) {
+        @for (card of serviceCardsResolved(); track card.slug) {
           <article
-            class="group relative bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 max-md:min-w-[85vw] max-md:snap-center"
+            class="group relative bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg transition-shadow duration-300 max-md:min-w-[85vw] max-md:snap-center"
           >
             <div class="h-48 overflow-hidden">
-              @if (getPageImage(card.slug)) {
+              @if (card.image) {
                 <img
-                  [ngSrc]="getPageImage(card.slug)"
+                  [ngSrc]="card.image"
                   width="400"
                   height="300"
-                  [alt]="getPageTitle(card.slug)"
+                  [alt]="card.title"
                   class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                 />
               }
@@ -183,9 +178,9 @@ const SERVICE_CARDS: readonly {
                 <app-icon [name]="card.iconName" size="md" />
               </div>
               <h3 class="text-lg font-semibold text-slate-800 mb-2">
-                {{ getPageTitle(card.slug) }}
+                {{ card.title }}
               </h3>
-              <p class="text-slate-600 text-sm mb-4 line-clamp-3">{{ getPageIntro(card.slug) }}</p>
+              <p class="text-slate-600 text-sm mb-4 line-clamp-3">{{ card.intro }}</p>
               <a
                 [routerLink]="card.route"
                 class="inline-flex items-center gap-1 text-brand-700 font-medium text-sm hover:text-brand-800 transition-colors"
@@ -260,7 +255,7 @@ const SERVICE_CARDS: readonly {
           class="group bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-md:p-6 text-left hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
         >
           <div
-            class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center mb-5"
+            class="w-14 h-14 rounded-2xl bg-brand-50 text-brand-500 flex items-center justify-center mb-5"
           >
             <app-icon name="mail" size="lg" />
           </div>
@@ -297,7 +292,7 @@ const SERVICE_CARDS: readonly {
     </section>
   `,
 })
-export class Home implements OnDestroy {
+export class Home {
   private readonly getSiteSetting = inject(GetSiteSettingUseCase);
   private readonly getAllPages = inject(GetAllPagesUseCase);
   private readonly platformId = inject(PLATFORM_ID);
@@ -306,20 +301,22 @@ export class Home implements OnDestroy {
   protected readonly services = signal<HomeServicesSettings>(DEFAULT_HOME_SERVICES);
   protected readonly ctaSettings = signal<HomeCTASettings>(DEFAULT_HOME_CTA);
   protected readonly pages = signal<readonly PageContent[]>([]);
-  protected readonly serviceCards = SERVICE_CARDS;
   protected readonly activePanel = signal<'booking' | 'contact' | null>(null);
 
-  private readonly servicesCarouselRef = viewChild<ElementRef<HTMLDivElement>>('servicesCarousel');
-  private destroyAutoScroll?: () => void;
+  protected readonly serviceCardsResolved = computed(() => {
+    const pages = this.pages();
+    return SERVICE_CARDS.map((card) => {
+      const page = pages.find((p) => p.slug === card.slug);
+      const title = page?.title ?? DEFAULT_PAGES[card.slug].title;
+      const introFull = page?.introduction ?? DEFAULT_PAGES[card.slug].introduction;
+      const intro = introFull.length > 120 ? introFull.substring(0, 120) + '...' : introFull;
+      const image = page?.imageUrl || DEFAULT_PAGES[card.slug].imageUrl;
+      return { ...card, title, intro, image };
+    });
+  });
 
   constructor() {
     this.loadContent();
-
-    afterNextRender({
-      read: () => {
-        this.setupAutoScroll();
-      },
-    });
   }
 
   private async loadContent(): Promise<void> {
@@ -335,73 +332,8 @@ export class Home implements OnDestroy {
     this.pages.set(pages);
   }
 
-  protected getPageTitle(slug: PageSlug): string {
-    const page = this.pages().find((p) => p.slug === slug);
-    return page?.title ?? DEFAULT_PAGES[slug].title;
-  }
-
-  protected getPageIntro(slug: PageSlug): string {
-    const page = this.pages().find((p) => p.slug === slug);
-    const intro = page?.introduction ?? DEFAULT_PAGES[slug].introduction;
-    return intro.length > 120 ? intro.substring(0, 120) + '...' : intro;
-  }
-
-  protected getPageImage(slug: PageSlug): string {
-    const page = this.pages().find((p) => p.slug === slug);
-    return page?.imageUrl || DEFAULT_PAGES[slug].imageUrl;
-  }
-
   protected openPanel(panel: 'booking' | 'contact'): void {
     this.activePanel.set(this.activePanel() === panel ? null : panel);
-  }
-
-  private setupAutoScroll(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-
-    // Check if on mobile (md breakpoint is 768px in Tailwind)
-    if (window.innerWidth >= 768) return;
-
-    const container = this.servicesCarouselRef()?.nativeElement;
-    if (!container) return;
-
-    let isHoveredOrTouched = false;
-
-    const pause = () => (isHoveredOrTouched = true);
-    const resume = () => (isHoveredOrTouched = false);
-
-    container.addEventListener('mouseenter', pause);
-    container.addEventListener('mouseleave', resume);
-    container.addEventListener('touchstart', pause, { passive: true });
-    container.addEventListener('touchend', resume);
-
-    const intervalId = setInterval(() => {
-      if (isHoveredOrTouched) return;
-
-      const maxScrollLeft = container.scrollWidth - container.clientWidth;
-      if (container.scrollLeft >= maxScrollLeft - 10) {
-        // A bit of margin
-        // Reached end, reset
-        container.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        // Scroll to next item (approx width of one card + gap)
-        const scrollAmount = window.innerWidth * 0.85 + 20;
-        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-      }
-    }, 4000); // Scroll every 4 seconds
-
-    this.destroyAutoScroll = () => {
-      clearInterval(intervalId);
-      container.removeEventListener('mouseenter', pause);
-      container.removeEventListener('mouseleave', resume);
-      container.removeEventListener('touchstart', pause);
-      container.removeEventListener('touchend', resume);
-    };
-  }
-
-  ngOnDestroy(): void {
-    if (this.destroyAutoScroll) {
-      this.destroyAutoScroll();
-    }
   }
 
   protected scrollTo(sectionId: string): void {

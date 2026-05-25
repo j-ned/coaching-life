@@ -20,7 +20,7 @@ const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
   host: { class: 'block' },
   template: `
     <div
-      class="relative border-2 border-dashed rounded-2xl p-6 text-center transition-colors cursor-pointer"
+      class="relative border-2 border-dashed rounded-2xl p-6 text-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
       [class.border-brand-400]="isDragOver()"
       [class.bg-brand-50]="isDragOver()"
       [class.border-slate-300]="!isDragOver()"
@@ -50,7 +50,7 @@ const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
             class="max-h-48 mx-auto rounded-lg object-cover"
           />
           <div
-            class="absolute inset-0 bg-black/40 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+            class="absolute inset-0 bg-slate-900/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
           >
             <span class="text-white text-sm font-medium">Changer l'image</span>
           </div>

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { GetPageContentUseCase } from '../../features/content/domain/use-cases/get-page-content.use-case';
 import { DEFAULT_PAGES } from '../../features/content/domain/models/default-content';
 import type { PageContent } from '../../features/content/domain/models/page-content.model';
@@ -6,7 +7,7 @@ import { Icon } from '../../shared/components/icon/icon';
 
 @Component({
   selector: 'app-personal-development',
-  imports: [Icon],
+  imports: [Icon, NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 max-md:py-10' },
   template: `
@@ -15,19 +16,22 @@ import { Icon } from '../../shared/components/icon/icon';
       <div
         class="order-2 lg:order-1 rounded-3xl overflow-hidden shadow-xl lg:h-[700px] max-lg:h-96 max-md:h-72"
       >
-        <img
-          [src]="c.imageUrl"
-          width="800"
-          height="800"
-          [alt]="c.imageAlt"
-          class="object-cover w-full h-full"
-        />
+        @if (c.imageUrl) {
+          <img
+            [ngSrc]="c.imageUrl"
+            width="800"
+            height="800"
+            priority
+            [alt]="c.imageAlt"
+            class="object-cover w-full h-full"
+          />
+        }
       </div>
       <div class="order-1 lg:order-2">
         <h1
           class="text-4xl lg:text-5xl font-bold text-slate-800 mb-6 max-md:mb-4 max-md:text-3xl flex items-center gap-4"
         >
-          <span class="p-3 bg-blue-50 text-blue-500 rounded-2xl">
+          <span class="p-3 bg-brand-50 text-brand-600 rounded-2xl">
             <app-icon name="book-open" size="xl" />
           </span>
           {{ c.title }}
@@ -47,9 +51,9 @@ import { Icon } from '../../shared/components/icon/icon';
             {{ c.sectionTitle }}
           </h2>
           <ul class="space-y-4 relative z-10">
-            @for (item of c.items; track $index) {
+            @for (item of c.items; track item.description) {
               <li class="flex items-start gap-3 text-slate-700">
-                <div class="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-2"></div>
+                <div class="w-2 h-2 rounded-full bg-brand-500 shrink-0 mt-2"></div>
                 <span>
                   @if (item.title) {
                     <strong>{{ item.title }} :</strong>

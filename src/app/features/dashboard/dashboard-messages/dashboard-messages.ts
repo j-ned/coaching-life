@@ -64,10 +64,12 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
     </nav>
 
     <div
-      class="bg-white rounded-xl shadow-sm border border-slate-100 grow flex overflow-hidden min-h-[500px]"
+      class="bg-white rounded-xl shadow-sm border border-slate-100 grow flex flex-col md:flex-row overflow-hidden min-h-[500px]"
     >
       <!-- Sidebar: Message List -->
-      <div class="w-1/3 border-r border-slate-100 overflow-y-auto">
+      <div
+        class="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-slate-100 overflow-y-auto max-h-[40vh] md:max-h-none"
+      >
         @if (filteredMessages().length === 0) {
           <div class="p-8 text-center text-slate-500">
             <svg
@@ -113,7 +115,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
                 </p>
                 <p class="text-xs text-slate-500 truncate pr-12">{{ msg.content }}</p>
                 <time
-                  class="text-[10px] text-slate-500 absolute bottom-4 right-4"
+                  class="text-xs text-slate-500 absolute bottom-4 right-4"
                   [attr.datetime]="msg.createdAt"
                   >{{ msg.createdAt | date: 'dd/MM/yy HH:mm' }}</time
                 >
@@ -124,7 +126,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
       </div>
 
       <!-- Main Area: Message Details -->
-      <div class="w-2/3 flex flex-col bg-slate-50/50">
+      <div class="w-full md:w-2/3 flex flex-col bg-slate-50/50">
         @if (selectedMessage(); as msg) {
           <div class="p-6 border-b border-slate-100 bg-white">
             <div class="flex justify-between items-start mb-3">

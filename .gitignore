@@ -51,5 +51,9 @@ Thumbs.db
 /backend/dist
 /backend/storage/uploads
 
+# Claude
+.claude/
+PRODUCT.md
+
 # Runtime config (généré au build)
 # src/app/core/config.ts  ← décommenter si on ne veut pas commiter l'URL dev

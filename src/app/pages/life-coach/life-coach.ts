@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { GetPageContentUseCase } from '../../features/content/domain/use-cases/get-page-content.use-case';
 import { DEFAULT_PAGES } from '../../features/content/domain/models/default-content';
 import type { PageContent } from '../../features/content/domain/models/page-content.model';
@@ -6,7 +7,7 @@ import { Icon } from '../../shared/components/icon/icon';
 
 @Component({
   selector: 'app-life-coach',
-  imports: [Icon],
+  imports: [Icon, NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 max-md:py-10' },
   template: `
@@ -31,7 +32,7 @@ import { Icon } from '../../shared/components/icon/icon';
             {{ c.sectionTitle }}
           </h2>
           <ul class="space-y-4">
-            @for (item of c.items; track $index) {
+            @for (item of c.items; track item.description) {
               <li class="flex items-start gap-3 text-slate-700">
                 <app-icon name="check" size="lg" class="text-brand-700 shrink-0 mt-0.5" />
                 <span>
@@ -46,13 +47,16 @@ import { Icon } from '../../shared/components/icon/icon';
         </div>
       </div>
       <div class="rounded-3xl overflow-hidden shadow-xl lg:h-[700px] max-lg:h-96 max-md:h-72">
-        <img
-          [src]="c.imageUrl"
-          width="800"
-          height="800"
-          [alt]="c.imageAlt"
-          class="object-cover w-full h-full"
-        />
+        @if (c.imageUrl) {
+          <img
+            [ngSrc]="c.imageUrl"
+            width="800"
+            height="800"
+            priority
+            [alt]="c.imageAlt"
+            class="object-cover w-full h-full"
+          />
+        }
       </div>
     </div>
   `,

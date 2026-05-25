@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  PLATFORM_ID,
-  signal,
-  HostListener,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -18,7 +11,10 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
   selector: 'app-main-layout',
   imports: [RouterOutlet, RouterLink, Login],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'min-h-screen flex flex-col font-sans' },
+  host: {
+    class: 'min-h-screen flex flex-col font-sans',
+    '(window:keydown.control.l)': 'toggleLogin($event)',
+  },
   template: `
     <header
       class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 shadow-sm"
@@ -102,8 +98,9 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
           <button
             type="button"
             (click)="toggleMobileMenu()"
-            class="text-slate-600 hover:text-brand-700 p-2 focus:outline-none cursor-pointer"
-            aria-label="Toggle mobile menu"
+            class="text-slate-600 hover:text-brand-700 p-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 cursor-pointer"
+            [attr.aria-expanded]="isMobileMenuOpen()"
+            aria-label="Menu de navigation"
           >
             <svg
               width="24"
@@ -294,8 +291,7 @@ export class MainLayout {
     }
   }
 
-  @HostListener('window:keydown.control.l', ['$event'])
-  onCtrlL(event: Event) {
+  protected toggleLogin(event: Event): void {
     event.preventDefault();
     this.showLogin.update((v) => !v);
   }

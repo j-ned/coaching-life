@@ -12,6 +12,9 @@ type CalendarDay = {
   readonly hasBooking: boolean;
   readonly isDisabled: boolean;
   readonly disabledReason?: string;
+  readonly cssClass: string;
+  readonly ariaLabel: string;
+  readonly isSelected: boolean;
 };
 
 @Component({
@@ -45,24 +48,27 @@ type CalendarDay = {
         }
       </div>
 
-      <div class="grid grid-cols-7 gap-1">
+      <div class="grid grid-cols-7 gap-1" role="grid" aria-label="Calendrier des disponibilités">
         @for (day of daysGrid(); track day.date) {
           @if (day.isCurrentMonth) {
             <button
               [disabled]="day.isPast || day.isDisabled"
               (click)="selectDate(day)"
-              [class]="getDayClasses(day)"
-              [title]="day.disabledReason ?? ''"
+              [class]="day.cssClass"
+              [attr.aria-label]="day.ariaLabel"
+              [attr.aria-pressed]="day.isSelected"
+              [attr.aria-current]="day.isToday ? 'date' : null"
             >
-              <span>{{ day.dayNumber }}</span>
+              <span aria-hidden="true">{{ day.dayNumber }}</span>
               @if (day.hasBooking) {
                 <span
                   class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand-400"
+                  aria-hidden="true"
                 ></span>
               }
             </button>
           } @else {
-            <div class="h-10"></div>
+            <div class="h-11" aria-hidden="true"></div>
           }
         }
       </div>
@@ -103,6 +109,7 @@ export class BookingCalendar {
     const bookedDates = new Set(this.bookedSlots().map((b) => b.appointmentDate));
     const adminDisabled = new Map(this.disabledDates().map((d) => [d.date, d.reason]));
     const holidays = getFrenchHolidays(year);
+    const selected = this.selectedDate();
 
     let startDayOfWeek = firstDay.getDay() - 1;
     if (startDayOfWeek < 0) startDayOfWeek = 6;
@@ -118,6 +125,9 @@ export class BookingCalendar {
         isToday: false,
         hasBooking: false,
         isDisabled: false,
+        cssClass: '',
+        ariaLabel: '',
+        isSelected: false,
       });
     }
 
@@ -128,16 +138,23 @@ export class BookingCalendar {
       const adminReason = adminDisabled.get(dateString);
       const unavailableReason = getUnavailableReason(dayDate, holidays);
       const disabledReason = adminReason ?? unavailableReason ?? undefined;
+      const isPast = dayDate < today;
+      const isToday = dayDate.getTime() === today.getTime();
+      const isDisabled = !!disabledReason;
+      const isSelected = selected === dateString;
 
       days.push({
         date: dateString,
         dayNumber: d,
         isCurrentMonth: true,
-        isPast: dayDate < today,
-        isToday: dayDate.getTime() === today.getTime(),
+        isPast,
+        isToday,
         hasBooking: bookedDates.has(dateString),
-        isDisabled: !!disabledReason,
+        isDisabled,
         disabledReason,
+        isSelected,
+        cssClass: this.computeDayClass({ isPast, isDisabled, isToday, isSelected }),
+        ariaLabel: this.computeDayLabel(dayDate, { isPast, isDisabled, isToday, disabledReason }),
       });
     }
 
@@ -166,26 +183,47 @@ export class BookingCalendar {
     this.selectedDateChange.emit(day.date);
   }
 
-  getDayClasses(day: CalendarDay): string {
+  private computeDayClass(state: {
+    isPast: boolean;
+    isDisabled: boolean;
+    isToday: boolean;
+    isSelected: boolean;
+  }): string {
     const base =
-      'relative h-10 w-full rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center';
+      'relative h-11 w-full rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1';
 
-    if (day.isPast) {
+    if (state.isPast) {
       return `${base} text-slate-300 cursor-not-allowed`;
     }
 
-    if (day.isDisabled) {
-      return `${base} bg-red-50 text-slate-400 cursor-not-allowed border border-red-100`;
+    if (state.isDisabled) {
+      return `${base} bg-red-50 text-red-400 cursor-not-allowed border border-red-100`;
     }
 
-    if (this.selectedDate() === day.date) {
+    if (state.isSelected) {
       return `${base} bg-brand-700 text-white ring-2 ring-brand-500 shadow-lg shadow-brand-500/25`;
     }
 
-    if (day.isToday) {
-      return `${base} bg-brand-50 text-brand-600 border border-brand-200 hover:bg-brand-100 cursor-pointer`;
+    if (state.isToday) {
+      return `${base} bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100 cursor-pointer`;
     }
 
     return `${base} text-slate-700 hover:bg-slate-50 hover:text-brand-700 cursor-pointer`;
+  }
+
+  private computeDayLabel(
+    date: Date,
+    state: { isPast: boolean; isDisabled: boolean; isToday: boolean; disabledReason?: string },
+  ): string {
+    const full = date.toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    if (state.isPast) return `${full}, date passée`;
+    if (state.isDisabled) return `${full}, indisponible : ${state.disabledReason}`;
+    if (state.isToday) return `${full}, aujourd'hui, disponible`;
+    return `${full}, disponible`;
   }
 }

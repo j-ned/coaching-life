@@ -24,21 +24,11 @@ const STATUS_CONFIG: Record<string, { label: string; colorClass: string }> = {
   pending: { label: 'En attente', colorClass: 'bg-amber-100 text-amber-800' },
   confirmed: { label: 'Confirmés', colorClass: 'bg-emerald-100 text-emerald-800' },
   cancelled: { label: 'Annulés', colorClass: 'bg-red-100 text-red-800' },
-  completed: { label: 'Terminés', colorClass: 'bg-violet-100 text-violet-800' },
+  completed: { label: 'Terminés', colorClass: 'bg-slate-200 text-slate-700' },
 };
 
-const SERVICE_COLOR_CONFIG: Record<string, string> = {
-  'life-coaching': 'bg-violet-100 text-violet-800',
-  'personal-development': 'bg-amber-100 text-amber-800',
-  'equine-coaching': 'bg-emerald-100 text-emerald-800',
-  'neuroatypical-parents': 'bg-sky-100 text-sky-800',
-  life_coach: 'bg-violet-100 text-violet-800',
-  dev_personnel: 'bg-amber-100 text-amber-800',
-  equine: 'bg-emerald-100 text-emerald-800',
-  parents: 'bg-sky-100 text-sky-800',
-  other: 'bg-slate-100 text-slate-700',
-  '': 'bg-slate-100 text-slate-600',
-};
+const SERVICE_PILL_CLASS = 'bg-brand-50 text-brand-700';
+const SERVICE_FALLBACK_CLASS = 'bg-slate-100 text-slate-600';
 
 @Component({
   selector: 'app-dashboard-home',
@@ -54,19 +44,19 @@ const SERVICE_COLOR_CONFIG: Record<string, string> = {
         label="Visites (30 jours)"
         [value]="visitsDisplay()"
         icon="trending-up"
-        iconBgClass="bg-violet-50 text-violet-500"
+        iconBgClass="bg-brand-50 text-brand-600"
       />
       <app-stat-card
         label="RDV à venir"
         [value]="appointmentsDisplay()"
         icon="calendar"
-        iconBgClass="bg-amber-50 text-amber-500"
+        iconBgClass="bg-brand-50 text-brand-600"
       />
       <app-stat-card
         label="Nouveaux Messages"
         [value]="messagesDisplay()"
         icon="mail"
-        iconBgClass="bg-teal-50 text-teal-500"
+        iconBgClass="bg-brand-50 text-brand-600"
       />
     </div>
 
@@ -207,7 +197,7 @@ export class DashboardHome {
       key,
       count,
       label: COACHING_TYPE_LABELS[key as keyof typeof COACHING_TYPE_LABELS] ?? key,
-      colorClass: SERVICE_COLOR_CONFIG[key] ?? 'bg-slate-100 text-slate-700',
+      colorClass: key ? SERVICE_PILL_CLASS : SERVICE_FALLBACK_CLASS,
     }));
   });
 
@@ -218,7 +208,7 @@ export class DashboardHome {
       key,
       count,
       label: MESSAGE_SUBJECT_LABELS[key] ?? key,
-      colorClass: SERVICE_COLOR_CONFIG[key] ?? 'bg-slate-100 text-slate-700',
+      colorClass: key ? SERVICE_PILL_CLASS : SERVICE_FALLBACK_CLASS,
     }));
   });
 

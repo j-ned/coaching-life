@@ -48,7 +48,9 @@ type SlotSelection = {
           <button
             [disabled]="slot.isBooked"
             (click)="selectTime(slot.time)"
-            [class]="getSlotClasses(slot)"
+            [class]="slot.cssClass"
+            [attr.aria-label]="slot.ariaLabel"
+            [attr.aria-pressed]="slot.isSelected"
           >
             {{ slot.time }}
           </button>
@@ -74,9 +76,16 @@ export class BookingTimePicker {
   readonly availableSlots = computed(() => {
     const dateValue = this.date();
     const duration = this.selectedDuration();
+    const selected = this.selectedTime();
     const booked = this.bookedSlots().filter((b) => b.appointmentDate === dateValue);
 
-    const slots: { time: string; isBooked: boolean }[] = [];
+    const slots: {
+      time: string;
+      isBooked: boolean;
+      isSelected: boolean;
+      cssClass: string;
+      ariaLabel: string;
+    }[] = [];
     const startHour = 9;
     const endHour = 18;
 
@@ -95,7 +104,14 @@ export class BookingTimePicker {
           return slotStart < bookedEnd && slotEnd > bookedStart;
         });
 
-        slots.push({ time, isBooked });
+        const isSelected = selected === time;
+        slots.push({
+          time,
+          isBooked,
+          isSelected,
+          cssClass: this.computeSlotClass(isBooked, isSelected),
+          ariaLabel: isBooked ? `${time}, créneau réservé` : `${time}, disponible`,
+        });
       }
     }
 
@@ -112,14 +128,15 @@ export class BookingTimePicker {
     this.slotSelected.emit({ time, duration: this.selectedDuration() });
   }
 
-  getSlotClasses(slot: { time: string; isBooked: boolean }): string {
-    const base = 'py-2.5 px-3 rounded-lg text-sm font-medium transition-all duration-200';
+  private computeSlotClass(isBooked: boolean, isSelected: boolean): string {
+    const base =
+      'py-2.5 px-3 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500';
 
-    if (slot.isBooked) {
+    if (isBooked) {
       return `${base} bg-slate-50 text-slate-300 line-through cursor-not-allowed`;
     }
 
-    if (this.selectedTime() === slot.time) {
+    if (isSelected) {
       return `${base} bg-brand-700 text-white ring-2 ring-brand-500 shadow-lg shadow-brand-500/25`;
     }
 

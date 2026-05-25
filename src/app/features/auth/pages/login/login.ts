@@ -1,4 +1,13 @@
-import { Component, ChangeDetectionStrategy, inject, signal, output } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  signal,
+  output,
+  viewChild,
+  ElementRef,
+  afterNextRender,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoginUseCase } from '../../domain/use-cases/login.use-case';
@@ -14,16 +23,23 @@ type LoginFormShape = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, Icon],
   host: {
+    role: 'dialog',
+    'aria-modal': 'true',
+    'aria-labelledby': 'login-title',
     class:
       'fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm',
+    '(keydown.escape)': 'closeModal()',
+    '(keydown.tab)': 'trapFocus($event, false)',
+    '(keydown.shift.tab)': 'trapFocus($event, true)',
   },
   template: `
     <div
+      #panel
       class="relative w-full max-w-md bg-white p-8 shadow-2xl rounded-2xl border border-slate-100"
     >
       <button
         (click)="closeModal()"
-        class="absolute top-4 right-4 text-slate-500 hover:text-slate-600 transition-colors"
+        class="absolute top-4 right-4 text-slate-500 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-md transition-colors"
         aria-label="Fermer"
       >
         <app-icon name="x" size="lg" />
@@ -35,7 +51,7 @@ type LoginFormShape = {
         >
           <app-icon name="lock" size="xl" />
         </div>
-        <h2 class="text-2xl font-bold text-slate-900">Accès Administrateur</h2>
+        <h2 id="login-title" class="text-2xl font-bold text-slate-900">Accès Administrateur</h2>
         <p class="text-sm text-slate-500 mt-2">Connectez-vous avec vos identifiants</p>
       </div>
 
@@ -51,6 +67,7 @@ type LoginFormShape = {
               class="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
             />
             <input
+              #emailInput
               id="login-email"
               type="email"
               formControlName="email"
@@ -107,7 +124,7 @@ type LoginFormShape = {
         <button
           type="submit"
           [disabled]="loginForm.invalid || isLoading()"
-          class="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl text-sm font-medium text-white bg-brand-700 hover:bg-brand-800 shadow-lg shadow-brand-500/25 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:-translate-y-0.5 active:translate-y-0"
+          class="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl text-sm font-medium text-white bg-brand-700 hover:bg-brand-800 shadow-lg shadow-brand-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           @if (isLoading()) {
             <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
@@ -140,6 +157,15 @@ export class Login {
   private readonly loginUseCase = inject(LoginUseCase);
   readonly closed = output<void>();
 
+  private readonly panel = viewChild.required<ElementRef<HTMLElement>>('panel');
+  private readonly emailInput = viewChild.required<ElementRef<HTMLInputElement>>('emailInput');
+
+  constructor() {
+    afterNextRender({
+      write: () => this.emailInput().nativeElement.focus(),
+    });
+  }
+
   protected readonly loginForm = new FormGroup<LoginFormShape>({
     email: new FormControl('', {
       nonNullable: true,
@@ -161,6 +187,25 @@ export class Login {
 
   closeModal(): void {
     this.closed.emit();
+  }
+
+  trapFocus(event: Event, backward: boolean): void {
+    const focusables = this.panel().nativeElement.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), input:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+    );
+    if (focusables.length === 0) return;
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const active = document.activeElement;
+
+    if (backward && active === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!backward && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   async submitLogin(): Promise<void> {

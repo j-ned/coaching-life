@@ -64,6 +64,17 @@ type CalendarDay = {
 
     <!-- ═══ TAB: Rendez-vous ═══ -->
     @if (activeTab() === 'appointments') {
+      @if (loadError()) {
+        <div class="mb-4 rounded-xl bg-red-50 border border-red-100 p-4" role="alert">
+          <p class="text-sm text-red-700">{{ loadError() }}</p>
+          <button
+            (click)="loadAppointments()"
+            class="mt-2 text-sm font-medium text-red-700 underline hover:text-red-800"
+          >
+            Réessayer
+          </button>
+        </div>
+      }
       <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
@@ -125,12 +136,27 @@ type CalendarDay = {
                           Annuler
                         </button>
                       }
-                      <button
-                        (click)="deleteAppointment(appt.id)"
-                        class="px-3 py-1.5 text-xs rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
-                      >
-                        Supprimer
-                      </button>
+                      @if (confirmDeleteId() === appt.id) {
+                        <button
+                          (click)="deleteAppointment(appt.id)"
+                          class="px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
+                        >
+                          Confirmer la suppression
+                        </button>
+                        <button
+                          (click)="confirmDeleteId.set(null)"
+                          class="px-3 py-1.5 text-xs rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                        >
+                          Annuler
+                        </button>
+                      } @else {
+                        <button
+                          (click)="confirmDeleteId.set(appt.id)"
+                          class="px-3 py-1.5 text-xs rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                        >
+                          Supprimer
+                        </button>
+                      }
                     </div>
                   </td>
                 </tr>
@@ -174,31 +200,34 @@ type CalendarDay = {
             }
           </div>
 
-          <div class="grid grid-cols-7 gap-1">
+          <div
+            class="grid grid-cols-7 gap-1"
+            role="grid"
+            aria-label="Calendrier de gestion des disponibilités"
+          >
             @for (day of daysGrid(); track day.date) {
               @if (day.isCurrentMonth) {
                 <button
                   (click)="toggleDate(day)"
                   [class]="getDayClasses(day)"
-                  [title]="
-                    day.isDisabled
-                      ? 'Désactivé' + (day.reason ? ' : ' + day.reason : '')
-                      : day.isAutoBlocked
-                        ? 'Auto : ' + day.autoBlockedReason
-                        : ''
-                  "
+                  [attr.aria-label]="dayLabel(day)"
+                  [attr.aria-pressed]="selectedDate() === day.date"
                 >
-                  <span>{{ day.dayNumber }}</span>
+                  <span aria-hidden="true">{{ day.dayNumber }}</span>
                   @if (day.isDisabled) {
-                    <span class="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-red-400"></span>
+                    <span
+                      class="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-red-400"
+                      aria-hidden="true"
+                    ></span>
                   } @else if (day.isAutoBlocked) {
                     <span
                       class="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-amber-400"
+                      aria-hidden="true"
                     ></span>
                   }
                 </button>
               } @else {
-                <div class="h-12"></div>
+                <div class="h-12" aria-hidden="true"></div>
               }
             }
           </div>
@@ -318,6 +347,8 @@ export class DashboardAppointments {
   protected readonly appointments = signal<readonly Appointment[]>([]);
   protected readonly disabledDates = signal<readonly DisabledDate[]>([]);
   protected readonly activeTab = signal<Tab>('appointments');
+  protected readonly confirmDeleteId = signal<string | null>(null);
+  protected readonly loadError = signal<string | null>(null);
 
   // Availability state
   protected readonly currentMonth = signal(new Date());
@@ -455,6 +486,7 @@ export class DashboardAppointments {
 
   protected async deleteAppointment(id: string): Promise<void> {
     await this.deleteAppointmentUseCase.execute(id);
+    this.confirmDeleteId.set(null);
     this.loadAppointments();
   }
 
@@ -519,9 +551,16 @@ export class DashboardAppointments {
     });
   }
 
+  protected dayLabel(day: CalendarDay): string {
+    const full = this.formatDate(day.date);
+    if (day.isDisabled) return `${full}, désactivé${day.reason ? ' : ' + day.reason : ''}`;
+    if (day.isAutoBlocked) return `${full}, ${day.autoBlockedReason}`;
+    return `${full}, disponible`;
+  }
+
   protected getDayClasses(day: CalendarDay): string {
     const base =
-      'relative h-12 w-full rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center cursor-pointer';
+      'relative h-12 w-full rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500';
 
     const selected = this.selectedDate() === day.date;
 
@@ -545,9 +584,14 @@ export class DashboardAppointments {
 
   // ── Data loading ──
 
-  private async loadAppointments(): Promise<void> {
-    const appts = await this.getAllAppointments.execute();
-    this.appointments.set(appts);
+  protected async loadAppointments(): Promise<void> {
+    try {
+      const appts = await this.getAllAppointments.execute();
+      this.appointments.set(appts);
+      this.loadError.set(null);
+    } catch {
+      this.loadError.set('Impossible de charger les rendez-vous. Vérifiez votre connexion.');
+    }
   }
 
   private async loadDisabledDates(): Promise<void> {

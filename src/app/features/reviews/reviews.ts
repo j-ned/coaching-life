@@ -1,14 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  viewChild,
-  ElementRef,
-  afterNextRender,
-  PLATFORM_ID,
-  inject,
-  OnDestroy,
-} from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Icon } from '../../shared/components/icon/icon';
 
 @Component({
@@ -26,8 +16,7 @@ import { Icon } from '../../shared/components/icon/icon';
       </h2>
 
       <div
-        #reviewsCarousel
-        class="grid grid-cols-1 md:grid-cols-3 gap-8 max-md:flex max-md:flex-row-reverse max-md:overflow-x-auto max-md:snap-x max-md:snap-mandatory max-md:pb-6 max-md:-mx-4 max-md:px-4 max-md:scroll-smooth max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden"
+        class="grid grid-cols-1 md:grid-cols-3 gap-8 max-md:flex max-md:overflow-x-auto max-md:snap-x max-md:snap-mandatory max-md:pb-6 max-md:-mx-4 max-md:px-4 max-md:scroll-smooth max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden"
       >
         <!-- Review Card 1 -->
         <article
@@ -126,80 +115,6 @@ import { Icon } from '../../shared/components/icon/icon';
         </a>
       </div>
     </section>
-    <!-- Removed wrapper div -->
   `,
 })
-export class Reviews implements OnDestroy {
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly reviewsCarouselRef = viewChild<ElementRef<HTMLDivElement>>('reviewsCarousel');
-  private destroyAutoScroll?: () => void;
-
-  constructor() {
-    afterNextRender({
-      read: () => {
-        this.setupAutoScroll();
-      },
-    });
-  }
-
-  private setupAutoScroll(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-
-    // Check if on mobile (md breakpoint is 768px in Tailwind)
-    if (window.innerWidth >= 768) return;
-
-    const container = this.reviewsCarouselRef()?.nativeElement;
-    if (!container) return;
-
-    let isHoveredOrTouched = false;
-
-    const pause = () => (isHoveredOrTouched = true);
-    const resume = () => (isHoveredOrTouched = false);
-
-    container.addEventListener('mouseenter', pause);
-    container.addEventListener('mouseleave', resume);
-    container.addEventListener('touchstart', pause, { passive: true });
-    container.addEventListener('touchend', resume);
-
-    // Initial scroll position for row-reverse (RTL layout) depends on browser behavior.
-    // In many modern browsers, scrollLeft is 0 or negative for flex-row-reverse.
-    // It is simpler to just scroll horizontally by manipulating coordinates.
-
-    let scrollDirection = -1; // Scroll leftwards by default
-
-    const intervalId = setInterval(() => {
-      if (isHoveredOrTouched) return;
-
-      const scrollAmount = (window.innerWidth * 0.85 + 20) * scrollDirection;
-      const startLeft = container.scrollLeft;
-
-      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-
-      // If we attempt to scroll and the scrollLeft doesn't change, we've hit a boundary
-      setTimeout(() => {
-        if (container.scrollLeft === startLeft) {
-          // Reached the end (leftmost or rightmost), reset to the other side
-          if (scrollDirection === -1) {
-            container.scrollTo({ left: container.scrollWidth, behavior: 'smooth' });
-          } else {
-            container.scrollTo({ left: -container.scrollWidth, behavior: 'smooth' }); // Catch-all for varied browser implementations
-          }
-        }
-      }, 500); // Wait for smooth scroll to finish
-    }, 2500); // Scroll every 2.5 seconds
-
-    this.destroyAutoScroll = () => {
-      clearInterval(intervalId);
-      container.removeEventListener('mouseenter', pause);
-      container.removeEventListener('mouseleave', resume);
-      container.removeEventListener('touchstart', pause);
-      container.removeEventListener('touchend', resume);
-    };
-  }
-
-  ngOnDestroy(): void {
-    if (this.destroyAutoScroll) {
-      this.destroyAutoScroll();
-    }
-  }
-}
+export class Reviews {}

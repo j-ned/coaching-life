@@ -93,15 +93,15 @@ type CTAFormShape = {
           [formGroup]="heroForm"
           class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
         >
-          <div
-            class="bg-gradient-to-r from-brand-500 to-brand-400 px-6 py-4 flex items-center gap-3"
-          >
-            <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white">
+          <div class="px-6 py-4 flex items-center gap-3 bg-slate-50 border-b border-slate-100">
+            <div
+              class="w-8 h-8 bg-brand-100 rounded-lg flex items-center justify-center text-brand-600"
+            >
               <app-icon name="star" size="md" />
             </div>
             <div>
-              <h3 class="text-white font-semibold">Section Hero</h3>
-              <p class="text-white/80 text-xs">L'en-tête principal de votre page d'accueil</p>
+              <h3 class="text-slate-800 font-semibold">Section Hero</h3>
+              <p class="text-slate-500 text-xs">L'en-tête principal de votre page d'accueil</p>
             </div>
           </div>
 
@@ -197,13 +197,15 @@ type CTAFormShape = {
           [formGroup]="servicesForm"
           class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
         >
-          <div class="bg-gradient-to-r from-blue-500 to-blue-400 px-6 py-4 flex items-center gap-3">
-            <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white">
+          <div class="px-6 py-4 flex items-center gap-3 bg-slate-50 border-b border-slate-100">
+            <div
+              class="w-8 h-8 bg-brand-100 rounded-lg flex items-center justify-center text-brand-600"
+            >
               <app-icon name="sparkles" size="md" />
             </div>
             <div>
-              <h3 class="text-white font-semibold">Section Accompagnements</h3>
-              <p class="text-white/80 text-xs">Le titre au-dessus de la grille de vos services</p>
+              <h3 class="text-slate-800 font-semibold">Section Accompagnements</h3>
+              <p class="text-slate-500 text-xs">Le titre au-dessus de la grille de vos services</p>
             </div>
           </div>
 
@@ -217,7 +219,7 @@ type CTAFormShape = {
                 type="text"
                 formControlName="badge"
                 placeholder="Ex : MES ACCOMPAGNEMENTS"
-                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
               />
               <p class="text-xs text-slate-500 mt-1">Petit texte affiché au-dessus du titre</p>
             </div>
@@ -231,7 +233,7 @@ type CTAFormShape = {
                 type="text"
                 formControlName="title"
                 placeholder="Ex : Un accompagnement adapté à chaque besoin"
-                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                 aria-required="true"
               />
             </div>
@@ -245,7 +247,7 @@ type CTAFormShape = {
                 formControlName="subtitle"
                 rows="2"
                 placeholder="Décrivez brièvement vos spécialités..."
-                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none"
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all resize-none"
               ></textarea>
             </div>
           </div>
@@ -256,15 +258,15 @@ type CTAFormShape = {
           [formGroup]="ctaForm"
           class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
         >
-          <div
-            class="bg-gradient-to-r from-emerald-500 to-emerald-400 px-6 py-4 flex items-center gap-3"
-          >
-            <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white">
+          <div class="px-6 py-4 flex items-center gap-3 bg-slate-50 border-b border-slate-100">
+            <div
+              class="w-8 h-8 bg-brand-100 rounded-lg flex items-center justify-center text-brand-600"
+            >
               <app-icon name="phone" size="md" />
             </div>
             <div>
-              <h3 class="text-white font-semibold">Section Appel à l'action</h3>
-              <p class="text-white/80 text-xs">
+              <h3 class="text-slate-800 font-semibold">Section Appel à l'action</h3>
+              <p class="text-slate-500 text-xs">
                 Le texte qui invite vos visiteurs à vous contacter
               </p>
             </div>
@@ -280,7 +282,7 @@ type CTAFormShape = {
                 type="text"
                 formControlName="badge"
                 placeholder="Ex : PASSEZ À L'ACTION"
-                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
               />
             </div>
 
@@ -293,7 +295,7 @@ type CTAFormShape = {
                 type="text"
                 formControlName="title"
                 placeholder="Ex : Prêt(e) à commencer ?"
-                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                 aria-required="true"
               />
             </div>
@@ -307,7 +309,7 @@ type CTAFormShape = {
                 formControlName="subtitle"
                 rows="2"
                 placeholder="Encouragez vos visiteurs à passer à l'action..."
-                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all resize-none"
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all resize-none"
               ></textarea>
             </div>
           </div>

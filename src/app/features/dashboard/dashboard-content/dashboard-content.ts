@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Icon } from '../../../shared/components/icon/icon';
 import { GetAllPagesUseCase } from '../../content/domain/use-cases/get-all-pages.use-case';
@@ -41,7 +41,7 @@ const ALL_SLUGS: readonly PageSlug[] = [
       <!-- Home page card -->
       <a
         routerLink="/dashboard/content/home"
-        class="group bg-white rounded-2xl shadow-sm border border-slate-100 p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+        class="group bg-white rounded-2xl shadow-sm border border-slate-100 p-6 hover:shadow-md transition-shadow duration-300"
       >
         <div
           class="w-12 h-12 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center mb-4"
@@ -53,18 +53,18 @@ const ALL_SLUGS: readonly PageSlug[] = [
       </a>
 
       <!-- Page cards -->
-      @for (slug of slugs; track slug) {
+      @for (card of pageCards(); track card.slug) {
         <a
-          [routerLink]="['/dashboard/content', slug]"
-          class="group bg-white rounded-2xl shadow-sm border border-slate-100 p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+          [routerLink]="['/dashboard/content', card.slug]"
+          class="group bg-white rounded-2xl shadow-sm border border-slate-100 p-6 hover:shadow-md transition-shadow duration-300"
         >
           <div
-            class="w-12 h-12 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center mb-4"
+            class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mb-4"
           >
-            <app-icon [name]="getIcon(slug)" size="lg" />
+            <app-icon [name]="card.icon" size="lg" />
           </div>
-          <h3 class="text-lg font-semibold text-slate-800 mb-1">{{ getLabel(slug) }}</h3>
-          <p class="text-sm text-slate-500">{{ getPageTitle(slug) }}</p>
+          <h3 class="text-lg font-semibold text-slate-800 mb-1">{{ card.label }}</h3>
+          <p class="text-sm text-slate-500">{{ card.title }}</p>
         </a>
       }
     </div>
@@ -73,7 +73,16 @@ const ALL_SLUGS: readonly PageSlug[] = [
 export class DashboardContent {
   private readonly getAllPages = inject(GetAllPagesUseCase);
   protected readonly pages = signal<readonly PageContent[]>([]);
-  protected readonly slugs = ALL_SLUGS;
+
+  protected readonly pageCards = computed(() => {
+    const pages = this.pages();
+    return ALL_SLUGS.map((slug) => ({
+      slug,
+      label: PAGE_LABELS[slug],
+      icon: PAGE_ICONS[slug],
+      title: pages.find((p) => p.slug === slug)?.title ?? DEFAULT_PAGES[slug].title,
+    }));
+  });
 
   constructor() {
     this.loadPages();
@@ -82,18 +91,5 @@ export class DashboardContent {
   private async loadPages(): Promise<void> {
     const pages = await this.getAllPages.execute();
     this.pages.set(pages);
-  }
-
-  protected getLabel(slug: PageSlug): string {
-    return PAGE_LABELS[slug];
-  }
-
-  protected getIcon(slug: PageSlug): string {
-    return PAGE_ICONS[slug];
-  }
-
-  protected getPageTitle(slug: PageSlug): string {
-    const page = this.pages().find((p) => p.slug === slug);
-    return page?.title ?? DEFAULT_PAGES[slug].title;
   }
 }

@@ -22,6 +22,7 @@ import { RouterLink } from '@angular/router';
             [ngSrc]="c.imageUrl"
             width="800"
             height="800"
+            priority
             [alt]="c.imageAlt"
             class="object-cover w-full h-full"
           />
@@ -31,8 +32,8 @@ import { RouterLink } from '@angular/router';
         <h1
           class="text-4xl lg:text-5xl font-bold text-slate-800 mb-6 max-md:mb-4 max-md:text-3xl flex items-center gap-4"
         >
-          <span class="p-3 bg-rose-50 text-rose-500 rounded-2xl">
-            <app-icon name="smile" size="xl" />
+          <span class="p-3 bg-brand-50 text-brand-700 rounded-2xl">
+            <app-icon name="heart" size="xl" />
           </span>
           {{ c.title }}
         </h1>
@@ -46,10 +47,10 @@ import { RouterLink } from '@angular/router';
             {{ c.sectionTitle }}
           </h2>
           <ul class="space-y-4 text-slate-700">
-            @for (item of c.items; track $index) {
+            @for (item of c.items; track item.description) {
               <li class="flex items-start gap-3">
                 <div
-                  class="w-8 h-8 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center shrink-0 mt-0.5"
+                  class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center shrink-0 mt-0.5"
                 >
                   <app-icon name="heart" size="sm" />
                 </div>

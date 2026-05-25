@@ -25,19 +25,19 @@ export class ActivityChart {
         {
           label: 'Visites',
           data: points.map((p) => p.visits),
-          backgroundColor: 'rgba(139, 92, 246, 0.8)',
+          backgroundColor: 'rgba(217, 123, 122, 0.85)',
           borderRadius: 4,
         },
         {
           label: 'RDV',
           data: points.map((p) => p.appointments),
-          backgroundColor: 'rgba(245, 158, 11, 0.8)',
+          backgroundColor: 'rgba(163, 72, 71, 0.85)',
           borderRadius: 4,
         },
         {
           label: 'Messages',
           data: points.map((p) => p.messages),
-          backgroundColor: 'rgba(20, 184, 166, 0.8)',
+          backgroundColor: 'rgba(148, 163, 184, 0.7)',
           borderRadius: 4,
         },
       ],
