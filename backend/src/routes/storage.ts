@@ -18,8 +18,9 @@ export const storageRoutes = new Hono()
 
     const buffer = await file.arrayBuffer();
     const key = await uploadFile(buffer, file.name, path);
-    const origin = new URL(c.req.url).origin;
-    const publicUrl = `${origin}/api/storage/files/${key}`;
+    // URL relative same-origin : insensible au domaine et au schéma (HTTPS derrière reverse proxy).
+    // Évite tout mixed content / couplage au domaine, le front étant servi par ce même backend.
+    const publicUrl = `/api/storage/files/${key}`;
 
     return c.json({ publicUrl, path: key }, 201);
   })
