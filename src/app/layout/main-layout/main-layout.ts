@@ -2,10 +2,10 @@ import { ChangeDetectionStrategy, Component, inject, PLATFORM_ID, signal } from 
 import { isPlatformBrowser } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AuthGateway } from '../../features/auth/domain/gateways/auth.gateway';
+import { AuthGateway } from '@features/auth/domain/gateways/auth.gateway';
 import { filter, map } from 'rxjs';
-import { Login } from '../../features/auth/pages/login/login';
-import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases/track-page-visit.use-case';
+import { Login } from '@features/auth/pages/login/login';
+import { TrackPageVisitUseCase } from '@features/analytics/domain/use-cases/track-page-visit.use-case';
 
 @Component({
   selector: 'app-main-layout',
@@ -49,28 +49,24 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
           </a>
         </div>
 
-        <nav class="hidden md:flex gap-8">
+        <nav class="hidden md:flex gap-8" aria-label="Navigation principale">
           <a
             routerLink="/life-coach"
-            aria-label="Coach de Vie – navigation principale"
             class="text-slate-600 hover:text-brand-700 font-medium transition-colors"
             >Coach de Vie</a
           >
           <a
             routerLink="/personal-development"
-            aria-label="Dev. Personnel – navigation principale"
             class="text-slate-600 hover:text-brand-700 font-medium transition-colors"
             >Dev. Personnel</a
           >
           <a
             routerLink="/equine-coaching"
-            aria-label="Coaching Equin – navigation principale"
             class="text-slate-600 hover:text-brand-700 font-medium transition-colors"
             >Coaching Equin</a
           >
           <a
             routerLink="/neuroatypical-parents"
-            aria-label="Parents Neuroatypiques – navigation principale"
             class="text-slate-600 hover:text-brand-700 font-medium transition-colors"
             >Parents Neuroatypiques</a
           >
@@ -186,46 +182,34 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
             Accompagnement personnalisé pour révéler votre plein potentiel.
           </p>
         </div>
-        <div>
+        <nav aria-label="Spécialités">
           <h3 class="text-white font-medium mb-4">Spécialités</h3>
           <ul class="space-y-2">
             <li>
-              <a
-                routerLink="/life-coach"
-                aria-label="Coach de Vie Certifié – pied de page"
-                class="hover:text-white transition-colors"
+              <a routerLink="/life-coach" class="hover:text-white transition-colors"
                 >Coach de Vie Certifié</a
               >
             </li>
             <li>
-              <a
-                routerLink="/personal-development"
-                aria-label="Développement Personnel – pied de page"
-                class="hover:text-white transition-colors"
+              <a routerLink="/personal-development" class="hover:text-white transition-colors"
                 >Développement Personnel</a
               >
             </li>
             <li>
-              <a
-                routerLink="/equine-coaching"
-                aria-label="Coaching facilité avec le cheval – pied de page"
-                class="hover:text-white transition-colors"
+              <a routerLink="/equine-coaching" class="hover:text-white transition-colors"
                 >Coaching facilité avec le cheval</a
               >
             </li>
             <li>
-              <a
-                routerLink="/neuroatypical-parents"
-                aria-label="Parents d'enfants neuroatypiques – pied de page"
-                class="hover:text-white transition-colors"
+              <a routerLink="/neuroatypical-parents" class="hover:text-white transition-colors"
                 >Parents d'enfants neuroatypiques</a
               >
             </li>
           </ul>
-        </div>
+        </nav>
         <div>
           <h3 class="text-white font-medium mb-4">Contact</h3>
-          <p class="text-brand-200/70 mb-2">Email: contact&#64;coaching-life.nedellec-julien.fr</p>
+          <p class="text-brand-200/70 mb-2">Email: contact&#64;nedellec-julien.fr</p>
           <p class="text-brand-200/70">Téléphone: +33 0 00 00 00 00</p>
         </div>
       </div>
@@ -242,7 +226,6 @@ export class MainLayout {
   private readonly trackPageVisit = inject(TrackPageVisitUseCase);
   private readonly platformId = inject(PLATFORM_ID);
 
-  protected readonly currentYear = new Date().getFullYear();
   protected readonly showLogin = signal(false);
   protected readonly isMobileMenuOpen = signal(false);
 

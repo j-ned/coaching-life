@@ -1,13 +1,14 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
-import { eq, ne, asc } from 'drizzle-orm';
+import { eq, ne, asc, and, gte, lte } from 'drizzle-orm';
 import { z } from 'zod';
 import { db, appointments, disabled_dates } from '../db/index.js';
 import { requireAdmin } from '../middleware/auth.js';
-import {
-  sendAppointmentConfirmation,
-  notifyAdminNewAppointment,
-} from '../lib/mailer.js';
+import { rateLimit } from '../middleware/rate-limit.js';
+import { sendAppointmentConfirmation, notifyAdminNewAppointment } from '../lib/mailer.js';
+
+// Soumission publique → limite stricte par IP (anti-spam).
+const submitRateLimit = rateLimit({ windowMs: 60_000, max: 5 });
 
 // ─── Schemas ────────────────────────────────────────────────────────────────
 
@@ -40,30 +41,43 @@ const addDisabledDateSchema = z.object({
   reason: z.string().max(200).optional(),
 });
 
+const idParamSchema = z.object({ id: z.string().uuid() });
+
 // ─── Routes ─────────────────────────────────────────────────────────────────
 
 export const appointmentRoutes = new Hono()
 
   // GET /api/appointments/booked?month=YYYY-MM  (public)
-  .get('/booked', zValidator('query', z.object({ month: z.string().regex(/^\d{4}-\d{2}$/) })), async (c) => {
-    const { month } = c.req.valid('query');
-    const [year, m] = month.split('-').map(Number) as [number, number];
-    const start = `${year}-${String(m).padStart(2, '0')}-01`;
-    const lastDay = new Date(year, m, 0).getDate();
-    const end = `${year}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  .get(
+    '/booked',
+    zValidator('query', z.object({ month: z.string().regex(/^\d{4}-\d{2}$/) })),
+    async (c) => {
+      const { month } = c.req.valid('query');
+      const [year, m] = month.split('-').map(Number) as [number, number];
+      const start = `${year}-${String(m).padStart(2, '0')}-01`;
+      const lastDay = new Date(year, m, 0).getDate();
+      const end = `${year}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
 
-    const rows = await db
-      .select()
-      .from(appointments)
-      .where(
-        ne(appointments.status, 'cancelled'),
-      )
-      .then((all) =>
-        all.filter((a) => a.appointment_date >= start && a.appointment_date <= end),
-      );
+      // Route PUBLIQUE : ne projeter que les créneaux occupés (date/heure/durée).
+      // JAMAIS les PII clients (nom, email, téléphone, message) — fuite RGPD sinon.
+      const rows = await db
+        .select({
+          appointment_date: appointments.appointment_date,
+          appointment_time: appointments.appointment_time,
+          duration: appointments.duration,
+        })
+        .from(appointments)
+        .where(
+          and(
+            ne(appointments.status, 'cancelled'),
+            gte(appointments.appointment_date, start),
+            lte(appointments.appointment_date, end),
+          ),
+        );
 
-    return c.json(rows);
-  })
+      return c.json(rows);
+    },
+  )
 
   // GET /api/appointments/disabled-dates  (public)
   .get('/disabled-dates', async (c) => {
@@ -82,14 +96,14 @@ export const appointmentRoutes = new Hono()
   })
 
   // DELETE /api/appointments/disabled-dates/:id  (admin)
-  .delete('/disabled-dates/:id', requireAdmin, async (c) => {
-    const { id } = c.req.param();
+  .delete('/disabled-dates/:id', requireAdmin, zValidator('param', idParamSchema), async (c) => {
+    const { id } = c.req.valid('param');
     await db.delete(disabled_dates).where(eq(disabled_dates.id, id));
     return c.json({ ok: true });
   })
 
   // POST /api/appointments  (public)
-  .post('/', zValidator('json', createAppointmentSchema), async (c) => {
+  .post('/', submitRateLimit, zValidator('json', createAppointmentSchema), async (c) => {
     const data = c.req.valid('json');
     await db.insert(appointments).values(data);
 
@@ -122,21 +136,27 @@ export const appointmentRoutes = new Hono()
   })
 
   // PATCH /api/appointments/:id/status  (admin)
-  .patch('/:id/status', requireAdmin, zValidator('json', updateStatusSchema), async (c) => {
-    const { id } = c.req.param();
-    const { status } = c.req.valid('json');
-    const [row] = await db
-      .update(appointments)
-      .set({ status })
-      .where(eq(appointments.id, id))
-      .returning();
-    if (!row) return c.json({ error: 'Not found' }, 404);
-    return c.json(row);
-  })
+  .patch(
+    '/:id/status',
+    requireAdmin,
+    zValidator('param', idParamSchema),
+    zValidator('json', updateStatusSchema),
+    async (c) => {
+      const { id } = c.req.valid('param');
+      const { status } = c.req.valid('json');
+      const [row] = await db
+        .update(appointments)
+        .set({ status })
+        .where(eq(appointments.id, id))
+        .returning();
+      if (!row) return c.json({ error: 'Not found' }, 404);
+      return c.json(row);
+    },
+  )
 
   // DELETE /api/appointments/:id  (admin)
-  .delete('/:id', requireAdmin, async (c) => {
-    const { id } = c.req.param();
+  .delete('/:id', requireAdmin, zValidator('param', idParamSchema), async (c) => {
+    const { id } = c.req.valid('param');
     await db.delete(appointments).where(eq(appointments.id, id));
     return c.json({ ok: true });
   });

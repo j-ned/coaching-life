@@ -8,9 +8,14 @@ import {
   type MessageStatus,
 } from '../../contact/domain/models/message.model';
 import { DatePipe } from '@angular/common';
-import { Icon } from '../../../shared/components/icon/icon';
+import { Icon } from '@shared/components/icon/icon';
 
 type FilterTab = 'all' | MessageStatus;
+
+type MessageRow = {
+  readonly message: Message;
+  readonly subjectLabel: string;
+};
 
 const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[] = [
   { key: 'all', label: 'Tous' },
@@ -44,6 +49,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
       @for (tab of tabs; track tab.key) {
         <button
           type="button"
+          data-testid="message-filter-tab"
           (click)="activeFilter.set(tab.key)"
           [class.bg-white]="activeFilter() === tab.key"
           [class.shadow-sm]="activeFilter() === tab.key"
@@ -86,9 +92,11 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
           </div>
         } @else {
           <div class="divide-y divide-slate-100">
-            @for (msg of filteredMessages(); track msg.id) {
+            @for (row of messageRows(); track row.message.id) {
+              @let msg = row.message;
               <button
                 type="button"
+                data-testid="message-row"
                 class="w-full p-4 text-left hover:bg-slate-50 cursor-pointer transition-colors relative"
                 [class.bg-brand-50]="selectedMessage()?.id === msg.id"
                 (click)="selectMessage(msg)"
@@ -111,7 +119,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
                   class="text-sm text-slate-600 truncate mb-1"
                   [class.font-semibold]="msg.status === 'unread'"
                 >
-                  {{ subjectLabel(msg.subject) }}
+                  {{ row.subjectLabel }}
                 </p>
                 <p class="text-xs text-slate-500 truncate pr-12">{{ msg.content }}</p>
                 <time
@@ -131,7 +139,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
           <div class="p-6 border-b border-slate-100 bg-white">
             <div class="flex justify-between items-start mb-3">
               <div>
-                <h3 class="text-lg font-medium text-slate-800">{{ subjectLabel(msg.subject) }}</h3>
+                <h3 class="text-lg font-medium text-slate-800">{{ selectedSubjectLabel() }}</h3>
                 <p class="text-sm text-slate-500">
                   De <span class="font-medium text-slate-700">{{ msg.senderName }}</span> &lt;{{
                     msg.senderEmail
@@ -148,6 +156,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
               @if (msg.status !== 'unread') {
                 <button
                   type="button"
+                  data-testid="message-status-unread"
                   (click)="changeStatus(msg.id, 'unread')"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
                 >
@@ -158,6 +167,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
               @if (msg.status !== 'read') {
                 <button
                   type="button"
+                  data-testid="message-status-read"
                   (click)="changeStatus(msg.id, 'read')"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
                 >
@@ -168,6 +178,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
               @if (msg.status !== 'archived') {
                 <button
                   type="button"
+                  data-testid="message-status-archived"
                   (click)="changeStatus(msg.id, 'archived')"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
                 >
@@ -181,6 +192,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
                   <span class="text-xs text-red-600 mr-2">Confirmer ?</span>
                   <button
                     type="button"
+                    data-testid="message-delete-confirm"
                     (click)="deleteMessage(msg.id)"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
                   >
@@ -196,6 +208,7 @@ const FILTER_TABS: readonly { readonly key: FilterTab; readonly label: string }[
                 } @else {
                   <button
                     type="button"
+                    data-testid="message-delete"
                     (click)="confirmDeleteId.set(msg.id)"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors"
                   >
@@ -252,11 +265,23 @@ export class DashboardMessages {
     return messages.filter((m) => m.status === filter);
   });
 
+  protected readonly messageRows = computed<readonly MessageRow[]>(() =>
+    this.filteredMessages().map((message) => ({
+      message,
+      subjectLabel: this.computeSubjectLabel(message.subject),
+    })),
+  );
+
+  protected readonly selectedSubjectLabel = computed(() => {
+    const msg = this.selectedMessage();
+    return msg ? this.computeSubjectLabel(msg.subject) : '';
+  });
+
   constructor() {
     this.loadMessages();
   }
 
-  protected subjectLabel(subject: string): string {
+  private computeSubjectLabel(subject: string): string {
     return MESSAGE_SUBJECT_LABELS[subject] ?? (subject || 'Sans sujet');
   }
 

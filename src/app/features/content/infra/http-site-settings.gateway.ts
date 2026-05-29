@@ -5,7 +5,7 @@ import { SiteSettingsGateway } from '../domain/gateways/site-settings.gateway';
 import type { SiteSettingKey, SiteSettingValue } from '../domain/models/site-settings.model';
 import { toSiteSetting } from './site-settings.adapter';
 import type { SiteSettingRow } from './site-settings.adapter';
-import { API_URL } from '../../../core/config.js';
+import { API_URL } from '@core/config';
 
 const BASE = `${API_URL}/api/settings`;
 

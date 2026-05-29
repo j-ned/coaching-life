@@ -5,7 +5,7 @@ import { PageVisitGateway } from '../domain/gateways/page-visit.gateway';
 import type { PageVisit } from '../domain/models/analytics.model';
 import { toPageVisit } from './page-visit.adapter';
 import type { PageVisitRow } from './page-visit.adapter';
-import { API_URL } from '../../../core/config.js';
+import { API_URL } from '@core/config';
 
 const BASE = `${API_URL}/api/analytics`;
 

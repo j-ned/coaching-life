@@ -1,8 +1,8 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
-import { SITE_NAME, SITE_URL } from '../config.js';
-import type { PageSeo } from './route-seo.js';
+import { SITE_NAME, SITE_URL } from '@core/config';
+import type { PageSeo } from '@core/seo/route-seo';
 
 /**
  * Met à jour titre, meta description, Open Graph, Twitter Card et canonical

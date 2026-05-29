@@ -116,6 +116,17 @@ import { BookingForm, type BookingFormPayload } from '../components/booking-form
             <div class="h-64 bg-slate-50 border border-slate-100 rounded-2xl animate-pulse"></div>
           </div>
         </div>
+      } @error {
+        <div class="py-10 text-center">
+          <p class="text-slate-600 mb-3">Le module de réservation n'a pas pu se charger.</p>
+          <button
+            type="button"
+            (click)="retry()"
+            class="text-brand-700 font-medium hover:text-brand-800 cursor-pointer"
+          >
+            Réessayer
+          </button>
+        </div>
       }
     </section>
   `,
@@ -138,6 +149,10 @@ export class Booking {
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     this.loadBookedSlots(currentMonth);
     this.loadDisabledDates();
+  }
+
+  protected retry(): void {
+    location.reload();
   }
 
   protected onDateSelected(date: string): void {

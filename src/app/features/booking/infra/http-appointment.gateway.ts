@@ -11,7 +11,7 @@ import type {
 } from '../domain/models/appointment.model';
 import { toAppointment, toDisabledDate, toInsert } from './appointment.adapter';
 import type { AppointmentRow, DisabledDateRow } from './appointment.adapter';
-import { API_URL } from '../../../core/config.js';
+import { API_URL } from '@core/config';
 
 const BASE = `${API_URL}/api/appointments`;
 

@@ -10,7 +10,7 @@ import type {
 } from '../domain/models/message.model';
 import { toMessage, toMessageInsert } from './message.adapter';
 import type { MessageRow } from './message.adapter';
-import { API_URL } from '../../../core/config.js';
+import { API_URL } from '@core/config';
 
 const BASE = `${API_URL}/api/messages`;
 

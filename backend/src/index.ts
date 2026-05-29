@@ -1,10 +1,8 @@
-import { config } from 'dotenv';
-import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+// ⚠️ DOIT rester le tout premier import : charge le .env avant l'évaluation des modules
+// qui lisent process.env au chargement (session, mailer, db).
+import './load-env.js';
+import { resolve } from 'node:path';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
-
-// Charge le .env racine du monorepo (../../ depuis backend/src/)
-config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../.env') });
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
@@ -38,9 +36,9 @@ if (existsSync(BROWSER_ROOT)) {
 }
 
 // Shell CSR (fallback pour routes client : dashboard, routes inconnues)
-const csrShellPath = ['./browser/index.csr.html', './browser/index.html']
-  .map((p) => resolve(p))
-  .find(existsSync) ?? null;
+const csrShellPath =
+  ['./browser/index.csr.html', './browser/index.html'].map((p) => resolve(p)).find(existsSync) ??
+  null;
 const csrShell = csrShellPath ? readFileSync(csrShellPath, 'utf-8') : null;
 
 const app = new Hono();

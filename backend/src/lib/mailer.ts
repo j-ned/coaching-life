@@ -8,9 +8,6 @@ const transporter = nodemailer.createTransport({
     user: process.env['SMTP_USER']!,
     pass: process.env['SMTP_PASS']!,
   },
-  tls: {
-    rejectUnauthorized: false,
-  },
 });
 
 const FROM = process.env['SMTP_FROM'] ?? process.env['SMTP_USER']!;
@@ -24,6 +21,17 @@ type MailOptions = {
 
 async function send(opts: MailOptions): Promise<void> {
   await transporter.sendMail({ from: FROM, ...opts });
+}
+
+// Échappe les données utilisateur avant injection dans le corps HTML de l'email
+// (anti-injection HTML : nom, email, sujet, contenu sont saisis librement par le visiteur).
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 // ─── Templates ─────────────────────────────────────────────────────────────
@@ -40,12 +48,12 @@ export async function sendAppointmentConfirmation(data: {
     to: data.clientEmail,
     subject: '✅ Confirmation de votre rendez-vous',
     html: `
-      <h2>Bonjour ${data.clientName},</h2>
+      <h2>Bonjour ${escapeHtml(data.clientName)},</h2>
       <p>Votre rendez-vous a bien été enregistré.</p>
       <table style="border-collapse:collapse">
-        <tr><td style="padding:8px"><strong>Type</strong></td><td style="padding:8px">${data.coachingType}</td></tr>
-        <tr><td style="padding:8px"><strong>Date</strong></td><td style="padding:8px">${data.date}</td></tr>
-        <tr><td style="padding:8px"><strong>Heure</strong></td><td style="padding:8px">${data.time}</td></tr>
+        <tr><td style="padding:8px"><strong>Type</strong></td><td style="padding:8px">${escapeHtml(data.coachingType)}</td></tr>
+        <tr><td style="padding:8px"><strong>Date</strong></td><td style="padding:8px">${escapeHtml(data.date)}</td></tr>
+        <tr><td style="padding:8px"><strong>Heure</strong></td><td style="padding:8px">${escapeHtml(data.time)}</td></tr>
         <tr><td style="padding:8px"><strong>Durée</strong></td><td style="padding:8px">${data.duration} min</td></tr>
       </table>
       <p>À bientôt !</p>
@@ -66,9 +74,9 @@ export async function notifyAdminNewAppointment(data: {
     html: `
       <h3>Nouveau rendez-vous</h3>
       <table style="border-collapse:collapse">
-        <tr><td style="padding:8px"><strong>Client</strong></td><td style="padding:8px">${data.clientName} (${data.clientEmail})</td></tr>
-        <tr><td style="padding:8px"><strong>Type</strong></td><td style="padding:8px">${data.coachingType}</td></tr>
-        <tr><td style="padding:8px"><strong>Date</strong></td><td style="padding:8px">${data.date} à ${data.time}</td></tr>
+        <tr><td style="padding:8px"><strong>Client</strong></td><td style="padding:8px">${escapeHtml(data.clientName)} (${escapeHtml(data.clientEmail)})</td></tr>
+        <tr><td style="padding:8px"><strong>Type</strong></td><td style="padding:8px">${escapeHtml(data.coachingType)}</td></tr>
+        <tr><td style="padding:8px"><strong>Date</strong></td><td style="padding:8px">${escapeHtml(data.date)} à ${escapeHtml(data.time)}</td></tr>
       </table>
     `,
   });
@@ -85,10 +93,10 @@ export async function notifyAdminNewMessage(data: {
     subject: `✉️ Nouveau message — ${data.senderName}`,
     html: `
       <h3>Nouveau message de contact</h3>
-      <p><strong>De :</strong> ${data.senderName} &lt;${data.senderEmail}&gt;</p>
-      <p><strong>Sujet :</strong> ${data.subject}</p>
+      <p><strong>De :</strong> ${escapeHtml(data.senderName)} &lt;${escapeHtml(data.senderEmail)}&gt;</p>
+      <p><strong>Sujet :</strong> ${escapeHtml(data.subject)}</p>
       <hr/>
-      <p>${data.content.replace(/\n/g, '<br/>')}</p>
+      <p>${escapeHtml(data.content).replace(/\n/g, '<br/>')}</p>
     `,
   });
 }

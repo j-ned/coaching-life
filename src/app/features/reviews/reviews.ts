@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Icon } from '../../shared/components/icon/icon';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Icon } from '@shared/components/icon/icon';
 
 @Component({
   selector: 'app-reviews',
@@ -103,18 +103,22 @@ import { Icon } from '../../shared/components/icon/icon';
         </article>
       </div>
 
-      <div class="mt-12 text-center">
-        <a
-          href="https://g.page/r/your-google-business-link"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 text-brand-700 font-medium hover:text-brand-800 transition-colors"
-        >
-          Voir tous les avis sur Google
-          <app-icon name="arrow-right" size="sm" />
-        </a>
-      </div>
+      @if (googleReviewsUrl()) {
+        <div class="mt-12 text-center">
+          <a
+            [href]="googleReviewsUrl()"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 text-brand-700 font-medium hover:text-brand-800 transition-colors"
+          >
+            Voir tous les avis sur Google
+            <app-icon name="arrow-right" size="sm" />
+          </a>
+        </div>
+      }
     </section>
   `,
 })
-export class Reviews {}
+export class Reviews {
+  readonly googleReviewsUrl = input<string>('');
+}

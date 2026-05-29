@@ -14,8 +14,8 @@ import { UpdatePageContentUseCase } from '../../content/domain/use-cases/update-
 import { UploadImageUseCase } from '../../content/domain/use-cases/upload-image.use-case';
 import { DEFAULT_PAGES } from '../../content/domain/models/default-content';
 import type { PageContentItem, PageSlug } from '../../content/domain/models/page-content.model';
-import { ImageDropzone } from '../../../shared/components/image-dropzone/image-dropzone';
-import { Icon } from '../../../shared/components/icon/icon';
+import { ImageDropzone } from '@shared/components/image-dropzone/image-dropzone';
+import { Icon } from '@shared/components/icon/icon';
 
 type ItemFormGroup = FormGroup<{
   title: FormControl<string>;
@@ -173,7 +173,7 @@ const PAGE_ICONS: Record<string, string> = {
               </div>
 
               <div class="space-y-3">
-                @for (item of itemsArray.controls; track $index; let i = $index) {
+                @for (item of itemsArray.controls; track item; let i = $index) {
                   <div
                     class="group relative bg-slate-50 hover:bg-slate-100/80 rounded-xl p-4 transition-colors border border-slate-100"
                     [formGroup]="item"

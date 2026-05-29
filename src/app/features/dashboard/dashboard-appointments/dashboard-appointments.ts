@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Icon } from '../../../shared/components/icon/icon';
+import { Icon } from '@shared/components/icon/icon';
 import type {
   Appointment,
   AppointmentStatus,
@@ -13,7 +13,7 @@ import { UpdateAppointmentStatusUseCase } from '../../booking/domain/use-cases/u
 import { DeleteAppointmentUseCase } from '../../booking/domain/use-cases/delete-appointment.use-case';
 import { AddDisabledDateUseCase } from '../../booking/domain/use-cases/add-disabled-date.use-case';
 import { RemoveDisabledDateUseCase } from '../../booking/domain/use-cases/remove-disabled-date.use-case';
-import { getFrenchHolidays, getUnavailableReason } from '../../../shared/calendar/french-holidays';
+import { getFrenchHolidays, getUnavailableReason } from '@shared/calendar/french-holidays';
 
 type Tab = 'appointments' | 'availability';
 
@@ -26,6 +26,22 @@ type CalendarDay = {
   readonly reason?: string;
   readonly isAutoBlocked: boolean;
   readonly autoBlockedReason?: string;
+  readonly isSelected: boolean;
+  readonly cssClass: string;
+  readonly ariaLabel: string;
+};
+
+type AppointmentRow = {
+  readonly appointment: Appointment;
+  readonly coachingLabel: string;
+  readonly dateTime: string;
+  readonly statusClass: string;
+  readonly statusLabel: string;
+};
+
+type DisabledDateRow = {
+  readonly disabledDate: DisabledDate;
+  readonly dateLabel: string;
 };
 
 @Component({
@@ -41,6 +57,7 @@ type CalendarDay = {
     <!-- Tabs -->
     <nav class="flex gap-1 mb-6 bg-slate-100 rounded-lg p-1 w-fit" aria-label="Onglets rendez-vous">
       <button
+        data-testid="tab-appointments"
         (click)="activeTab.set('appointments')"
         [class]="
           activeTab() === 'appointments'
@@ -51,6 +68,7 @@ type CalendarDay = {
         Rendez-vous ({{ appointments().length }})
       </button>
       <button
+        data-testid="tab-availability"
         (click)="activeTab.set('availability')"
         [class]="
           activeTab() === 'availability'
@@ -90,32 +108,35 @@ type CalendarDay = {
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              @for (appt of appointments(); track appt.id) {
-                <tr class="hover:bg-slate-50/50 transition-colors">
+              @for (row of appointmentRows(); track row.appointment.id) {
+                @let appt = row.appointment;
+                <tr class="hover:bg-slate-50/50 transition-colors" data-testid="appointment-row">
                   <td class="p-4">
                     <p class="font-medium text-slate-800">{{ appt.clientName }}</p>
                     <p class="text-xs text-slate-500">{{ appt.clientEmail }}</p>
                   </td>
-                  <td class="p-4 text-slate-600">{{ getCoachingLabel(appt.coachingType) }}</td>
-                  <td class="p-4 text-slate-600">{{ formatDateTime(appt) }}</td>
+                  <td class="p-4 text-slate-600">{{ row.coachingLabel }}</td>
+                  <td class="p-4 text-slate-600">{{ row.dateTime }}</td>
                   <td class="p-4">
                     <span
                       class="px-2.5 py-1 rounded-full text-xs font-medium"
-                      [class]="getStatusClass(appt.status)"
+                      [class]="row.statusClass"
                     >
-                      {{ getStatusLabel(appt.status) }}
+                      {{ row.statusLabel }}
                     </span>
                   </td>
                   <td class="p-4 text-right">
                     <div class="flex items-center justify-end gap-2">
                       @if (appt.status === 'pending') {
                         <button
+                          data-testid="appointment-confirm"
                           (click)="updateStatus(appt.id, 'confirmed')"
                           class="px-3 py-1.5 text-xs rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
                         >
                           Confirmer
                         </button>
                         <button
+                          data-testid="appointment-cancel"
                           (click)="updateStatus(appt.id, 'cancelled')"
                           class="px-3 py-1.5 text-xs rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
                         >
@@ -124,12 +145,14 @@ type CalendarDay = {
                       }
                       @if (appt.status === 'confirmed') {
                         <button
+                          data-testid="appointment-complete"
                           (click)="updateStatus(appt.id, 'completed')"
                           class="px-3 py-1.5 text-xs rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                         >
                           Terminé
                         </button>
                         <button
+                          data-testid="appointment-cancel"
                           (click)="updateStatus(appt.id, 'cancelled')"
                           class="px-3 py-1.5 text-xs rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
                         >
@@ -138,6 +161,7 @@ type CalendarDay = {
                       }
                       @if (confirmDeleteId() === appt.id) {
                         <button
+                          data-testid="appointment-delete-confirm"
                           (click)="deleteAppointment(appt.id)"
                           class="px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
                         >
@@ -151,6 +175,7 @@ type CalendarDay = {
                         </button>
                       } @else {
                         <button
+                          data-testid="appointment-delete"
                           (click)="confirmDeleteId.set(appt.id)"
                           class="px-3 py-1.5 text-xs rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
                         >
@@ -208,10 +233,11 @@ type CalendarDay = {
             @for (day of daysGrid(); track day.date) {
               @if (day.isCurrentMonth) {
                 <button
+                  data-testid="availability-day"
                   (click)="toggleDate(day)"
-                  [class]="getDayClasses(day)"
-                  [attr.aria-label]="dayLabel(day)"
-                  [attr.aria-pressed]="selectedDate() === day.date"
+                  [class]="day.cssClass"
+                  [attr.aria-label]="day.ariaLabel"
+                  [attr.aria-pressed]="day.isSelected"
                 >
                   <span aria-hidden="true">{{ day.dayNumber }}</span>
                   @if (day.isDisabled) {
@@ -257,7 +283,7 @@ type CalendarDay = {
           @if (selectedDate()) {
             <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
               <h4 class="text-sm font-semibold text-slate-800 mb-3">
-                {{ formatDate(selectedDate()!) }}
+                {{ selectedDateLabel() }}
               </h4>
 
               @if (isSelectedDisabled()) {
@@ -266,6 +292,7 @@ type CalendarDay = {
                   <p class="text-xs text-slate-500 mb-4">Raison : {{ selectedReason() }}</p>
                 }
                 <button
+                  data-testid="enable-date"
                   (click)="enableDate()"
                   class="w-full px-4 py-2 rounded-lg bg-emerald-50 text-emerald-600 text-sm font-medium hover:bg-emerald-100 transition-colors"
                 >
@@ -286,6 +313,7 @@ type CalendarDay = {
                     />
                   </div>
                   <button
+                    data-testid="disable-date"
                     (click)="disableDate()"
                     class="w-full px-4 py-2 rounded-lg bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 transition-colors"
                   >
@@ -307,17 +335,20 @@ type CalendarDay = {
               Dates désactivées ({{ disabledDates().length }})
             </h4>
             <div class="space-y-2 max-h-64 overflow-y-auto">
-              @for (dd of disabledDates(); track dd.id) {
+              @for (row of disabledDateRows(); track row.disabledDate.id) {
+                @let dd = row.disabledDate;
                 <div
                   class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-red-50 border border-red-100"
+                  data-testid="disabled-date-row"
                 >
                   <div class="min-w-0">
-                    <p class="text-xs font-medium text-slate-700">{{ formatDate(dd.date) }}</p>
+                    <p class="text-xs font-medium text-slate-700">{{ row.dateLabel }}</p>
                     @if (dd.reason) {
                       <p class="text-xs text-slate-500 truncate">{{ dd.reason }}</p>
                     }
                   </div>
                   <button
+                    data-testid="disabled-date-remove"
                     (click)="removeDate(dd)"
                     class="shrink-0 text-red-400 hover:text-red-600 transition-colors"
                     aria-label="Supprimer"
@@ -380,7 +411,7 @@ export class DashboardAppointments {
     return date ? this.disabledDateSet().get(date)?.reason : undefined;
   });
 
-  protected readonly daysGrid = computed(() => {
+  protected readonly daysGrid = computed<readonly CalendarDay[]>(() => {
     const date = this.currentMonth();
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -391,6 +422,7 @@ export class DashboardAppointments {
 
     const disabled = this.disabledDateSet();
     const holidays = getFrenchHolidays(year);
+    const selected = this.selectedDate();
 
     let startDayOfWeek = firstDay.getDay() - 1;
     if (startDayOfWeek < 0) startDayOfWeek = 6;
@@ -405,6 +437,9 @@ export class DashboardAppointments {
         isToday: false,
         isDisabled: false,
         isAutoBlocked: false,
+        isSelected: false,
+        cssClass: '',
+        ariaLabel: '',
       });
     }
 
@@ -413,19 +448,55 @@ export class DashboardAppointments {
       const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const dd = disabled.get(dateString);
       const autoReason = getUnavailableReason(dayDate, holidays);
+      const isToday = dayDate.getTime() === today.getTime();
+      const isDisabled = !!dd;
+      const isAutoBlocked = !!autoReason;
+      const isSelected = selected === dateString;
+      const reason = dd?.reason;
+      const autoBlockedReason = autoReason ?? undefined;
       days.push({
         date: dateString,
         dayNumber: d,
         isCurrentMonth: true,
-        isToday: dayDate.getTime() === today.getTime(),
-        isDisabled: !!dd,
-        reason: dd?.reason,
-        isAutoBlocked: !!autoReason,
-        autoBlockedReason: autoReason ?? undefined,
+        isToday,
+        isDisabled,
+        reason,
+        isAutoBlocked,
+        autoBlockedReason,
+        isSelected,
+        cssClass: this.computeDayClass({ isSelected, isDisabled, isAutoBlocked, isToday }),
+        ariaLabel: this.computeDayLabel(dateString, {
+          isDisabled,
+          isAutoBlocked,
+          reason,
+          autoBlockedReason,
+        }),
       });
     }
 
     return days;
+  });
+
+  protected readonly appointmentRows = computed<readonly AppointmentRow[]>(() =>
+    this.appointments().map((appointment) => ({
+      appointment,
+      coachingLabel: this.computeCoachingLabel(appointment.coachingType),
+      dateTime: this.computeDateTime(appointment),
+      statusClass: this.computeStatusClass(appointment.status),
+      statusLabel: this.computeStatusLabel(appointment.status),
+    })),
+  );
+
+  protected readonly disabledDateRows = computed<readonly DisabledDateRow[]>(() =>
+    this.disabledDates().map((disabledDate) => ({
+      disabledDate,
+      dateLabel: this.computeDate(disabledDate.date),
+    })),
+  );
+
+  protected readonly selectedDateLabel = computed(() => {
+    const date = this.selectedDate();
+    return date ? this.computeDate(date) : '';
   });
 
   constructor() {
@@ -435,7 +506,7 @@ export class DashboardAppointments {
 
   // ── Appointments ──
 
-  protected getStatusClass(status: string): string {
+  private computeStatusClass(status: string): string {
     switch (status) {
       case 'confirmed':
         return 'bg-emerald-100 text-emerald-700';
@@ -450,7 +521,7 @@ export class DashboardAppointments {
     }
   }
 
-  protected getStatusLabel(status: string): string {
+  private computeStatusLabel(status: string): string {
     switch (status) {
       case 'confirmed':
         return 'Confirmé';
@@ -465,11 +536,11 @@ export class DashboardAppointments {
     }
   }
 
-  protected getCoachingLabel(type: string): string {
+  private computeCoachingLabel(type: string): string {
     return COACHING_TYPE_LABELS[type as keyof typeof COACHING_TYPE_LABELS] ?? type;
   }
 
-  protected formatDateTime(appt: Appointment): string {
+  private computeDateTime(appt: Appointment): string {
     const [year, month, day] = appt.appointmentDate.split('-').map(Number);
     const dateStr = new Date(year, month - 1, day).toLocaleDateString('fr-FR', {
       day: 'numeric',
@@ -541,7 +612,7 @@ export class DashboardAppointments {
     this.loadDisabledDates();
   }
 
-  protected formatDate(dateStr: string): string {
+  private computeDate(dateStr: string): string {
     const [year, month, day] = dateStr.split('-').map(Number);
     return new Date(year, month - 1, day).toLocaleDateString('fr-FR', {
       weekday: 'short',
@@ -551,32 +622,43 @@ export class DashboardAppointments {
     });
   }
 
-  protected dayLabel(day: CalendarDay): string {
-    const full = this.formatDate(day.date);
-    if (day.isDisabled) return `${full}, désactivé${day.reason ? ' : ' + day.reason : ''}`;
-    if (day.isAutoBlocked) return `${full}, ${day.autoBlockedReason}`;
+  private computeDayLabel(
+    dateStr: string,
+    state: {
+      isDisabled: boolean;
+      isAutoBlocked: boolean;
+      reason?: string;
+      autoBlockedReason?: string;
+    },
+  ): string {
+    const full = this.computeDate(dateStr);
+    if (state.isDisabled) return `${full}, désactivé${state.reason ? ' : ' + state.reason : ''}`;
+    if (state.isAutoBlocked) return `${full}, ${state.autoBlockedReason}`;
     return `${full}, disponible`;
   }
 
-  protected getDayClasses(day: CalendarDay): string {
+  private computeDayClass(state: {
+    isSelected: boolean;
+    isDisabled: boolean;
+    isAutoBlocked: boolean;
+    isToday: boolean;
+  }): string {
     const base =
       'relative h-12 w-full rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500';
 
-    const selected = this.selectedDate() === day.date;
-
-    if (selected && day.isDisabled) {
+    if (state.isSelected && state.isDisabled) {
       return `${base} bg-red-100 text-red-700 ring-2 ring-red-400 shadow-lg`;
     }
-    if (selected) {
+    if (state.isSelected) {
       return `${base} bg-brand-100 text-brand-700 ring-2 ring-brand-500 shadow-lg shadow-brand-500/25`;
     }
-    if (day.isDisabled) {
+    if (state.isDisabled) {
       return `${base} bg-red-50 text-red-500 border border-red-100 hover:bg-red-100`;
     }
-    if (day.isAutoBlocked) {
+    if (state.isAutoBlocked) {
       return `${base} bg-amber-50 text-amber-500 border border-amber-100 hover:bg-amber-100`;
     }
-    if (day.isToday) {
+    if (state.isToday) {
       return `${base} bg-brand-50 text-brand-600 border border-brand-200 hover:bg-brand-100`;
     }
     return `${base} text-slate-700 hover:bg-slate-50 hover:text-brand-700`;

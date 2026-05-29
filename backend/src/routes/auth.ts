@@ -13,16 +13,20 @@ import {
   COOKIE_NAME,
 } from '../lib/session.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { rateLimit } from '../middleware/rate-limit.js';
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
 
+// Anti brute-force : 10 tentatives / 5 min / IP sur le login.
+const loginRateLimit = rateLimit({ windowMs: 5 * 60_000, max: 10 });
+
 export const authRoutes = new Hono()
 
   // POST /api/auth/login
-  .post('/login', zValidator('json', loginSchema), async (c) => {
+  .post('/login', loginRateLimit, zValidator('json', loginSchema), async (c) => {
     const { email, password } = c.req.valid('json');
 
     const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
@@ -31,7 +35,12 @@ export const authRoutes = new Hono()
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return c.json({ error: 'Identifiants invalides' }, 401);
 
-    const token = await signSession({ sub: user.id, email: user.email, name: user.name, role: user.role });
+    const token = await signSession({
+      sub: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    });
     c.header('Set-Cookie', sessionCookieHeader(token));
 
     return c.json({ userId: user.id, email: user.email, name: user.name, role: user.role });

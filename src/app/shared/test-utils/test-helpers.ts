@@ -13,17 +13,15 @@ export function setupTestBed<T>(component: Type<T>, providers: Provider[]): Comp
 }
 
 /**
- * Cherche un élément HTML par son contenu textuel.
+ * Cherche un élément par son `data-testid` (jamais par id/classe/texte).
  */
-export function getByText(root: HTMLElement, text: string, selector?: string): HTMLElement | null {
-  const candidates = selector
-    ? Array.from(root.querySelectorAll(selector))
-    : Array.from([root, ...root.querySelectorAll('*')]);
+export function getByTestId(root: HTMLElement, testId: string): HTMLElement | null {
+  return root.querySelector<HTMLElement>(`[data-testid="${testId}"]`);
+}
 
-  for (const el of candidates) {
-    if (el.textContent?.trim().includes(text)) {
-      return el as HTMLElement;
-    }
-  }
-  return null;
+/**
+ * Tous les éléments portant ce `data-testid` (listes, lignes répétées).
+ */
+export function getAllByTestId(root: HTMLElement, testId: string): readonly HTMLElement[] {
+  return Array.from(root.querySelectorAll<HTMLElement>(`[data-testid="${testId}"]`));
 }

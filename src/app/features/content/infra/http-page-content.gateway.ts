@@ -5,7 +5,7 @@ import { PageContentGateway } from '../domain/gateways/page-content.gateway';
 import type { PageContent, PageSlug } from '../domain/models/page-content.model';
 import { toPageContent, toPageUpdate } from './page-content.adapter';
 import type { PageRow } from './page-content.adapter';
-import { API_URL } from '../../../core/config.js';
+import { API_URL } from '@core/config';
 
 const BASE = `${API_URL}/api/pages`;
 

@@ -4,7 +4,11 @@ import { eq, desc } from 'drizzle-orm';
 import { z } from 'zod';
 import { db, messages } from '../db/index.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { rateLimit } from '../middleware/rate-limit.js';
 import { notifyAdminNewMessage } from '../lib/mailer.js';
+
+// Soumission publique → limite stricte par IP (anti-spam).
+const submitRateLimit = rateLimit({ windowMs: 60_000, max: 5 });
 
 const sendMessageSchema = z.object({
   sender_name: z.string().min(2).max(100),
@@ -18,10 +22,12 @@ const updateStatusSchema = z.object({
   status: z.enum(['unread', 'read', 'archived']),
 });
 
+const idParamSchema = z.object({ id: z.string().uuid() });
+
 export const messageRoutes = new Hono()
 
   // POST /api/messages  (public)
-  .post('/', zValidator('json', sendMessageSchema), async (c) => {
+  .post('/', submitRateLimit, zValidator('json', sendMessageSchema), async (c) => {
     const data = c.req.valid('json');
     await db.insert(messages).values(data);
 
@@ -42,21 +48,27 @@ export const messageRoutes = new Hono()
   })
 
   // PATCH /api/messages/:id/status  (admin)
-  .patch('/:id/status', requireAdmin, zValidator('json', updateStatusSchema), async (c) => {
-    const { id } = c.req.param();
-    const { status } = c.req.valid('json');
-    const [row] = await db
-      .update(messages)
-      .set({ status })
-      .where(eq(messages.id, id))
-      .returning();
-    if (!row) return c.json({ error: 'Not found' }, 404);
-    return c.json(row);
-  })
+  .patch(
+    '/:id/status',
+    requireAdmin,
+    zValidator('param', idParamSchema),
+    zValidator('json', updateStatusSchema),
+    async (c) => {
+      const { id } = c.req.valid('param');
+      const { status } = c.req.valid('json');
+      const [row] = await db
+        .update(messages)
+        .set({ status })
+        .where(eq(messages.id, id))
+        .returning();
+      if (!row) return c.json({ error: 'Not found' }, 404);
+      return c.json(row);
+    },
+  )
 
   // DELETE /api/messages/:id  (admin)
-  .delete('/:id', requireAdmin, async (c) => {
-    const { id } = c.req.param();
+  .delete('/:id', requireAdmin, zValidator('param', idParamSchema), async (c) => {
+    const { id } = c.req.valid('param');
     await db.delete(messages).where(eq(messages.id, id));
     return c.json({ ok: true });
   });

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ImageStorageGateway } from '../domain/gateways/image-storage.gateway';
 import type { ImageUploadResult } from '../domain/models/image-upload.model';
-import { API_URL } from '../../../core/config.js';
+import { API_URL } from '@core/config';
 
 const BASE = `${API_URL}/api/storage`;
 

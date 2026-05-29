@@ -9,29 +9,27 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Booking } from '../../features/booking/pages/booking';
-import { ContactForm } from '../../features/contact/contact-form';
-import { Reviews } from '../../features/reviews/reviews';
-import { Icon } from '../../shared/components/icon/icon';
-import { GetSiteSettingUseCase } from '../../features/content/domain/use-cases/get-site-setting.use-case';
-import { GetAllPagesUseCase } from '../../features/content/domain/use-cases/get-all-pages.use-case';
-import { Seo } from '../../core/seo/seo';
-import { ROUTE_SEO } from '../../core/seo/route-seo';
+import { Booking } from '@features/booking/pages/booking';
+import { ContactForm } from '@features/contact/contact-form';
+import { Reviews } from '@features/reviews/reviews';
+import { Icon } from '@shared/components/icon/icon';
+import { GetSiteSettingUseCase } from '@features/content/domain/use-cases/get-site-setting.use-case';
+import { GetAllPagesUseCase } from '@features/content/domain/use-cases/get-all-pages.use-case';
+import { Seo } from '@core/seo/seo';
+import { ROUTE_SEO } from '@core/seo/route-seo';
+import { GOOGLE_REVIEWS_URL } from '@core/config';
 import {
   DEFAULT_HERO,
   DEFAULT_HOME_CTA,
   DEFAULT_HOME_SERVICES,
   DEFAULT_PAGES,
-} from '../../features/content/domain/models/default-content';
+} from '@features/content/domain/models/default-content';
 import type {
   HeroSettings,
   HomeCTASettings,
   HomeServicesSettings,
-} from '../../features/content/domain/models/site-settings.model';
-import type {
-  PageContent,
-  PageSlug,
-} from '../../features/content/domain/models/page-content.model';
+} from '@features/content/domain/models/site-settings.model';
+import type { PageContent, PageSlug } from '@features/content/domain/models/page-content.model';
 
 const SERVICE_CARDS: readonly {
   slug: PageSlug;
@@ -202,9 +200,11 @@ const SERVICE_CARDS: readonly {
     </section>
 
     @defer (on viewport) {
-      <app-reviews />
+      <app-reviews [googleReviewsUrl]="googleReviewsUrl" />
     } @placeholder {
       <div class="section-y"></div>
+    } @error {
+      <p class="text-center text-slate-500 section-y">Les témoignages n'ont pas pu être chargés.</p>
     }
 
     <section
@@ -281,6 +281,17 @@ const SERVICE_CARDS: readonly {
             <app-booking />
           } @placeholder {
             <div class="py-10"></div>
+          } @error {
+            <div class="py-10 text-center">
+              <p class="text-slate-600 mb-3">Le module de réservation n'a pas pu se charger.</p>
+              <button
+                type="button"
+                (click)="retry()"
+                class="text-brand-700 font-medium hover:text-brand-800 cursor-pointer"
+              >
+                Réessayer
+              </button>
+            </div>
           }
         </div>
       } @else if (activePanel() === 'contact') {
@@ -289,6 +300,17 @@ const SERVICE_CARDS: readonly {
             <app-contact-form />
           } @placeholder {
             <div class="py-10"></div>
+          } @error {
+            <div class="py-10 text-center">
+              <p class="text-slate-600 mb-3">Le formulaire n'a pas pu se charger.</p>
+              <button
+                type="button"
+                (click)="retry()"
+                class="text-brand-700 font-medium hover:text-brand-800 cursor-pointer"
+              >
+                Réessayer
+              </button>
+            </div>
           }
         </div>
       }
@@ -300,6 +322,8 @@ export class Home {
   private readonly getAllPages = inject(GetAllPagesUseCase);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly _seo = inject(Seo);
+
+  protected readonly googleReviewsUrl = GOOGLE_REVIEWS_URL;
 
   protected readonly hero = signal<HeroSettings>(DEFAULT_HERO);
   protected readonly services = signal<HomeServicesSettings>(DEFAULT_HOME_SERVICES);
@@ -343,6 +367,10 @@ export class Home {
 
   protected openPanel(panel: 'booking' | 'contact'): void {
     this.activePanel.set(this.activePanel() === panel ? null : panel);
+  }
+
+  protected retry(): void {
+    if (isPlatformBrowser(this.platformId)) location.reload();
   }
 
   protected scrollTo(sectionId: string): void {

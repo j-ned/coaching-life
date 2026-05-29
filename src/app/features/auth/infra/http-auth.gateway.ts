@@ -9,7 +9,7 @@ import type {
   AuthSession,
   LoginCredentials,
 } from '../domain/models/auth.model';
-import { API_URL } from '../../../core/config.js';
+import { API_URL } from '@core/config';
 
 const BASE = `${API_URL}/api/auth`;
 

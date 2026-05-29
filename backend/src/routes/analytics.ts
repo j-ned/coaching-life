@@ -4,12 +4,17 @@ import { gte, lte, and, asc, count } from 'drizzle-orm';
 import { z } from 'zod';
 import { db, page_visits } from '../db/index.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { rateLimit } from '../middleware/rate-limit.js';
+
+// Tracking public à fort volume légitime → limite large par IP (anti-flood DB).
+const visitsRateLimit = rateLimit({ windowMs: 60_000, max: 30 });
 
 export const analyticsRoutes = new Hono()
 
   // POST /api/analytics/visits  (public — fire & forget)
   .post(
     '/visits',
+    visitsRateLimit,
     zValidator(
       'json',
       z.object({
