@@ -73,7 +73,7 @@ type LoginFormShape = {
               formControlName="email"
               autocomplete="email"
               aria-required="true"
-              placeholder="admin@coaching-life.fr"
+              placeholder="admin@coaching-life.nedellec-julien.fr"
               class="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
             />
           </div>

@@ -13,7 +13,7 @@
 [![Tailwind](https://img.shields.io/badge/Tailwind-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Chart.js](https://img.shields.io/badge/Chart.js-4-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)](https://www.chartjs.org)
 
-[**🔗 Démo live**](https://coaching-life.j-ned.dev) · [**📸 Captures**](#-captures-décran) · [**🏗️ Architecture**](#️-architecture)
+[**🔗 Démo live**](https://coaching-life.nedellec-julien.fr) · [**📸 Captures**](#-captures-décran) · [**🏗️ Architecture**](#️-architecture)
 
 ![Coaching Life — Page d'accueil](./public/screen/hero-dark.png)
 
@@ -63,27 +63,22 @@ Les coachs indépendants ont besoin d'une **vitrine crédible**, d'un **système
 
 ## 🧠 Choix techniques marquants
 
-### 1. **SSR pour le SEO**
+### 1. **Prerender (SSG) pour le SEO**
 
-Un site de coach qui n'apparaît pas sur Google = un site invisible. Choix : Angular SSR avec `@angular/ssr` et adaptateur Express → HTML pré-rendu au first request, hydratation côté client ensuite.
+Un site de coach qui n'apparaît pas sur Google = un site invisible. Choix : **prérendu au build** (`@angular/ssr`, `RenderMode.Prerender`) des pages publiques → un `index.html` statique par route, avec `<title>`, `canonical`, Open Graph et description **propres à chaque page**. Servi tel quel par Hono, donc indexable par tous les crawlers (y compris sans JS). Le dashboard reste en rendu client (`RenderMode.Client`).
 
 ```mermaid
 sequenceDiagram
-  participant C as Client
-  participant S as Server (Express)
-  participant A as Angular SSR
+  participant B as Build (CI)
+  participant A as Angular Prerender
+  participant H as Hono (runtime)
   participant G as Crawler Google
 
-  G->>S: GET /coaching-vie
-  S->>A: Render route
-  A-->>S: HTML complet
-  S-->>G: HTML indexable ✓
-
-  C->>S: GET /coaching-vie
-  S->>A: Render route
-  A-->>S: HTML pré-rendu
-  S-->>C: HTML + bundle JS
-  C->>A: Hydratation
+  B->>A: build → prerender routes publiques
+  A-->>B: /life-coach/index.html (SEO par route)
+  G->>H: GET /life-coach
+  H-->>G: HTML statique indexable ✓
+  Note over H,G: contenu live + dashboard chargés<br/>côté client après hydratation
 ```
 
 ### 2. **Zoneless + Signals**

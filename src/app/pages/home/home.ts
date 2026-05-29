@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -14,6 +15,8 @@ import { Reviews } from '../../features/reviews/reviews';
 import { Icon } from '../../shared/components/icon/icon';
 import { GetSiteSettingUseCase } from '../../features/content/domain/use-cases/get-site-setting.use-case';
 import { GetAllPagesUseCase } from '../../features/content/domain/use-cases/get-all-pages.use-case';
+import { Seo } from '../../core/seo/seo';
+import { ROUTE_SEO } from '../../core/seo/route-seo';
 import {
   DEFAULT_HERO,
   DEFAULT_HOME_CTA,
@@ -296,6 +299,7 @@ export class Home {
   private readonly getSiteSetting = inject(GetSiteSettingUseCase);
   private readonly getAllPages = inject(GetAllPagesUseCase);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly _seo = inject(Seo);
 
   protected readonly hero = signal<HeroSettings>(DEFAULT_HERO);
   protected readonly services = signal<HomeServicesSettings>(DEFAULT_HOME_SERVICES);
@@ -316,7 +320,12 @@ export class Home {
   });
 
   constructor() {
-    this.loadContent();
+    this._seo.update(ROUTE_SEO.home);
+    // Fetch côté browser uniquement : le prerender sert le contenu par défaut (stable, SEO),
+    // le contenu live est chargé après hydratation.
+    afterNextRender(() => {
+      this.loadContent();
+    });
   }
 
   private async loadContent(): Promise<void> {

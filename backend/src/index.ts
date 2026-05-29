@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 
 // Charge le .env racine du monorepo (../../ depuis backend/src/)
 config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../.env') });
@@ -18,10 +18,30 @@ import { settingRoutes } from './routes/settings.js';
 import { analyticsRoutes } from './routes/analytics.js';
 import { storageRoutes } from './routes/storage.js';
 
-// Angular index.html mis en cache au démarrage (fallback SPA)
-// outputMode: 'server' → index.html | outputMode: 'static' CSR → index.csr.html
-const indexPath = ['./browser/index.html', './browser/index.csr.html'].map((p) => resolve(p)).find(existsSync) ?? null;
-const indexHtml = indexPath ? readFileSync(indexPath, 'utf-8') : null;
+// Frontend Angular mis en cache au démarrage.
+// Routes publiques prérendues (RenderMode.Prerender) → `<route>/index.html` : HTML statique
+// avec SEO par route, servi tel quel aux crawlers. Dashboard / routes client → shell CSR.
+const BROWSER_ROOT = resolve('./browser');
+
+const prerenderedRoutes = new Map<string, string>();
+if (existsSync(BROWSER_ROOT)) {
+  const rootIndex = resolve(BROWSER_ROOT, 'index.html');
+  if (existsSync(rootIndex)) prerenderedRoutes.set('/', readFileSync(rootIndex, 'utf-8'));
+
+  for (const entry of readdirSync(BROWSER_ROOT, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const routeIndex = resolve(BROWSER_ROOT, entry.name, 'index.html');
+    if (existsSync(routeIndex)) {
+      prerenderedRoutes.set(`/${entry.name}`, readFileSync(routeIndex, 'utf-8'));
+    }
+  }
+}
+
+// Shell CSR (fallback pour routes client : dashboard, routes inconnues)
+const csrShellPath = ['./browser/index.csr.html', './browser/index.html']
+  .map((p) => resolve(p))
+  .find(existsSync) ?? null;
+const csrShell = csrShellPath ? readFileSync(csrShellPath, 'utf-8') : null;
 
 const app = new Hono();
 
@@ -56,9 +76,12 @@ app.get('/health', (c) => c.json({ status: 'ok', ts: new Date().toISOString() })
 
 // ─── Frontend Angular (static) ─────────────────────────────────────────────
 
-if (indexHtml) {
+if (csrShell) {
   app.use(serveStatic({ root: './browser' }));
-  app.get('*', (c) => c.html(indexHtml));
+  app.get('*', (c) => {
+    const path = c.req.path.replace(/\/+$/, '') || '/';
+    return c.html(prerenderedRoutes.get(path) ?? csrShell);
+  });
 }
 
 app.notFound((c) => c.json({ error: 'Route introuvable' }, 404));

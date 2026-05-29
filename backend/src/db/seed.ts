@@ -9,7 +9,7 @@ async function seed() {
   console.log('🌱 Seeding database...');
 
   // ─── Admin user ───────────────────────────────────────────────────────────
-  const adminEmail = process.env['ADMIN_EMAIL'] ?? 'admin@coaching-life.fr';
+  const adminEmail = process.env['ADMIN_EMAIL'] ?? 'admin@coaching-life.nedellec-julien.fr';
   const adminPassword = process.env['ADMIN_PASSWORD'] ?? 'changeme';
   const hash = await bcrypt.hash(adminPassword, 12);
 

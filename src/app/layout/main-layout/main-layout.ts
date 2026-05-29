@@ -225,7 +225,7 @@ import { TrackPageVisitUseCase } from '../../features/analytics/domain/use-cases
         </div>
         <div>
           <h3 class="text-white font-medium mb-4">Contact</h3>
-          <p class="text-brand-200/70 mb-2">Email: contact&#64;coaching-life.com</p>
+          <p class="text-brand-200/70 mb-2">Email: contact&#64;coaching-life.nedellec-julien.fr</p>
           <p class="text-brand-200/70">Téléphone: +33 0 00 00 00 00</p>
         </div>
       </div>

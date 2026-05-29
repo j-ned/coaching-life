@@ -1,6 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformServer } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, of } from 'rxjs';
 import { AuthGateway } from '../domain/gateways/auth.gateway';
 import type {
   AuthState,
@@ -15,6 +16,7 @@ const BASE = `${API_URL}/api/auth`;
 @Injectable()
 export class HttpAuthGateway implements AuthGateway {
   private readonly http = inject(HttpClient);
+  private readonly platformId = inject(PLATFORM_ID);
 
   async login(credentials: LoginCredentials): Promise<AuthSession | null> {
     try {
@@ -51,6 +53,10 @@ export class HttpAuthGateway implements AuthGateway {
   }
 
   authStateChanges(): Observable<AuthState> {
+    // Pas de session sur une page prérendue/SSR : check réel côté client après hydratation.
+    if (isPlatformServer(this.platformId)) {
+      return of('unauthenticated');
+    }
     return new Observable<AuthState>((observer) => {
       observer.next('loading');
       firstValueFrom(this.http.get<AuthUser>(`${BASE}/me`, { withCredentials: true }))

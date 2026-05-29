@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { GetPageContentUseCase } from '../../features/content/domain/use-cases/get-page-content.use-case';
 import { DEFAULT_PAGES } from '../../features/content/domain/models/default-content';
 import type { PageContent } from '../../features/content/domain/models/page-content.model';
 import { Icon } from '../../shared/components/icon/icon';
+import { Seo } from '../../core/seo/seo';
+import { ROUTE_SEO } from '../../core/seo/route-seo';
 
 @Component({
   selector: 'app-personal-development',
@@ -75,11 +77,15 @@ import { Icon } from '../../shared/components/icon/icon';
 })
 export class PersonalDevelopment {
   private readonly getPageContent = inject(GetPageContentUseCase);
+  private readonly _seo = inject(Seo);
 
   protected readonly content = signal<PageContent>(DEFAULT_PAGES['personal-development']);
 
   constructor() {
-    this.loadContent();
+    this._seo.update(ROUTE_SEO['personal-development']);
+    afterNextRender(() => {
+      this.loadContent();
+    });
   }
 
   private async loadContent(): Promise<void> {

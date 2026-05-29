@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+
+Sitemap: https://coaching-life.nedellec-julien.fr/sitemap.xml

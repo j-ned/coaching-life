@@ -31,7 +31,7 @@
             "server": "src/main.server.ts",
             "outputMode": "server",
             "security": {
-              "allowedHosts": []
+              "allowedHosts": ["localhost", "coaching-life.nedellec-julien.fr"]
             },
             "ssr": {
               "entry": "src/server.ts"
