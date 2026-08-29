@@ -15,7 +15,7 @@
 
 [**🔗 Démo live**](https://coaching-life.nedellec-julien.fr) · [**📸 Captures**](#-captures-décran) · [**🏗️ Architecture**](#️-architecture)
 
-![Coaching Life — Page d'accueil](./public/screen/hero-dark.png)
+![Coaching Life - Page d'accueil](./public/screen/hero-dark.png)
 
 </div>
 
@@ -93,7 +93,7 @@ Pas de `zone.js` = bundle plus léger, change detection explicite via Signals �
 
 ### 4. **Chart.js via ng2-charts**
 
-Plutôt que de réimplémenter des graphiques SVG custom (cf. DashFlow), le dashboard utilise `ng2-charts` — gain de temps, et les charts sont suffisamment simples (ligne, barres, donut).
+Plutôt que de réimplémenter des graphiques SVG custom (cf. DashFlow), le dashboard utilise `ng2-charts` - gain de temps, et les charts sont suffisamment simples (ligne, barres, donut).
 
 ---
 
@@ -191,7 +191,7 @@ pnpm dev
 
 <div align="center">
 
-**Développé par [Julien Nedellec](https://j-ned.dev)**
+**Développé par [Julien Nedellec](https://nedellec-julien.fr)**
 
 [![Portfolio](https://img.shields.io/badge/Portfolio-j--ned.dev-4f46e5?style=for-the-badge)](https://j-ned.dev)
 [![GitHub](https://img.shields.io/badge/GitHub-j--ned-181717?style=for-the-badge&logo=github)](https://github.com/j-ned)
