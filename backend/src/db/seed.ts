@@ -3,9 +3,9 @@ import { db, users, pages, site_settings } from './index.js';
 import bcrypt from 'bcryptjs';
 
 async function seed() {
-  console.log('🌱 Seeding database...');
+  console.log('Seeding database...');
 
-  // ─── Admin user ───────────────────────────────────────────────────────────
+  // Admin user
   const adminEmail = process.env['ADMIN_EMAIL'] ?? 'admin@coaching-life.nedellec-julien.fr';
   const adminPassword = process.env['ADMIN_PASSWORD'];
   if (!adminPassword) {
@@ -14,7 +14,7 @@ async function seed() {
       throw new Error('ADMIN_PASSWORD manquant : refus de seeder un compte admin en production.');
     }
     console.warn(
-      '⚠️  ADMIN_PASSWORD absent — seed admin ignoré (définissez-le pour créer le compte).',
+      'ADMIN_PASSWORD absent, seed admin ignoré (définissez-le pour créer le compte).',
     );
   }
   const hash = adminPassword ? await bcrypt.hash(adminPassword, 12) : null;
@@ -24,10 +24,10 @@ async function seed() {
       .insert(users)
       .values({ email: adminEmail, name: 'Admin', password: hash, role: 'admin' })
       .onConflictDoNothing();
-    console.log(`✓ Admin user: ${adminEmail}`);
+    console.log(`Admin user: ${adminEmail}`);
   }
 
-  // ─── Pages ────────────────────────────────────────────────────────────────
+  // Pages
   await db
     .insert(pages)
     .values([
@@ -129,9 +129,9 @@ async function seed() {
       },
     ])
     .onConflictDoNothing();
-  console.log('✓ Pages seeded');
+  console.log('Pages seeded');
 
-  // ─── Site settings ────────────────────────────────────────────────────────
+  // Site settings
   await db
     .insert(site_settings)
     .values([
@@ -167,13 +167,13 @@ async function seed() {
       },
     ])
     .onConflictDoNothing();
-  console.log('✓ Site settings seeded');
+  console.log('Site settings seeded');
 
-  console.log('✅ Done');
+  console.log('Done');
   process.exit(0);
 }
 
 seed().catch((err) => {
-  console.error('❌ Seed failed:', err);
+  console.error('Seed failed:', err);
   process.exit(1);
 });

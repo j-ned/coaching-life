@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { Icon } from '@shared/components/icon/icon';
 import type {
   Appointment,
@@ -46,7 +45,7 @@ type DisabledDateRow = {
 
 @Component({
   selector: 'app-dashboard-appointments',
-  imports: [FormsModule, Icon],
+  imports: [Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   template: `
@@ -305,9 +304,11 @@ type DisabledDateRow = {
                       Raison (optionnel)
                     </label>
                     <input
+                      #reasonInputEl
                       id="reason"
                       type="text"
-                      [(ngModel)]="reasonInput"
+                      [value]="reasonInput()"
+                      (input)="reasonInput.set(reasonInputEl.value)"
                       class="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-sm placeholder-slate-400 focus:border-brand-500 focus:outline-none transition-colors"
                       placeholder="Congé, formation..."
                     />
@@ -384,7 +385,7 @@ export class DashboardAppointments {
   // Availability state
   protected readonly currentMonth = signal(new Date());
   protected readonly selectedDate = signal<string | null>(null);
-  protected reasonInput = '';
+  protected readonly reasonInput = signal('');
 
   readonly weekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
@@ -504,7 +505,7 @@ export class DashboardAppointments {
     this.loadDisabledDates();
   }
 
-  // ── Appointments ──
+  // Appointments
 
   private computeStatusClass(status: string): string {
     switch (status) {
@@ -561,7 +562,7 @@ export class DashboardAppointments {
     this.loadAppointments();
   }
 
-  // ── Availability ──
+  // Availability
 
   protected previousMonth(): void {
     this.currentMonth.update((d) => {
@@ -581,7 +582,7 @@ export class DashboardAppointments {
 
   protected toggleDate(day: CalendarDay): void {
     this.selectedDate.set(day.date);
-    this.reasonInput = '';
+    this.reasonInput.set('');
   }
 
   protected async disableDate(): Promise<void> {
@@ -590,9 +591,9 @@ export class DashboardAppointments {
 
     await this.addDisabledDateUseCase.execute({
       date,
-      reason: this.reasonInput || undefined,
+      reason: this.reasonInput() || undefined,
     });
-    this.reasonInput = '';
+    this.reasonInput.set('');
     this.loadDisabledDates();
   }
 
@@ -664,7 +665,7 @@ export class DashboardAppointments {
     return `${base} text-slate-700 hover:bg-slate-50 hover:text-brand-700`;
   }
 
-  // ── Data loading ──
+  // Data loading
 
   protected async loadAppointments(): Promise<void> {
     try {

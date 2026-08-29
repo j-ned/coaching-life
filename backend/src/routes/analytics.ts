@@ -11,7 +11,7 @@ const visitsRateLimit = rateLimit({ windowMs: 60_000, max: 30 });
 
 export const analyticsRoutes = new Hono()
 
-  // POST /api/analytics/visits  (public — fire & forget)
+  // POST /api/analytics/visits (public, fire & forget)
   .post(
     '/visits',
     visitsRateLimit,

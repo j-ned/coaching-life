@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, integer, timestamp, jsonb } from 'drizzle-orm/pg-core';
 
-// ─── Users ─────────────────────────────────────────────────────────────────
+// Users
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -11,7 +11,7 @@ export const users = pgTable('users', {
   created_at: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-// ─── Appointments ──────────────────────────────────────────────────────────
+// Appointments
 
 export const appointments = pgTable('appointments', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -27,7 +27,7 @@ export const appointments = pgTable('appointments', {
   created_at: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-// ─── Disabled Dates ────────────────────────────────────────────────────────
+// Disabled Dates
 
 export const disabled_dates = pgTable('disabled_dates', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -35,7 +35,7 @@ export const disabled_dates = pgTable('disabled_dates', {
   reason: text('reason'),
 });
 
-// ─── Messages ──────────────────────────────────────────────────────────────
+// Messages
 
 export const messages = pgTable('messages', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -47,7 +47,7 @@ export const messages = pgTable('messages', {
   created_at: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-// ─── Pages (CMS) ───────────────────────────────────────────────────────────
+// Pages (CMS)
 
 export const pages = pgTable('pages', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -62,7 +62,7 @@ export const pages = pgTable('pages', {
   updated_at: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-// ─── Site Settings ─────────────────────────────────────────────────────────
+// Site Settings
 
 export const site_settings = pgTable('site_settings', {
   key: text('key').primaryKey(),
@@ -70,7 +70,7 @@ export const site_settings = pgTable('site_settings', {
   updated_at: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-// ─── Page Visits ───────────────────────────────────────────────────────────
+// Page Visits
 
 export const page_visits = pgTable('page_visits', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -80,7 +80,7 @@ export const page_visits = pgTable('page_visits', {
   user_agent: text('user_agent'),
 });
 
-// ─── Inferred types ────────────────────────────────────────────────────────
+// Inferred types
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;

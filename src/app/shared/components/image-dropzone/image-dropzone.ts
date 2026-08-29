@@ -63,7 +63,7 @@ const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
           <div>
             <p class="text-sm font-medium text-slate-700">Glissez-déposez une image ici</p>
             <p class="text-xs text-slate-500 mt-1">
-              ou cliquez pour parcourir (JPEG, PNG, WebP, AVIF — max {{ maxSizeMb }} Mo)
+              ou cliquez pour parcourir (JPEG, PNG, WebP, AVIF - max {{ maxSizeMb }} Mo)
             </p>
           </div>
         </div>

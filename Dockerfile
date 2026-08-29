@@ -1,4 +1,4 @@
-# ─── Stage 1: Builder ────────────────────────────────────────────────────────
+# Stage 1: Builder
 FROM node:22-alpine AS builder
 
 WORKDIR /app
@@ -26,7 +26,7 @@ RUN cp -r backend/src/db/migrations backend/dist/db/migrations
 RUN pnpm deploy --filter @coaching-life/backend --prod --legacy /app/deploy
 
 
-# ─── Stage 2: Runner ─────────────────────────────────────────────────────────
+# Stage 2: Runner
 FROM node:22-alpine AS runner
 
 WORKDIR /app

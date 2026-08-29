@@ -8,7 +8,7 @@ import { requireAdmin } from '../middleware/auth.js';
 const settingKeySchema = z.enum(['home_hero', 'home_services', 'home_cta']);
 
 const updateSettingSchema = z.object({
-  value: z.record(z.unknown()),
+  value: z.record(z.string(), z.unknown()),
 });
 
 export const settingRoutes = new Hono()

@@ -1,4 +1,4 @@
-// ⚠️ DOIT rester le tout premier import : charge le .env avant l'évaluation des modules
+// DOIT rester le tout premier import : charge le .env avant l'évaluation des modules
 // qui lisent process.env au chargement (session, mailer, db).
 import './load-env.js';
 import { resolve } from 'node:path';
@@ -43,7 +43,7 @@ const csrShell = csrShellPath ? readFileSync(csrShellPath, 'utf-8') : null;
 
 const app = new Hono();
 
-// ─── Middleware global ─────────────────────────────────────────────────────
+// Middleware global
 
 app.use(logger());
 
@@ -58,7 +58,7 @@ app.use(
   }),
 );
 
-// ─── Routes ────────────────────────────────────────────────────────────────
+// Routes
 
 app.route('/api/auth', authRoutes);
 app.route('/api/appointments', appointmentRoutes);
@@ -68,11 +68,11 @@ app.route('/api/settings', settingRoutes);
 app.route('/api/analytics', analyticsRoutes);
 app.route('/api/storage', storageRoutes);
 
-// ─── Health check ──────────────────────────────────────────────────────────
+// Health check
 
 app.get('/health', (c) => c.json({ status: 'ok', ts: new Date().toISOString() }));
 
-// ─── Frontend Angular (static) ─────────────────────────────────────────────
+// Frontend Angular (static)
 
 if (csrShell) {
   app.use(serveStatic({ root: './browser' }));
@@ -89,9 +89,9 @@ app.onError((err, c) => {
   return c.json({ error: 'Erreur interne du serveur' }, 500);
 });
 
-// ─── Start ─────────────────────────────────────────────────────────────────
+// Start
 
 const port = Number(process.env['PORT'] ?? 3000);
 serve({ fetch: app.fetch, port }, () => {
-  console.log(`🚀 Backend démarré sur http://localhost:${port}`);
+  console.log(`Backend démarré sur http://localhost:${port}`);
 });

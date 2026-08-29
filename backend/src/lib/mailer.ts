@@ -34,7 +34,7 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-// ─── Templates ─────────────────────────────────────────────────────────────
+// Templates
 
 export async function sendAppointmentConfirmation(data: {
   clientName: string;
@@ -46,7 +46,7 @@ export async function sendAppointmentConfirmation(data: {
 }): Promise<void> {
   await send({
     to: data.clientEmail,
-    subject: '✅ Confirmation de votre rendez-vous',
+    subject: 'Confirmation de votre rendez-vous',
     html: `
       <h2>Bonjour ${escapeHtml(data.clientName)},</h2>
       <p>Votre rendez-vous a bien été enregistré.</p>
@@ -70,7 +70,7 @@ export async function notifyAdminNewAppointment(data: {
 }): Promise<void> {
   await send({
     to: ADMIN_EMAIL,
-    subject: `📅 Nouveau RDV — ${data.clientName}`,
+    subject: `Nouveau RDV - ${data.clientName}`,
     html: `
       <h3>Nouveau rendez-vous</h3>
       <table style="border-collapse:collapse">
@@ -90,7 +90,7 @@ export async function notifyAdminNewMessage(data: {
 }): Promise<void> {
   await send({
     to: ADMIN_EMAIL,
-    subject: `✉️ Nouveau message — ${data.senderName}`,
+    subject: `Nouveau message - ${data.senderName}`,
     html: `
       <h3>Nouveau message de contact</h3>
       <p><strong>De :</strong> ${escapeHtml(data.senderName)} &lt;${escapeHtml(data.senderEmail)}&gt;</p>

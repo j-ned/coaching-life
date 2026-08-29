@@ -1,6 +1,6 @@
 ---
 name: Coaching Life
-description: Plateforme de coaching — vitrine chaleureuse + dashboard, identité terracotta
+description: Plateforme de coaching - vitrine chaleureuse + dashboard, identité terracotta
 colors:
   brand-primary: "oklch(51.9% 0.121 22.8)"
   brand-mid: "oklch(68.6% 0.117 21.2)"
@@ -78,11 +78,11 @@ components:
 
 **Creative North Star: « Le Foyer Rassurant »**
 
-Coaching Life accueille des visiteurs souvent en recherche émotionnelle, parfois fragiles, majoritairement sur mobile. L'interface doit produire la sensation d'entrer dans un lieu chaleureux et sûr — pas dans un tunnel de conversion. La chaleur vient de la **composition** (rythme, respiration, terracotta assumé) et du **ton**, jamais d'effets décoratifs. La crédibilité se montre par la clarté de l'offre et la fluidité du parcours de réservation, pas par des superlatifs.
+Coaching Life accueille des visiteurs souvent en recherche émotionnelle, parfois fragiles, majoritairement sur mobile. L'interface doit produire la sensation d'entrer dans un lieu chaleureux et sûr, pas dans un tunnel de conversion. La chaleur vient de la **composition** (rythme, respiration, terracotta assumé) et du **ton**, jamais d'effets décoratifs. La crédibilité se montre par la clarté de l'offre et la fluidité du parcours de réservation, pas par des superlatifs.
 
-Le système repose sur une identité **terracotta / rose poudré** (OKLCH) posée sur des neutres slate tièdes, une typographie humaniste à voix (display chaleureux + sans lisible), et un rythme vertical fluide qui respire en grand sur desktop et se resserre sur mobile. Deux registres cohabitent : la **vitrine** (brand — le design EST le produit, stratégie couleur Committed) et le **dashboard** (product — sobre, une seule couleur d'accent, la couleur sert l'action).
+Le système repose sur une identité **terracotta / rose poudré** (OKLCH) posée sur des neutres slate tièdes, une typographie humaniste à voix (display chaleureux + sans lisible), et un rythme vertical fluide qui respire en grand sur desktop et se resserre sur mobile. Deux registres cohabitent : la **vitrine** (brand : le design EST le produit, stratégie couleur Committed) et le **dashboard** (product : sobre, une seule couleur d'accent, la couleur sert l'action).
 
-Ce que le système rejette explicitement : le **template SaaS générique** (Calendly/Squarespace, grilles de cards icône+titre+texte répétées, hero-métrique, dégradés AI-slop) ; le **cliché wellness** (lavande/galets zen, vert-sauge + serif fin) ; la **froideur corporate** (dark observability, fintech navy-and-gold).
+Ce que le système rejette explicitement : le **template SaaS générique** (Calendly/Squarespace, grilles de cards icône+titre+texte répétées, hero-métrique, dégradés arc-en-ciel génériques) ; le **cliché wellness** (lavande/galets zen, vert-sauge + serif fin) ; la **froideur corporate** (dark observability, fintech navy-and-gold).
 
 **Key Characteristics:**
 - Terracotta load-bearing, pas saupoudré (Committed sur la vitrine)
@@ -96,7 +96,7 @@ Ce que le système rejette explicitement : le **template SaaS générique** (Cal
 Palette mono-chromatique chaude : une seule famille terracotta déclinée en 11 paliers OKLCH, sur des neutres slate. Aucune couleur catégorielle arc-en-ciel.
 
 ### Primary
-- **Terracotta Profond** (`oklch(51.9% 0.121 22.8)`, brand-700) : couleur d'action — boutons primaires, liens, icônes clés, focus rings. C'est la voix de la marque.
+- **Terracotta Profond** (`oklch(51.9% 0.121 22.8)`, brand-700) : couleur d'action (boutons primaires, liens, icônes clés, focus rings). C'est la voix de la marque.
 - **Terracotta Doux** (`oklch(68.6% 0.117 21.2)`, brand-500) : pastilles de disponibilité, accents secondaires, ring de sélection.
 
 ### Neutral
@@ -105,7 +105,7 @@ Palette mono-chromatique chaude : une seule famille terracotta déclinée en 11 
 - **Liseré Slate** (`#e2e8f0`, slate-200 / slate-100) : bordures hairline, dividers.
 
 ### Named Rules
-**The Single Hue Rule.** Une seule famille de teinte (terracotta) porte toute l'identité. Aucune couleur catégorielle (violet, ambre, teal, sky) n'est autorisée pour « différencier » des cartes ou des séries — la différenciation passe par le label, l'icône et l'espace, pas par l'arc-en-ciel.
+**The Single Hue Rule.** Une seule famille de teinte (terracotta) porte toute l'identité. Aucune couleur catégorielle (violet, ambre, teal, sky) n'est autorisée pour « différencier » des cartes ou des séries : la différenciation passe par le label, l'icône et l'espace, pas par l'arc-en-ciel.
 
 **The Committed-on-Brand Rule.** Sur la vitrine, le terracotta porte des surfaces entières (hero baigné en `brand-50`, footer ancré en `brand-950`), pas seulement des accents ≤10%. Sur le dashboard, l'inverse : Restrained, la couleur ne sert que l'action et l'état.
 
@@ -124,15 +124,15 @@ Palette mono-chromatique chaude : une seule famille terracotta déclinée en 11 
 - **Label** (600, 0.875rem, tracking 0.05em) : badges-pilule, métadonnées.
 
 ### Named Rules
-**The No-Inter Rule.** Inter (et les serifs réflexes Fraunces/Lora/Playfair/Cormorant) sont interdits : ils signent l'output IA générique. Le couple Bricolage + Hanken est l'identité.
+**The No-Inter Rule.** Inter (et les serifs réflexes Fraunces/Lora/Playfair/Cormorant) sont interdits : ils signent une identité générique de template. Le couple Bricolage + Hanken est l'identité.
 
 ## 4. Elevation
 
 Système majoritairement **plat avec ombres subtiles**. Les cartes posent une `shadow-sm` au repos, montent en `shadow-md`/`shadow-lg` au hover. Aucune ombre dramatique, aucun glow coloré. Le glassmorphism (`backdrop-blur`) est réservé aux surfaces fonctionnelles persistantes (header sticky, barres de sauvegarde), jamais décoratif.
 
 ### Shadow Vocabulary
-- **Repos** (`box-shadow: 0 1px 2px rgba(15,23,42,0.05)` — shadow-sm) : cartes, panneaux au repos.
-- **Hover** (`box-shadow: 0 10px 15px -3px rgba(15,23,42,0.1)` — shadow-lg) : élévation de réponse au survol.
+- **Repos** (`box-shadow: 0 1px 2px rgba(15,23,42,0.05)`, shadow-sm) : cartes, panneaux au repos.
+- **Hover** (`box-shadow: 0 10px 15px -3px rgba(15,23,42,0.1)`, shadow-lg) : élévation de réponse au survol.
 - **Accent CTA** (`shadow-brand-500/25`) : halo terracotta diffus sous les boutons primaires et l'état sélectionné.
 
 ### Named Rules
@@ -172,7 +172,7 @@ Système majoritairement **plat avec ombres subtiles**. Les cartes posent une `s
 ## 6. Do's and Don'ts
 
 ### Do:
-- **Do** assumer le terracotta sur des surfaces entières côté vitrine (hero baigné, footer ancré) — la couleur est la voix.
+- **Do** assumer le terracotta sur des surfaces entières côté vitrine (hero baigné, footer ancré) : la couleur est la voix.
 - **Do** porter la hiérarchie par l'échelle fluide (`clamp`) et le contraste de graisse Bricolage/Hanken.
 - **Do** varier le rythme vertical (`section-y` / `section-y-lg`) : respiration généreuse entre sections, regroupement serré à l'intérieur.
 - **Do** garder une seule couleur d'accent au dashboard ; la couleur sert l'action et l'état.
@@ -180,8 +180,8 @@ Système majoritairement **plat avec ombres subtiles**. Les cartes posent une `s
 
 ### Don't:
 - **Don't** réintroduire Inter ni les serifs réflexes (Fraunces/Lora/Playfair/Cormorant).
-- **Don't** différencier des cartes/séries par des couleurs catégorielles (violet, ambre, teal, sky) — c'est de l'arc-en-ciel AI-slop.
+- **Don't** différencier des cartes/séries par des couleurs catégorielles (violet, ambre, teal, sky) : c'est du template arc-en-ciel générique.
 - **Don't** retomber dans le template SaaS : grilles de cards icône+titre+texte répétées, hero-métrique, dégradés violet-bleu.
 - **Don't** utiliser de bordure latérale colorée >1px, de gradient text, ni de glassmorphism décoratif.
-- **Don't** imposer du mouvement non sollicité (auto-scroll, carrousels automatiques) — public potentiellement neuroatypique, WCAG 2.2.2.
+- **Don't** imposer du mouvement non sollicité (auto-scroll, carrousels automatiques) : public potentiellement neuroatypique, WCAG 2.2.2.
 - **Don't** mettre du texte gris sur fond coloré ni du `#000`/`#fff` purs sur de grandes surfaces.

@@ -10,7 +10,7 @@ import { sendAppointmentConfirmation, notifyAdminNewAppointment } from '../lib/m
 // Soumission publique → limite stricte par IP (anti-spam).
 const submitRateLimit = rateLimit({ windowMs: 60_000, max: 5 });
 
-// ─── Schemas ────────────────────────────────────────────────────────────────
+// Schemas
 
 const coachingTypeSchema = z.enum([
   'life-coaching',
@@ -43,7 +43,7 @@ const addDisabledDateSchema = z.object({
 
 const idParamSchema = z.object({ id: z.string().uuid() });
 
-// ─── Routes ─────────────────────────────────────────────────────────────────
+// Routes
 
 export const appointmentRoutes = new Hono()
 
@@ -59,7 +59,7 @@ export const appointmentRoutes = new Hono()
       const end = `${year}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
 
       // Route PUBLIQUE : ne projeter que les créneaux occupés (date/heure/durée).
-      // JAMAIS les PII clients (nom, email, téléphone, message) — fuite RGPD sinon.
+      // JAMAIS les PII clients (nom, email, téléphone, message) : fuite RGPD sinon.
       const rows = await db
         .select({
           appointment_date: appointments.appointment_date,

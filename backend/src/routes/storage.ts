@@ -37,7 +37,7 @@ export const storageRoutes = new Hono()
     },
   )
 
-  // GET /api/storage/files/:key  (public — proxy depuis S3)
+  // GET /api/storage/files/:key (public, proxy depuis S3)
   .get('/files/:key{.+}', async (c) => {
     const key = c.req.param('key');
     try {

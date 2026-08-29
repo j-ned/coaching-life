@@ -51,7 +51,7 @@ describe('GetWeeklyActivityUseCase', () => {
     // When
     const result = await useCase.execute(period);
 
-    // Then — March 2026 has 31 days → 5 weeks (1-7, 8-14, 15-21, 22-28, 29-31)
+    // Then: March 2026 has 31 days -> 5 weeks (1-7, 8-14, 15-21, 22-28, 29-31)
     expect(result).toHaveLength(5);
     expect(result[0].weekLabel).toBe('S1');
     expect(result[4].weekLabel).toBe('S5');
@@ -70,7 +70,7 @@ describe('GetWeeklyActivityUseCase', () => {
     // When
     const result = await useCase.execute(period);
 
-    // Then — 2 visits in S1 (1-7), 1 visit in S2 (8-14)
+    // Then: 2 visits in S1 (1-7), 1 visit in S2 (8-14)
     expect(result[0].visits).toBe(2);
     expect(result[1].visits).toBe(1);
     expect(result[2].visits).toBe(0);
@@ -89,7 +89,7 @@ describe('GetWeeklyActivityUseCase', () => {
     // When
     const result = await useCase.execute(period);
 
-    // Then — 2 in S3 (15-21), 1 in S5 (29-31)
+    // Then: 2 in S3 (15-21), 1 in S5 (29-31)
     expect(result[2].appointments).toBe(2);
     expect(result[4].appointments).toBe(1);
   });
@@ -106,7 +106,7 @@ describe('GetWeeklyActivityUseCase', () => {
     // When
     const result = await useCase.execute(period);
 
-    // Then — 2 messages in S4 (22-28)
+    // Then: 2 messages in S4 (22-28)
     expect(result[3].messages).toBe(2);
   });
 
@@ -133,7 +133,7 @@ describe('GetWeeklyActivityUseCase', () => {
     // When
     const result = await useCase.execute(febPeriod);
 
-    // Then — February 2026 has 28 days → 4 weeks exactly
+    // Then: February 2026 has 28 days -> 4 weeks exactly
     expect(result).toHaveLength(4);
   });
 });

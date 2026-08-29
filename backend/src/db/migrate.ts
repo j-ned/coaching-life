@@ -10,9 +10,9 @@ const db = drizzle(pool);
 
 const migrationsFolder = resolve(dirname(fileURLToPath(import.meta.url)), 'migrations');
 
-console.log('🗄️  Running migrations...');
+console.log('Running migrations...');
 await migrate(db, { migrationsFolder });
-console.log('✅ Migrations applied');
+console.log('Migrations applied');
 
 await pool.end();
 process.exit(0);

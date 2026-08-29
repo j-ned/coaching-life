@@ -16,10 +16,10 @@ function requireEnv(name: string): string {
 
 // Init paresseuse : les variables d'env ne sont lues qu'au premier appel (à la requête),
 // jamais au chargement du module. En ESM, les imports s'évaluent AVANT le `dotenv.config()`
-// de index.ts — instancier ici planterait avec « Missing env var ».
+// de index.ts : instancier ici planterait avec « Missing env var ».
 let _s3: S3Client | null = null;
 
-// Cloudflare R2 — compatible S3. Endpoint : https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+// Cloudflare R2, compatible S3. Endpoint : https://<ACCOUNT_ID>.r2.cloudflarestorage.com
 function getS3(): S3Client {
   if (_s3) return _s3;
   _s3 = new S3Client({

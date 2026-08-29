@@ -84,7 +84,7 @@ describe('GetDashboardStatsUseCase', () => {
     // When
     const stats = await useCase.execute();
 
-    // Then — only future pending + confirmed
+    // Then: only future pending + confirmed
     expect(stats.upcomingAppointments).toBe(2);
   });
 
