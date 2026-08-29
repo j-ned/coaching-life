@@ -154,11 +154,8 @@ coaching-life/
 
 ## 📸 Captures d'écran
 
-### Page d'accueil (dark mode)
 
-![Hero dark](./public/screen/hero-dark.png)
-
-### Page d'accueil (light mode)
+### Page d'accueil
 
 ![Hero light](./public/screen/hero-light.png)
 
