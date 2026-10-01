@@ -18,6 +18,11 @@
 }
 
 @layer base {
+  html {
+    /* Les ancres (#services, #contact) ne passent pas sous la navigation flottante */
+    scroll-padding-top: 7rem;
+  }
+
   body {
     @apply bg-slate-50 text-slate-800;
     font-family: var(--font-sans), sans-serif;
@@ -37,6 +42,34 @@
 }
 @utility section-y-lg {
   padding-block: clamp(4rem, 10vw, 9rem);
+}
+/* Chapitres de la vitrine : grande respiration entre les sections */
+@utility section-chapter {
+  padding-block: clamp(6rem, 12vw, 12rem);
+}
+
+/* Fond chaud ambiant : halos terracotta diffus, jamais d'arc-en-ciel */
+@utility bg-warm-mesh {
+  background-color: var(--color-brand-50);
+  background-image:
+    radial-gradient(60% 50% at 85% 10%, oklch(88.1% 0.055 18.2 / 0.55), transparent 70%),
+    radial-gradient(45% 40% at 5% 90%, oklch(93.8% 0.026 17.6 / 0.9), transparent 70%);
+}
+
+/* Grain papier subtil, posé en pseudo-élément pour ne jamais gêner la lecture */
+@utility grain {
+  position: relative;
+  isolation: isolate;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.18;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
 }
 
 /* Respect des préférences de mouvement réduit, public potentiellement neuroatypique */

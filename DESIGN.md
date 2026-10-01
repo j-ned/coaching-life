@@ -163,8 +163,14 @@ Système majoritairement **plat avec ombres subtiles**. Les cartes posent une `s
 - **Error:** message `role="alert"`, texte `red-700` sur `red-50`.
 
 ### Navigation
-- **Header:** sticky, `bg-white/80 backdrop-blur-md`, liens `slate-600` → hover `brand-700`. Burger mobile avec `aria-expanded` + focus-visible.
-- **Footer:** ancré en `brand-950` (terracotta sombre), texte `brand-100/80`, liens hover blanc.
+- **Header:** pilule flottante fixe (`rounded-full bg-white/75 backdrop-blur-xl`, ring hairline), lien actif en `bg-brand-50` + `aria-current="page"`. Burger mobile avec `aria-expanded` + `aria-controls`. Les pages commencent par un `pt-32`+ pour ne pas passer dessous ; `scroll-padding-top` protège les ancres.
+- **Footer:** ancré en `brand-950` + grain, CTA massif (hors accueil, qui a déjà sa section contact), wordmark géant décoratif `aria-hidden`.
+
+### Bento des spécialités (accueil)
+- `grid-flow-dense`, lg 4×2 : feature 2×2 + wide 2×1 + soft 1×1 + deep 1×1 ; md 2×3. Toute la carte est un lien. Image de fond + voile `brand-950` (texte blanc AA) ou fallback `brand-800` si l'image manque.
+
+### Motion (scroll)
+- Seul mouvement autorisé : **piloté par le scroll de l'utilisateur** (`shared/motion` : `appScrollScale`, `app-scrub-text`, GSAP chargé à la demande côté navigateur). Coupé sous `prefers-reduced-motion: reduce`, l'état final statique est alors affiché. Jamais d'autoplay ; le carrousel de témoignages avance uniquement au clic.
 
 ### Calendrier de réservation (signature)
 - Grille `role="grid"`, jours = `<button>` `h-11` (44px tactile) avec `aria-label` date complète + statut, `aria-pressed`, `aria-current="date"`. Sélection en `brand-700`, aujourd'hui en `brand-50`, indisponible en `red-50/red-400`. Divulgation progressive : créneaux puis formulaire n'apparaissent qu'après sélection.

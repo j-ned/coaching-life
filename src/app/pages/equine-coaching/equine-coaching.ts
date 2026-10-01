@@ -1,76 +1,17 @@
 import { afterNextRender, ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { NgOptimizedImage } from '@angular/common';
-import { GetPageContentUseCase } from '../../features/content/domain/use-cases/get-page-content.use-case';
-import { DEFAULT_PAGES } from '../../features/content/domain/models/default-content';
-import type { PageContent } from '../../features/content/domain/models/page-content.model';
-import { Icon } from '../../shared/components/icon/icon';
-import { Seo } from '../../core/seo/seo';
-import { ROUTE_SEO } from '../../core/seo/route-seo';
+import { GetPageContentUseCase } from '@features/content/domain/use-cases/get-page-content.use-case';
+import { DEFAULT_PAGES } from '@features/content/domain/models/default-content';
+import type { PageContent } from '@features/content/domain/models/page-content.model';
+import { Seo } from '@core/seo/seo';
+import { ROUTE_SEO } from '@core/seo/route-seo';
+import { ServicePage } from '../service-page/service-page';
 
 @Component({
   selector: 'app-equine-coaching',
-  imports: [Icon, NgOptimizedImage],
+  imports: [ServicePage],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 section-y' },
-  template: `
-    @let c = content();
-    <div class="grid lg:grid-cols-2 gap-12 max-md:gap-8 items-center">
-      <div>
-        <h1
-          class="text-4xl lg:text-5xl font-bold text-slate-800 mb-6 max-md:mb-4 max-md:text-3xl flex items-center gap-4"
-        >
-          <span class="p-3 bg-brand-100 text-brand-600 rounded-2xl">
-            <app-icon name="smile" size="xl" />
-          </span>
-          {{ c.title }}
-        </h1>
-        <p
-          class="text-xl text-slate-600 leading-relaxed mb-6 max-md:mb-4 max-md:text-lg font-light"
-        >
-          {{ c.introduction }}
-        </p>
-        <div class="bg-brand-50/60 rounded-2xl border border-brand-100 p-8 max-md:p-6 mt-8">
-          <h2 class="text-2xl font-semibold text-slate-800 mb-6 max-md:mb-4 max-md:text-xl">
-            {{ c.sectionTitle }}
-          </h2>
-          <ul class="space-y-4 text-slate-700">
-            @for (item of c.items; track item.description) {
-              <li class="flex items-center gap-4">
-                <div
-                  class="w-10 h-10 rounded-full bg-brand-50 text-brand-700 flex items-center justify-center shrink-0"
-                >
-                  {{ $index + 1 }}
-                </div>
-                <div>
-                  @if (item.title) {
-                    <strong class="block text-slate-800">{{ item.title }}</strong>
-                  }
-                  <span class="text-sm">{{ item.description }}</span>
-                </div>
-              </li>
-            }
-          </ul>
-          @if (c.extraText) {
-            <div class="mt-8 p-4 bg-slate-50 rounded-lg text-sm text-slate-600">
-              <strong class="text-slate-800">À noter :</strong> {{ c.extraText }}
-            </div>
-          }
-        </div>
-      </div>
-      <div class="rounded-3xl overflow-hidden shadow-xl lg:h-[700px] max-lg:h-96 max-md:h-72">
-        @if (c.imageUrl) {
-          <img
-            [ngSrc]="c.imageUrl"
-            width="800"
-            height="800"
-            priority
-            [alt]="c.imageAlt"
-            class="object-cover w-full h-full"
-          />
-        }
-      </div>
-    </div>
-  `,
+  host: { class: 'block' },
+  template: `<app-service-page [content]="content()" icon="smile" />`,
 })
 export class EquineCoaching {
   private readonly getPageContent = inject(GetPageContentUseCase);

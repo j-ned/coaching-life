@@ -1,119 +1,150 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { Icon } from '@shared/components/icon/icon';
 
+type Review = {
+  readonly quote: string;
+  readonly author: string;
+  readonly initial: string;
+  readonly service: string;
+  readonly rating: number;
+};
+
+const REVIEWS: readonly Review[] = [
+  {
+    quote:
+      "Un accompagnement exceptionnel. J'ai pu dépasser mes blocages professionnels en quelques séances. Je recommande vivement !",
+    author: 'Sophie L.',
+    initial: 'S',
+    service: 'Coaching de vie',
+    rating: 5,
+  },
+  {
+    quote:
+      "L'équicoaching a été une révélation. Comprendre mes émotions à travers la réaction du cheval m'a beaucoup aidé en tant que manager.",
+    author: 'Thomas M.',
+    initial: 'T',
+    service: 'Coaching équin',
+    rating: 4,
+  },
+  {
+    quote:
+      "Enfin une personne qui comprend vraiment ma réalité de maman d'un enfant TDAH. Un grand soutien sans jugement.",
+    author: 'Claire D.',
+    initial: 'C',
+    service: 'Aide aux parents',
+    rating: 5,
+  },
+];
+
+const STARS = [1, 2, 3, 4, 5] as const;
+
+/** Témoignages : une voix à la fois, défilement uniquement à la demande (pas d'autoplay). */
 @Component({
   selector: 'app-reviews',
   imports: [Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'block section-y bg-slate-50' },
+  host: { class: 'block section-chapter' },
   template: `
-    <section aria-labelledby="reviews-heading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2
-        id="reviews-heading"
-        class="text-3xl font-bold text-center text-slate-800 mb-12 max-md:mb-8 max-md:text-2xl"
-      >
-        Ce que disent mes clients
-      </h2>
+    @let r = current();
+    <section
+      aria-labelledby="reviews-heading"
+      aria-roledescription="carrousel"
+      class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8"
+    >
+      <div class="grid gap-14 lg:grid-cols-12 lg:gap-20">
+        <div class="lg:col-span-4">
+          <h2
+            id="reviews-heading"
+            class="font-display text-[clamp(2rem,3.5vw,3rem)] font-bold leading-[1.08] text-slate-900"
+          >
+            Ce que disent mes clients
+          </h2>
 
-      <div
-        class="grid grid-cols-1 md:grid-cols-3 gap-8 max-md:flex max-md:overflow-x-auto max-md:snap-x max-md:snap-mandatory max-md:pb-6 max-md:-mx-4 max-md:px-4 max-md:scroll-smooth max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden"
-      >
-        <!-- Review Card 1 -->
-        <article
-          class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative group hover:shadow-md transition-shadow max-md:min-w-[85vw] max-md:snap-center"
-        >
-          <div class="text-brand-400 mb-4 flex">
-            <app-icon name="star-filled" size="md" [filled]="true" />
-            <app-icon name="star-filled" size="md" [filled]="true" />
-            <app-icon name="star-filled" size="md" [filled]="true" />
-            <app-icon name="star-filled" size="md" [filled]="true" />
-            <app-icon name="star-filled" size="md" [filled]="true" />
+          <div class="mt-10 flex items-center" aria-hidden="true">
+            @for (item of reviews; track item.author; let i = $index) {
+              <span
+                class="-ml-3 first:ml-0 inline-flex size-14 items-center justify-center rounded-full font-display text-lg font-bold ring-4 ring-slate-50 transition-all duration-500"
+                [class]="
+                  i === index()
+                    ? 'bg-brand-700 text-white scale-110 z-10'
+                    : 'bg-brand-100 text-brand-800'
+                "
+                >{{ item.initial }}</span
+              >
+            }
           </div>
-          <p class="text-slate-600 mb-6 italic">
-            "Un accompagnement exceptionnel. J'ai pu dépasser mes blocages professionnels en
-            quelques séances. Je recommande vivement !"
-          </p>
-          <div class="flex items-center gap-4">
-            <div
-              class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-semibold"
-            >
-              S
-            </div>
-            <div>
-              <h4 class="font-semibold text-slate-800">Sophie L.</h4>
-              <p class="text-sm text-slate-500">Coaching de Vie</p>
-            </div>
-          </div>
-        </article>
 
-        <!-- Review Card 2 -->
-        <article
-          class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative group hover:shadow-md transition-shadow max-md:min-w-[85vw] max-md:snap-center"
-        >
-          <div class="text-brand-400 mb-4 flex">
-            <app-icon name="star-filled" size="md" [filled]="true" />
-            <app-icon name="star-filled" size="md" [filled]="true" />
-            <app-icon name="star-filled" size="md" [filled]="true" />
-            <app-icon name="star-filled" size="md" [filled]="true" />
-            <app-icon name="star-filled" size="md" [filled]="true" class="text-slate-200" />
-          </div>
-          <p class="text-slate-600 mb-6 italic">
-            "L'équicoaching a été une révélation. Comprendre mes émotions à travers la réaction du
-            cheval m'a beaucoup aidé en tant que manager."
-          </p>
-          <div class="flex items-center gap-4">
-            <div
-              class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-semibold"
+          <div class="mt-10 flex items-center gap-3">
+            <button
+              type="button"
+              (click)="previous()"
+              class="inline-flex size-12 items-center justify-center rounded-full bg-white text-slate-800 ring-1 ring-slate-200 transition-colors hover:bg-brand-50 hover:text-brand-800 cursor-pointer"
+              aria-label="Témoignage précédent"
             >
-              T
-            </div>
-            <div>
-              <h4 class="font-semibold text-slate-800">Thomas M.</h4>
-              <p class="text-sm text-slate-500">Coaching Equin</p>
-            </div>
+              <app-icon name="chevron-left" size="md" />
+            </button>
+            <button
+              type="button"
+              (click)="next()"
+              class="inline-flex size-12 items-center justify-center rounded-full bg-white text-slate-800 ring-1 ring-slate-200 transition-colors hover:bg-brand-50 hover:text-brand-800 cursor-pointer"
+              aria-label="Témoignage suivant"
+            >
+              <app-icon name="chevron-right" size="md" />
+            </button>
+            <span class="ml-2 text-sm font-medium tabular-nums text-slate-500"
+              >{{ index() + 1 }} / {{ reviews.length }}</span
+            >
           </div>
-        </article>
+        </div>
 
-        <!-- Review Card 3 -->
-        <article
-          class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative group hover:shadow-md transition-shadow max-md:min-w-[85vw] max-md:snap-center"
+        <figure
+          class="lg:col-span-8"
+          aria-live="polite"
+          aria-roledescription="diapositive"
+          [attr.aria-label]="index() + 1 + ' sur ' + reviews.length"
         >
-          <div class="text-brand-400 mb-4 flex">
-            <app-icon name="star-filled" size="md" [filled]="true" />
-            <app-icon name="star-filled" size="md" [filled]="true" />
-            <app-icon name="star-filled" size="md" [filled]="true" />
-            <app-icon name="star-filled" size="md" [filled]="true" />
-            <app-icon name="star-filled" size="md" [filled]="true" />
+          <div
+            class="flex gap-1 text-brand-500"
+            role="img"
+            [attr.aria-label]="r.rating + ' étoiles sur 5'"
+          >
+            @for (s of stars; track s) {
+              <app-icon
+                name="star-filled"
+                size="md"
+                [filled]="true"
+                [class.text-brand-100]="s > r.rating"
+              />
+            }
           </div>
-          <p class="text-slate-600 mb-6 italic">
-            "Enfin une personne qui comprend vraiment ma réalité de maman d'un enfant TDAH. Un grand
-            soutien sans jugement."
-          </p>
-          <div class="flex items-center gap-4">
-            <div
-              class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-semibold"
-            >
-              C
-            </div>
-            <div>
-              <h4 class="font-semibold text-slate-800">Claire D.</h4>
-              <p class="text-sm text-slate-500">Aide Parents</p>
-            </div>
-          </div>
-        </article>
+          <blockquote
+            class="mt-8 font-display text-[clamp(1.6rem,3vw,2.6rem)] font-semibold leading-[1.25] text-slate-900"
+          >
+            <p>&laquo;&nbsp;{{ r.quote }}&nbsp;&raquo;</p>
+          </blockquote>
+          <figcaption class="mt-10 flex items-center gap-4">
+            <span class="h-px w-12 bg-brand-300" aria-hidden="true"></span>
+            <span>
+              <span class="block font-semibold text-slate-900">{{ r.author }}</span>
+              <span class="block text-sm text-slate-500">{{ r.service }}</span>
+            </span>
+          </figcaption>
+        </figure>
       </div>
 
       @if (googleReviewsUrl()) {
-        <div class="mt-12 text-center">
-          <a
-            [href]="googleReviewsUrl()"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 text-brand-700 font-medium hover:text-brand-800 transition-colors"
-          >
-            Voir tous les avis sur Google
-            <app-icon name="arrow-right" size="sm" />
-          </a>
+        <div class="mt-16 lg:grid lg:grid-cols-12 lg:gap-20">
+          <div class="lg:col-span-8 lg:col-start-5">
+            <a
+              [href]="googleReviewsUrl()"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 font-semibold text-brand-700 transition-colors hover:text-brand-800"
+            >
+              Voir tous les avis sur Google
+              <app-icon name="arrow-right" size="sm" />
+            </a>
+          </div>
         </div>
       }
     </section>
@@ -121,4 +152,17 @@ import { Icon } from '@shared/components/icon/icon';
 })
 export class Reviews {
   readonly googleReviewsUrl = input<string>('');
+
+  protected readonly reviews = REVIEWS;
+  protected readonly stars = STARS;
+  protected readonly index = signal(0);
+  protected readonly current = computed(() => this.reviews[this.index()]);
+
+  protected next(): void {
+    this.index.update((i) => (i + 1) % this.reviews.length);
+  }
+
+  protected previous(): void {
+    this.index.update((i) => (i - 1 + this.reviews.length) % this.reviews.length);
+  }
 }

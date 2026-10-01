@@ -13,6 +13,7 @@ import { Booking } from '@features/booking/pages/booking';
 import { ContactForm } from '@features/contact/contact-form';
 import { Reviews } from '@features/reviews/reviews';
 import { Icon } from '@shared/components/icon/icon';
+import { ScrubText } from '@shared/motion/scrub-text';
 import { GetSiteSettingUseCase } from '@features/content/domain/use-cases/get-site-setting.use-case';
 import { GetAllPagesUseCase } from '@features/content/domain/use-cases/get-all-pages.use-case';
 import { Seo } from '@core/seo/seo';
@@ -31,46 +32,55 @@ import type {
 } from '@features/content/domain/models/site-settings.model';
 import type { PageContent, PageSlug } from '@features/content/domain/models/page-content.model';
 
+type BentoVariant = 'feature' | 'wide' | 'soft' | 'deep';
+
+// Bento lg 4x2 : feature 2x2 + wide 2x1 + soft 1x1 + deep 1x1 = 8 cellules, aucune case vide.
+// md 2 colonnes : feature 2 + wide 2 + soft 1 + deep 1 = 2x3, aucune case vide.
 const SERVICE_CARDS: readonly {
   slug: PageSlug;
   route: string;
-  iconBg: string;
-  iconColor: string;
   iconName: string;
+  variant: BentoVariant;
+  span: string;
 }[] = [
   {
     slug: 'life-coach',
     route: '/life-coach',
-    iconBg: 'bg-brand-100',
-    iconColor: 'text-brand-700',
     iconName: 'sparkles',
-  },
-  {
-    slug: 'personal-development',
-    route: '/personal-development',
-    iconBg: 'bg-brand-50',
-    iconColor: 'text-brand-600',
-    iconName: 'book-open',
+    variant: 'feature',
+    span: 'md:col-span-2 lg:row-span-2 min-h-[26rem] lg:min-h-0',
   },
   {
     slug: 'equine-coaching',
     route: '/equine-coaching',
-    iconBg: 'bg-brand-100',
-    iconColor: 'text-brand-600',
     iconName: 'smile',
+    variant: 'wide',
+    span: 'md:col-span-2 min-h-[20rem]',
+  },
+  {
+    slug: 'personal-development',
+    route: '/personal-development',
+    iconName: 'book-open',
+    variant: 'soft',
+    span: 'min-h-[18rem]',
   },
   {
     slug: 'neuroatypical-parents',
     route: '/neuroatypical-parents',
-    iconBg: 'bg-brand-50',
-    iconColor: 'text-brand-700',
     iconName: 'heart',
+    variant: 'deep',
+    span: 'min-h-[18rem]',
   },
 ];
 
+type HeadingSegment = { kind: 'text'; text: string } | { kind: 'pill'; src: string };
+
+const MANIFESTO =
+  'Chaque accompagnement commence par votre histoire. Une écoute active, de la bienveillance, et des outils concrets pour avancer à votre rythme, sans jugement.';
+
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, Booking, ContactForm, Reviews, Icon, NgOptimizedImage],
+  imports: [RouterLink, Booking, ContactForm, Reviews, Icon, NgOptimizedImage, ScrubText],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   template: `
@@ -78,131 +88,177 @@ const SERVICE_CARDS: readonly {
     @let svc = services();
     @let cta = ctaSettings();
 
-    <section aria-labelledby="hero-heading" class="relative bg-brand-50 overflow-hidden">
+    <section aria-labelledby="hero-heading" class="bg-warm-mesh grain overflow-hidden">
       <div
-        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 section-y-lg grid lg:grid-cols-2 gap-12 max-md:gap-8 items-center max-md:text-center"
+        class="mx-auto grid max-w-7xl gap-16 px-4 pt-32 pb-24 sm:px-6 md:pt-44 md:pb-36 lg:grid-cols-12 lg:items-center lg:gap-10 lg:px-8"
       >
-        <div class="text-left max-md:text-center z-10">
-          <span
-            class="inline-block py-1 px-3 rounded-full bg-brand-100 text-brand-700 font-semibold tracking-wider text-sm mb-6"
-            >COACHING LIFE</span
-          >
+        <div class="lg:col-span-7">
           <h1
             id="hero-heading"
-            class="text-[clamp(2.25rem,4vw+1rem,4rem)] font-bold text-slate-900 mb-6 max-md:mb-4 leading-[1.05]"
+            class="max-w-4xl text-balance font-display text-[clamp(2.75rem,5.2vw,5.25rem)] font-bold leading-[1.02] text-slate-900"
           >
             {{ h.title }}
           </h1>
-          <p
-            class="text-xl text-slate-600 mb-10 max-md:mb-8 leading-relaxed max-w-lg max-md:text-lg max-md:mx-auto"
-          >
+          <p class="mt-8 max-w-xl text-xl leading-relaxed text-slate-600 max-md:text-lg">
             {{ h.subtitle }}
           </p>
-          <div class="flex flex-wrap gap-4 max-md:justify-center">
+          <div class="mt-12 flex flex-wrap gap-4">
             <button
               type="button"
-              (click)="scrollTo('contact')"
-              class="bg-brand-700 text-white px-8 py-4 rounded-full font-medium hover:bg-brand-800 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 cursor-pointer"
+              (click)="scrollTo(h.ctaPrimaryLink || 'contact')"
+              class="inline-flex items-center gap-3 rounded-full bg-brand-700 px-8 py-4 font-semibold text-white shadow-lg shadow-brand-500/25 transition-colors hover:bg-brand-800 cursor-pointer"
             >
               {{ h.ctaPrimaryText }}
+              <app-icon name="arrow-right" size="sm" />
             </button>
             <button
               type="button"
-              (click)="scrollTo('services')"
-              class="bg-white text-slate-700 border border-slate-200 px-8 py-4 rounded-full font-medium hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+              (click)="scrollTo(h.ctaSecondaryLink || 'services')"
+              class="rounded-full bg-white/80 px-8 py-4 font-semibold text-slate-900 ring-1 ring-slate-900/10 transition-colors hover:bg-white cursor-pointer"
             >
               {{ h.ctaSecondaryText }}
             </button>
           </div>
         </div>
+
+        <div class="lg:col-span-5">
+          <div
+            class="relative mx-auto aspect-4/5 w-full max-w-md overflow-hidden rounded-t-full rounded-b-[2.5rem] bg-linear-to-b from-brand-200 to-brand-400 shadow-2xl shadow-brand-900/15 lg:max-w-none"
+          >
+            @if (h.imageUrl) {
+              <img
+                [ngSrc]="h.imageUrl"
+                fill
+                priority
+                sizes="(min-width: 1024px) 40vw, 90vw"
+                [alt]="h.imageAlt"
+                class="object-cover"
+              />
+            } @else {
+              <div class="flex h-full items-center justify-center text-white/80" aria-hidden="true">
+                <app-icon name="sparkles" size="xl" />
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="services" aria-labelledby="services-heading" class="section-chapter scroll-mt-24">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="max-w-5xl">
+          @if (svc.badge) {
+            <p class="mb-6 flex items-center gap-3 text-sm font-semibold text-brand-700">
+              <span class="h-px w-10 bg-brand-300" aria-hidden="true"></span>
+              {{ svc.badge }}
+            </p>
+          }
+          <h2
+            id="services-heading"
+            class="font-display text-[clamp(2.25rem,4.5vw,4rem)] font-bold leading-[1.12] text-slate-900"
+          >
+            @for (seg of servicesHeading(); track $index) {
+              @if (seg.kind === 'text') {
+                {{ seg.text }}
+              } @else {
+                <span
+                  class="mx-1 inline-block h-[0.82em] w-[1.9em] translate-y-[0.06em] overflow-hidden rounded-full bg-brand-100 align-baseline ring-2 ring-white"
+                  aria-hidden="true"
+                  ><img
+                    [ngSrc]="seg.src"
+                    width="120"
+                    height="64"
+                    alt=""
+                    class="h-full w-full object-cover"
+                /></span>
+              }
+            }
+          </h2>
+          <p class="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">{{ svc.subtitle }}</p>
+        </div>
+
         <div
-          class="relative z-10 lg:h-150 rounded-3xl overflow-hidden shadow-2xl transform lg:rotate-2 hover:rotate-0 transition-transform duration-500 max-lg:h-96 max-md:h-72"
+          class="mt-16 grid grid-flow-dense grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 lg:grid-rows-[repeat(2,minmax(19rem,auto))]"
         >
-          @if (h.imageUrl) {
-            <img
-              [ngSrc]="h.imageUrl"
-              width="800"
-              height="800"
-              priority
-              [alt]="h.imageAlt"
-              class="object-cover w-full h-full"
-            />
+          @for (card of serviceCardsResolved(); track card.slug) {
+            <a
+              [routerLink]="card.route"
+              class="group relative isolate flex flex-col overflow-hidden rounded-[2rem] p-8 transition-shadow duration-500 hover:shadow-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-300"
+              [class]="card.span + ' ' + variantClass[card.variant]"
+            >
+              @if (card.variant === 'feature' || card.variant === 'wide') {
+                @if (card.image) {
+                  <img
+                    [ngSrc]="card.image"
+                    fill
+                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    alt=""
+                    class="-z-20 object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  />
+                }
+                <div
+                  class="absolute inset-0 -z-10 bg-linear-to-t from-brand-950/95 via-brand-950/65 to-brand-950/10"
+                  aria-hidden="true"
+                ></div>
+              }
+
+              <span
+                class="inline-flex size-12 items-center justify-center rounded-2xl"
+                [class]="iconClass[card.variant]"
+                aria-hidden="true"
+              >
+                <app-icon [name]="card.iconName" size="md" />
+              </span>
+
+              <div class="mt-auto pt-16">
+                <h3
+                  class="font-display font-bold leading-tight"
+                  [class]="
+                    card.variant === 'feature'
+                      ? 'text-[clamp(1.9rem,3vw,2.75rem)]'
+                      : 'text-2xl md:text-[1.7rem]'
+                  "
+                >
+                  {{ card.title }}
+                </h3>
+                <p
+                  class="mt-3 max-w-lg leading-relaxed"
+                  [class]="card.variant === 'soft' ? 'text-slate-600' : 'text-white/80'"
+                  [class.line-clamp-3]="card.variant !== 'feature'"
+                >
+                  {{ card.variant === 'feature' ? card.introFull : card.intro }}
+                </p>
+                <span
+                  class="mt-6 inline-flex items-center gap-2 font-semibold"
+                  [class]="card.variant === 'soft' ? 'text-brand-800' : 'text-white'"
+                >
+                  Découvrir
+                  <app-icon
+                    name="arrow-right"
+                    size="sm"
+                    class="transition-transform duration-500 group-hover:translate-x-1"
+                  />
+                </span>
+              </div>
+            </a>
           }
         </div>
       </div>
-
-      <div
-        class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-brand-100/50 blur-3xl z-0"
-        aria-hidden="true"
-      ></div>
     </section>
 
-    <section
-      id="services"
-      aria-labelledby="services-heading"
-      class="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 section-y"
-    >
-      <div class="text-center mb-16">
-        <span
-          class="inline-block py-1 px-3 rounded-full bg-brand-100 text-brand-700 font-semibold tracking-wider text-sm mb-4"
-          >{{ svc.badge }}</span
-        >
-        <h2 id="services-heading" class="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-          {{ svc.title }}
-        </h2>
-        <p class="text-lg text-slate-600 max-w-2xl mx-auto">{{ svc.subtitle }}</p>
-      </div>
-
-      <div
-        class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-md:flex max-md:overflow-x-auto max-md:snap-x max-md:snap-mandatory max-md:pb-6 max-md:-mx-4 max-md:px-4 max-md:scroll-smooth max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden"
-      >
-        @for (card of serviceCardsResolved(); track card.slug) {
-          <article
-            class="group relative bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg transition-shadow duration-300 max-md:min-w-[85vw] max-md:snap-center"
-          >
-            <div class="h-48 overflow-hidden">
-              @if (card.image) {
-                <img
-                  [ngSrc]="card.image"
-                  width="400"
-                  height="300"
-                  [alt]="card.title"
-                  class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                />
-              }
-            </div>
-            <div class="p-6">
-              <div
-                class="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                [class]="card.iconBg + ' ' + card.iconColor"
-              >
-                <app-icon [name]="card.iconName" size="md" />
-              </div>
-              <h3 class="text-lg font-semibold text-slate-800 mb-2">
-                {{ card.title }}
-              </h3>
-              <p class="text-slate-600 text-sm mb-4 line-clamp-3">{{ card.intro }}</p>
-              <a
-                [routerLink]="card.route"
-                class="inline-flex items-center gap-1 text-brand-700 font-medium text-sm hover:text-brand-800 transition-colors"
-              >
-                En savoir plus
-                <app-icon
-                  name="chevron-right"
-                  size="sm"
-                  class="group-hover:translate-x-1 transition-transform"
-                />
-              </a>
-            </div>
-          </article>
-        }
+    <section aria-label="Mon approche" class="section-chapter bg-white">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <app-scrub-text
+          [text]="manifesto"
+          class="font-display text-[clamp(1.85rem,3.6vw,3.4rem)] font-semibold leading-[1.2] text-slate-900"
+        />
       </div>
     </section>
 
     @defer (on viewport) {
       <app-reviews [googleReviewsUrl]="googleReviewsUrl" />
     } @placeholder {
-      <div class="section-y"></div>
+      <div class="section-chapter"></div>
     } @error {
       <p class="text-center text-slate-500 section-y">Les témoignages n'ont pas pu être chargés.</p>
     }
@@ -210,110 +266,104 @@ const SERVICE_CARDS: readonly {
     <section
       id="contact"
       aria-labelledby="contact-heading"
-      class="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 section-y"
+      class="bg-warm-mesh grain scroll-mt-24 section-chapter"
     >
-      <div class="text-center mb-12">
-        <span
-          class="inline-block py-1 px-3 rounded-full bg-brand-100 text-brand-700 font-semibold tracking-wider text-sm mb-4"
-          >{{ cta.badge }}</span
-        >
-        <h2 id="contact-heading" class="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-          {{ cta.title }}
-        </h2>
-        <p class="text-lg text-slate-600 max-w-2xl mx-auto">{{ cta.subtitle }}</p>
-      </div>
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl">
+          @if (cta.badge) {
+            <p class="mb-6 flex items-center gap-3 text-sm font-semibold text-brand-700">
+              <span class="h-px w-10 bg-brand-300" aria-hidden="true"></span>
+              {{ cta.badge }}
+            </p>
+          }
+          <h2
+            id="contact-heading"
+            class="font-display text-[clamp(2.5rem,6vw,5.5rem)] font-bold leading-[1.02] text-slate-900"
+          >
+            {{ cta.title }}
+          </h2>
+          <p class="mt-6 max-w-2xl text-xl leading-relaxed text-slate-600">{{ cta.subtitle }}</p>
+        </div>
 
-      <div class="grid sm:grid-cols-2 gap-8 max-md:gap-5 max-w-3xl mx-auto mb-12">
-        <button
-          type="button"
-          (click)="openPanel('booking')"
-          [class.ring-2]="activePanel() === 'booking'"
-          [class.ring-brand-500]="activePanel() === 'booking'"
-          class="group bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-md:p-6 text-left hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-        >
-          <div
-            class="w-14 h-14 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center mb-5"
-          >
-            <app-icon name="calendar" size="lg" />
-          </div>
-          <h3 class="text-xl max-md:text-lg font-semibold text-slate-800 mb-2">
-            Prendre rendez-vous
-          </h3>
-          <p class="text-slate-600 text-sm">
-            Choisissez une date et un créneau pour votre séance de coaching personnalisée.
-          </p>
-          <span
-            class="inline-flex items-center gap-1 text-brand-700 font-medium text-sm mt-4 group-hover:gap-2 transition-all"
-          >
-            Ouvrir le calendrier
-            <app-icon name="chevron-right" size="sm" />
-          </span>
-        </button>
-
-        <button
-          type="button"
-          (click)="openPanel('contact')"
-          [class.ring-2]="activePanel() === 'contact'"
-          [class.ring-brand-500]="activePanel() === 'contact'"
-          class="group bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-md:p-6 text-left hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-        >
-          <div
-            class="w-14 h-14 rounded-2xl bg-brand-50 text-brand-500 flex items-center justify-center mb-5"
-          >
-            <app-icon name="mail" size="lg" />
-          </div>
-          <h3 class="text-xl font-semibold text-slate-800 mb-2">Me contacter</h3>
-          <p class="text-slate-600 text-sm">
-            Une question ? Envoyez-moi un message et je vous répondrai rapidement.
-          </p>
-          <span
-            class="inline-flex items-center gap-1 text-brand-700 font-medium text-sm mt-4 group-hover:gap-2 transition-all"
-          >
-            Ouvrir le formulaire
-            <app-icon name="chevron-right" size="sm" />
-          </span>
-        </button>
-      </div>
-
-      @if (activePanel() === 'booking') {
-        <div class="max-w-5xl mx-auto">
-          @defer {
-            <app-booking />
-          } @placeholder {
-            <div class="py-10"></div>
-          } @error {
-            <div class="py-10 text-center">
-              <p class="text-slate-600 mb-3">Le module de réservation n'a pas pu se charger.</p>
-              <button
-                type="button"
-                (click)="retry()"
-                class="text-brand-700 font-medium hover:text-brand-800 cursor-pointer"
+        <div class="mt-16 grid gap-4 sm:grid-cols-2">
+          @for (option of contactOptions; track option.panel) {
+            <button
+              type="button"
+              (click)="openPanel(option.panel)"
+              [attr.aria-expanded]="activePanel() === option.panel"
+              aria-controls="contact-panel"
+              class="group flex items-start gap-6 rounded-[2rem] p-8 text-left transition-colors duration-500 cursor-pointer max-md:p-6"
+              [class]="
+                activePanel() === option.panel
+                  ? 'bg-brand-700 text-white shadow-xl shadow-brand-900/20'
+                  : 'bg-white text-slate-900 ring-1 ring-slate-900/5 hover:ring-brand-300'
+              "
+            >
+              <span
+                class="inline-flex size-14 shrink-0 items-center justify-center rounded-2xl"
+                [class]="
+                  activePanel() === option.panel
+                    ? 'bg-white/15 text-white'
+                    : 'bg-brand-50 text-brand-700'
+                "
+                aria-hidden="true"
               >
-                Réessayer
-              </button>
+                <app-icon [name]="option.icon" size="lg" />
+              </span>
+              <span>
+                <span class="block font-display text-2xl font-bold">{{ option.title }}</span>
+                <span
+                  class="mt-2 block"
+                  [class]="activePanel() === option.panel ? 'text-white/80' : 'text-slate-600'"
+                  >{{ option.description }}</span
+                >
+              </span>
+            </button>
+          }
+        </div>
+
+        <div id="contact-panel">
+          @if (activePanel() === 'booking') {
+            <div class="mx-auto mt-12 max-w-5xl">
+              @defer {
+                <app-booking />
+              } @placeholder {
+                <div class="py-10"></div>
+              } @error {
+                <div class="py-10 text-center">
+                  <p class="text-slate-600 mb-3">Le module de réservation n'a pas pu se charger.</p>
+                  <button
+                    type="button"
+                    (click)="retry()"
+                    class="text-brand-700 font-medium hover:text-brand-800 cursor-pointer"
+                  >
+                    Réessayer
+                  </button>
+                </div>
+              }
+            </div>
+          } @else if (activePanel() === 'contact') {
+            <div class="mx-auto mt-12 max-w-2xl">
+              @defer {
+                <app-contact-form />
+              } @placeholder {
+                <div class="py-10"></div>
+              } @error {
+                <div class="py-10 text-center">
+                  <p class="text-slate-600 mb-3">Le formulaire n'a pas pu se charger.</p>
+                  <button
+                    type="button"
+                    (click)="retry()"
+                    class="text-brand-700 font-medium hover:text-brand-800 cursor-pointer"
+                  >
+                    Réessayer
+                  </button>
+                </div>
+              }
             </div>
           }
         </div>
-      } @else if (activePanel() === 'contact') {
-        <div class="max-w-2xl mx-auto">
-          @defer {
-            <app-contact-form />
-          } @placeholder {
-            <div class="py-10"></div>
-          } @error {
-            <div class="py-10 text-center">
-              <p class="text-slate-600 mb-3">Le formulaire n'a pas pu se charger.</p>
-              <button
-                type="button"
-                (click)="retry()"
-                class="text-brand-700 font-medium hover:text-brand-800 cursor-pointer"
-              >
-                Réessayer
-              </button>
-            </div>
-          }
-        </div>
-      }
+      </div>
     </section>
   `,
 })
@@ -324,6 +374,34 @@ export class Home {
   private readonly _seo = inject(Seo);
 
   protected readonly googleReviewsUrl = GOOGLE_REVIEWS_URL;
+  protected readonly manifesto = MANIFESTO;
+
+  protected readonly variantClass: Record<BentoVariant, string> = {
+    feature: 'bg-brand-800 text-white',
+    wide: 'bg-brand-700 text-white',
+    soft: 'bg-brand-100 text-slate-900',
+    deep: 'bg-brand-950 text-white',
+  };
+  protected readonly iconClass: Record<BentoVariant, string> = {
+    feature: 'bg-white/15 text-white backdrop-blur-sm',
+    wide: 'bg-white/15 text-white backdrop-blur-sm',
+    soft: 'bg-white text-brand-700',
+    deep: 'bg-white/10 text-brand-200',
+  };
+  protected readonly contactOptions = [
+    {
+      panel: 'booking',
+      icon: 'calendar',
+      title: 'Prendre rendez-vous',
+      description: 'Choisissez une date et un créneau pour votre séance personnalisée.',
+    },
+    {
+      panel: 'contact',
+      icon: 'mail',
+      title: 'Me contacter',
+      description: 'Une question ? Envoyez-moi un message, je vous réponds rapidement.',
+    },
+  ] as const;
 
   protected readonly hero = signal<HeroSettings>(DEFAULT_HERO);
   protected readonly services = signal<HomeServicesSettings>(DEFAULT_HOME_SERVICES);
@@ -339,8 +417,29 @@ export class Home {
       const introFull = page?.introduction ?? DEFAULT_PAGES[card.slug].introduction;
       const intro = introFull.length > 120 ? introFull.substring(0, 120) + '...' : introFull;
       const image = page?.imageUrl || DEFAULT_PAGES[card.slug].imageUrl;
-      return { ...card, title, intro, image };
+      return { ...card, title, intro, introFull, image };
     });
+  });
+
+  // Titre de section éditable, ponctué de deux pastilles-images des spécialités (si disponibles).
+  protected readonly servicesHeading = computed<readonly HeadingSegment[]>(() => {
+    const words = this.services().title.split(/\s+/).filter(Boolean);
+    const images = this.serviceCardsResolved()
+      .map((c) => c.image)
+      .filter(Boolean);
+    if (words.length < 4 || images.length === 0) return [{ kind: 'text', text: words.join(' ') }];
+
+    const cuts = [Math.ceil(words.length / 3), Math.ceil((2 * words.length) / 3)];
+    const segments: HeadingSegment[] = [];
+    let from = 0;
+    cuts.forEach((cut, i) => {
+      if (i >= images.length) return;
+      segments.push({ kind: 'text', text: words.slice(from, cut).join(' ') + ' ' });
+      segments.push({ kind: 'pill', src: images[i] });
+      from = cut;
+    });
+    segments.push({ kind: 'text', text: ' ' + words.slice(from).join(' ') });
+    return segments;
   });
 
   constructor() {
