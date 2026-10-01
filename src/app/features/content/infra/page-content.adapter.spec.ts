@@ -73,5 +73,15 @@ describe('page-content.adapter', () => {
       const result = toPageUpdate({ sectionTitle: 'Titre de section' });
       expect(result['section_title']).toBe('Titre de section');
     });
+
+    it('should keep a relative storage path as image_url', () => {
+      const result = toPageUpdate({ imageUrl: '/api/storage/files/pages/life-coach/img.jpg' });
+      expect(result['image_url']).toBe('/api/storage/files/pages/life-coach/img.jpg');
+    });
+
+    it('should send null as image_url when imageUrl is empty', () => {
+      const result = toPageUpdate({ imageUrl: '' });
+      expect(result['image_url']).toBeNull();
+    });
   });
 });

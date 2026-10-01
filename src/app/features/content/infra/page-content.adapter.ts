@@ -35,7 +35,7 @@ export function toPageUpdate(data: Partial<Omit<PageContent, 'id' | 'slug' | 'up
   if (data.sectionTitle !== undefined) result['section_title'] = data.sectionTitle;
   if (data.items !== undefined) result['items'] = data.items;
   if (data.extraText !== undefined) result['extra_text'] = data.extraText;
-  if (data.imageUrl !== undefined) result['image_url'] = data.imageUrl;
+  if (data.imageUrl !== undefined) result['image_url'] = data.imageUrl || null;
   if (data.imageAlt !== undefined) result['image_alt'] = data.imageAlt;
   return result;
 }
