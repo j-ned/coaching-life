@@ -78,4 +78,62 @@ describe('POST /api/appointments', () => {
     expect(statuses).toEqual([201, 201, 201, 201, 201, 429]);
     expect(bookings.inserted).toHaveLength(5);
   });
+
+  it.each([
+    { appointment_date: '2026-02-30', code: 'invalid_date', error: 'Date invalide.' },
+    { appointment_date: '2026-09-30', code: 'past_date', error: 'Cette date est passée.' },
+    {
+      appointment_date: '2026-12-25',
+      code: 'unavailable_day',
+      error: "Ce jour n'est pas ouvert à la réservation.",
+    },
+    {
+      appointment_date: '2026-10-03',
+      code: 'unavailable_day',
+      error: "Ce jour n'est pas ouvert à la réservation.",
+    },
+  ])(
+    'refuse $appointment_date en 422 ($code) sans rien enregistrer ni notifier',
+    async ({ appointment_date, code, error }) => {
+      const { app, bookings, notifier } = setup();
+
+      const response = await postBooking(app, aBookingRequest({ appointment_date }));
+
+      expect(response.status).toBe(422);
+      expect(await response.json()).toEqual({ error, code });
+      expect(bookings.inserted).toEqual([]);
+      expect(notifier.booked).toEqual([]);
+    },
+  );
+
+  it("refuse en 422 le seul jour désactivé par l'admin, sans l'enregistrer ni le notifier", async () => {
+    const { app, bookings, notifier } = setup();
+    bookings.disableDate('2026-10-05');
+    const otherDay = aBookingRequest({ appointment_date: '2026-10-06' });
+
+    const refused = await postBooking(app, aBookingRequest({ appointment_date: '2026-10-05' }));
+    const accepted = await postBooking(app, otherDay);
+
+    expect(refused.status).toBe(422);
+    expect(await refused.json()).toEqual({
+      error: "Ce jour n'est pas disponible à la réservation.",
+      code: 'disabled_date',
+    });
+    expect(accepted.status).toBe(201);
+    expect(bookings.inserted).toEqual([otherDay]);
+    expect(notifier.booked).toEqual([otherDay]);
+  });
+
+  it('signale la règle de calendrier plutôt que la désactivation quand les deux s’appliquent', async () => {
+    const { app, bookings } = setup();
+    bookings.disableDate('2026-10-03');
+
+    const response = await postBooking(app, aBookingRequest({ appointment_date: '2026-10-03' }));
+
+    expect(response.status).toBe(422);
+    expect(await response.json()).toEqual({
+      error: "Ce jour n'est pas ouvert à la réservation.",
+      code: 'unavailable_day',
+    });
+  });
 });

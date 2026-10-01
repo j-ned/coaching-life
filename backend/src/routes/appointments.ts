@@ -8,6 +8,7 @@ import { requireAdmin } from '../middleware/auth.js';
 import { rateLimit } from '../middleware/rate-limit.js';
 import { createAppointmentSchema } from '../lib/appointment-schema.js';
 import { mailBookingNotifier, type BookingNotifier } from '../lib/booking-notifier.js';
+import { BOOKING_RULE_MESSAGES, checkBookingRules } from '../lib/booking-rules.js';
 
 type AppointmentRoutesDeps = {
   readonly bookings: BookingRepository;
@@ -32,7 +33,7 @@ const idParamSchema = z.object({ id: z.string().uuid() });
 
 // Routes
 
-export function createAppointmentRoutes({ bookings, notifier }: AppointmentRoutesDeps) {
+export function createAppointmentRoutes({ bookings, notifier, now }: AppointmentRoutesDeps) {
   // Soumission publique → limite stricte par IP (anti-spam).
   const submitRateLimit = rateLimit({ windowMs: 60_000, max: 5 });
 
@@ -107,6 +108,17 @@ export function createAppointmentRoutes({ bookings, notifier }: AppointmentRoute
       // POST /api/appointments  (public)
       .post('/', submitRateLimit, zValidator('json', createAppointmentSchema), async (c) => {
         const data = c.req.valid('json');
+
+        const rules = checkBookingRules(data, now());
+        if (!rules.ok) return c.json({ error: rules.message, code: rules.code }, 422);
+
+        if (await bookings.isDateDisabled(data.appointment_date)) {
+          return c.json(
+            { error: BOOKING_RULE_MESSAGES.disabled_date, code: 'disabled_date' },
+            422,
+          );
+        }
+
         await bookings.insert(data);
 
         // Emails en fire & forget (n'empêche pas la réponse si ça échoue)

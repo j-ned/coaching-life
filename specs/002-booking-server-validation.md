@@ -272,6 +272,51 @@ Nature des échecs : symbole applicatif absent (`createAppointmentRoutes`) pour 
 
 Tous les tests de cette tranche échouent à ce stade (RED confirmé via la commande test du profil (`BU`) le 2026-10-01 19:49, 4 failed / 4 total, plus la suite `paris-time.spec.ts` (9 cas) en échec de chargement).
 
+### Tranche 2 — règles de calendrier (422)
+
+Horloge fixe `FIXED_NOW` = `2026-10-01T08:00Z` (jeudi, 10:00 à Paris). Entrées via `aBookingRequest` (défaut : `2026-10-05` 10:00, 60 min), doublures de `backend/src/test/booking-fakes.ts` réutilisées telles quelles (`InMemoryBookingRepository.disableDate` / `isDateDisabled` déjà présents). Aucune suite existante n'encode un état dont la sémantique change : les 4 tests de route de la tranche 1 réservent un lundi ouvré futur (`2026-10-05`), toujours valide.
+
+`backend/src/lib/booking-rules.spec.ts` — `checkBookingRules(request, now)`, égalité stricte sur le résultat :
+
+- **accepte un jour ouvré futur** : `2026-10-05` → `{ ok: true, duration: 60 }`.
+- **accepte le 29 février d'une année bissextile** : `2028-02-29` → `{ ok: true, duration: 60 }` (garde-fou contre un `invalid_date` trop large).
+- **refuse la date non calendaire** (`it.each`) : `2026-02-30`, `2027-02-29`, `2026-13-01`, `2026-00-10`, `2026-04-31`, `2026-10-00` → `{ ok: false, code: 'invalid_date', message: 'Date invalide.' }`.
+- **refuse la date passée, même un jour indisponible** (`it.each`) : `2026-09-30`, `2026-09-27` (dimanche), `2025-12-25` (Noël) → `past_date`, « Cette date est passée. » (ordre `past_date` avant `unavailable_day`).
+- **ne traite pas la date du jour à Paris comme passée** : `2026-10-01` → code ≠ `past_date` (assertion sur le code, stable quand la tranche 3 renverra `too_soon`).
+- **juge la date passée selon l'heure de Paris** : `now = 2026-09-30T22:30Z` (00:30 le 1er à Paris), date `2026-09-30` → `past_date` (une comparaison en UTC la verrait « aujourd'hui »).
+- **refuse le jour indisponible** (`it.each`) : `2026-12-25` (Noël, vendredi), `2027-05-06` (Ascension, jeudi), `2026-10-03` (samedi), `2026-10-04` (dimanche) → `unavailable_day`, « Ce jour n'est pas ouvert à la réservation. ».
+
+`backend/src/lib/french-holidays.spec.ts` — `getUnavailableDayReason(iso)` : fériés fixes et mobiles 2026-2027 (Jour de l'An, Lundi de Pâques `2026-04-06`, Ascension `2026-05-14` et `2027-05-06`, Lundi de Pentecôte `2026-05-25`, Fête nationale, Noël), férié un dimanche (`2026-11-01` → `Toussaint`, le férié prime sur `Weekend`), samedi / dimanche → `Weekend` ; jours ouvrés (`2026-10-02`, `2026-10-05`, `2026-12-24`, `2027-05-07`) → `null`. Valeurs attendues vérifiées contre `src/app/shared/calendar/french-holidays.ts` (la parité exhaustive 2025-2035 reste en tranche 6).
+
+`backend/src/routes/appointments.spec.ts` (ajouts) :
+
+- **refuse en 422 sans enregistrer ni notifier** (`it.each`) : `2026-02-30` / `invalid_date`, `2026-09-30` / `past_date`, `2026-12-25` et `2026-10-03` / `unavailable_day` → statut 422, corps `{ error: <message FR>, code }`, `inserted` et `booked` vides.
+- **refuse en 422 le seul jour désactivé par l'admin** : `disableDate('2026-10-05')` ; POST `2026-10-05` → 422 `{ error: "Ce jour n'est pas disponible à la réservation.", code: 'disabled_date' }` ; POST `2026-10-06` → 201 ; `inserted` et `booked` égaux à `[requête du 06]` (la date interrogée est bien celle de la requête).
+- **signale la règle de calendrier avant la désactivation** : `disableDate('2026-10-03')` (samedi) → 422 `unavailable_day` (la vérification DB n'intervient qu'après les règles pures).
+
+Sortie `BU` condensée :
+
+```
+ ❯  unit  src/routes/appointments.spec.ts (10 tests | 6 failed)
+     × refuse '2026-02-30' en 422 ('invalid_date') sans rien enregistrer ni notifier
+     × refuse '2026-09-30' en 422 ('past_date') sans rien enregistrer ni notifier
+     × refuse '2026-12-25' en 422 ('unavailable_day') sans rien enregistrer ni notifier
+     × refuse '2026-10-03' en 422 ('unavailable_day') sans rien enregistrer ni notifier
+     × refuse en 422 le seul jour désactivé par l'admin, sans l'enregistrer ni le notifier
+     × signale la règle de calendrier plutôt que la désactivation quand les deux s'appliquent
+ FAIL   unit  src/lib/booking-rules.spec.ts
+Error: Cannot find module './booking-rules.js'
+ FAIL   unit  src/lib/french-holidays.spec.ts
+Error: Cannot find module './french-holidays.js'
+AssertionError: expected 201 to be 422 // Object.is equality   (x6)
+ Test Files  3 failed | 1 passed (4)
+      Tests  6 failed | 13 passed (19)
+```
+
+Nature des échecs : 6 assertions comportementales (`201` reçu au lieu de `422`) sur la route ; modules applicatifs absents (`booking-rules.ts`, `french-holidays.ts`) pour les deux suites pures (17 + 14 cas), non collectées. Aucune erreur de harnais. Non-régression : les 13 tests de la tranche 1 (4 route + 9 `toParisDateTime`) restent verts. `typecheck` backend échoue uniquement sur les deux modules dus au GREEN : `./booking-rules.js` (`src/lib/booking-rules.ts` : `checkBookingRules`, type `BookingRuleResult`) et `./french-holidays.js` (`src/lib/french-holidays.ts` : `getUnavailableDayReason`) ; à ajouter aussi au GREEN : `isDateDisabled` sur le port `BookingRepository` et dans `createBookingRepository`. Prettier vert sur les trois fichiers. Front : `pnpm test --watch=false` → 90 passed / 90 (19 fichiers), aucune régression.
+
+Tous les tests de cette tranche échouent à ce stade (RED confirmé via la commande test du profil (`BU`) le 2026-10-01 19:58, 6 failed / 19 total, plus les suites `booking-rules.spec.ts` (17 cas) et `french-holidays.spec.ts` (14 cas) en échec de chargement).
+
 ## Implémentation
 
 ### Tranche 1
@@ -281,9 +326,18 @@ Tous les tests de cette tranche échouent à ce stade (RED confirmé via la comm
 - `createAppointmentRoutes({ bookings, notifier, now })` : rate-limit de soumission instancié dans la factory ; `appointmentRoutes = createAppointmentRoutes(defaultDeps)` exporté, `backend/src/index.ts` inchangé. `now` fait partie du contrat de deps mais n'est lu qu'à partir de la tranche 2.
 - **Écart au plan** : `checkBookingRules` « réduit à `{ ok: true }` » n'est **pas** introduit. Aucun test de la tranche ne l'exerce, et une fonction qui renvoie toujours `ok` serait du code non couvert. Il arrive en tranche 2 avec sa première règle (`invalid_date`).
 
+### Tranche 2
+
+- `backend/src/lib/french-holidays.ts` : jumeau du calcul front (mêmes libellés, même algorithme de Meeus), mais en arithmétique `Date.UTC` / `getUTCDay` sur la chaîne ISO : indépendant du fuseau du conteneur. Seul `getUnavailableDayReason(iso)` est exporté (la map des fériés reste privée, pas de consommateur hors fichier).
+- `backend/src/lib/booking-rules.ts` : `checkBookingRules(request, now)` renvoie la première violation parmi `invalid_date` (aller-retour `Date.UTC` → ISO) → `past_date` (comparaison lexicale avec `toParisDateTime(now).date`) → `unavailable_day` ; succès `{ ok: true, duration }`. `BOOKING_RULE_MESSAGES` exporté (lu par la route pour `disabled_date`).
+- Port `BookingRepository` étendu de `isDateDisabled` ; `createBookingRepository` l'implémente par un `SELECT id … WHERE date = ? LIMIT 1` sur `disabled_dates`.
+- Route POST : règles pures, puis `isDateDisabled`, puis `insert` ; refus → 422 `{ error, code }`, sans insert ni notification.
+- **Réduit à la tranche (le plan complet arrive en tranche 3)** : `BookingRuleViolation` ne porte que les 4 codes exercés ; `duration` du succès est typé `number` (le resserrement en `BookingDuration` suit l'arrivée de `invalid_duration`) ; `checkBookingRules` prend `Pick<…, 'appointment_date' | 'duration'>` (`appointment_time` arrive avec `invalid_slot` / `too_soon`). `BookingRuleResult` n'est pas exporté : aucun consommateur hors du fichier.
+
 ## Journal des tranches
 
 - **Tranche 1 — réservation nominale acceptée, infra de test backend** : GREEN 13 passed / 13 total (4 route + 9 `toParisDateTime`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), `ParisDateTime` dés-exporté (aucun consommateur hors fichier), import de type `db` renommé `appDb` dans le repository pour ne pas masquer le paramètre
+- **Tranche 2 — règles de calendrier (422)** : GREEN 50 passed / 50 total (10 route + 9 `toParisDateTime` + 17 `checkBookingRules` + 14 `getUnavailableDayReason`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), commentaire d'en-tête de `french-holidays.ts` réduit à son WHY (jumeau front, calcul UTC), aucun autre changement
 
 ## Verify
 
@@ -306,3 +360,28 @@ GET /health     → {"status":"ok",…} HTTP 200
 ```
 
 Console serveur : propre, à une ligne attendue près. `[mail] appointment: Error: connect ECONNREFUSED 127.0.0.1:1` est loggée **après** le `--> POST /api/appointments 201` : l'échec SMTP provoqué est bien absorbé en fire & forget par `mailBookingNotifier` via la route, sans rejection non gérée ni crash. La ligne réservée est en base (relue par `/booked`). Le câblage par défaut (`createBookingRepository(db)` + `mailBookingNotifier`) est donc exercé de bout en bout.
+
+**Tranche 2 : PASS.** La tranche modifie `POST /api/appointments` (atteignable en production) et ajoute une requête `disabled_dates` au chemin nominal : la preuve est due.
+
+Steps (horloge réelle, 2026-10-01 ; PostgreSQL jetable `postgres:18` sur 54339, SMTP volontairement injoignable) :
+
+1. `docker run --rm -d --name cl-f001-verify2 -e POSTGRES_PASSWORD=test -p 54339:5432 postgres:18`, puis `npx tsx src/db/migrate.ts` → `Migrations applied`
+2. `INSERT INTO disabled_dates(date, reason) VALUES ('2026-10-06','test')` (via `docker exec … psql`)
+3. `PORT=3918 … npx tsx src/index.ts`, puis un `POST /api/appointments` (10:00, 60 min) par date ; second serveur sur 3919 pour le jour désactivé (le rate-limit de 5/min avait servi le 6e appel en 429, comportement attendu)
+4. `GET /api/appointments/booked?month=2026-10` et `?month=2026-12`
+
+Capture (sorties curl) :
+
+```
+2026-10-05 → {"success":true,"message":"Votre rendez-vous a été réservé avec succès !"} HTTP 201
+2026-02-30 → {"error":"Date invalide.","code":"invalid_date"} HTTP 422
+2026-09-30 → {"error":"Cette date est passée.","code":"past_date"} HTTP 422
+2026-12-25 → {"error":"Ce jour n'est pas ouvert à la réservation.","code":"unavailable_day"} HTTP 422
+2026-10-03 → {"error":"Ce jour n'est pas ouvert à la réservation.","code":"unavailable_day"} HTTP 422
+2026-10-06 → {"error":"Ce jour n'est pas disponible à la réservation.","code":"disabled_date"} HTTP 422
+2026-10-07 → {"success":true,"message":"Votre rendez-vous a été réservé avec succès !"} HTTP 201
+GET /booked?month=2026-10 → [{…"2026-10-05"…},{…"2026-10-07"…}] HTTP 200
+GET /booked?month=2026-12 → [] HTTP 200
+```
+
+Console serveur : propre. Les seules lignes `[mail] appointment: Error: connect ECONNREFUSED 127.0.0.1:1` suivent les deux `201` (échec SMTP provoqué, absorbé en fire & forget) ; aucune ne suit un `422`, donc aucun email n'est tenté pour une réservation refusée. Seuls les deux RDV acceptés sont en base. `isDateDisabled` (Drizzle) est exercé sur vrai PostgreSQL : jour désactivé refusé, jour voisin accepté.
