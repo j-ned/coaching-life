@@ -12,6 +12,20 @@ const pageSlugSchema = z.enum([
   'neuroatypical-parents',
 ]);
 
+// Les images uploadées sont stockées en chemin relatif same-origin (cf. migration 0001).
+// Une chaîne vide signifie « pas d'image » et est normalisée en null.
+const imageUrlSchema = z
+  .union([
+    z.url({ protocol: /^https?$/ }),
+    z
+      .string()
+      .startsWith('/api/storage/files/')
+      .refine((v) => !v.includes('..')),
+    z.literal(''),
+  ])
+  .nullable()
+  .transform((v) => (v === '' ? null : v));
+
 const updatePageSchema = z
   .object({
     title: z.string().min(1).max(200),
@@ -19,7 +33,7 @@ const updatePageSchema = z
     section_title: z.string().max(200),
     items: z.array(z.object({ title: z.string(), description: z.string() })),
     extra_text: z.string().max(2000).nullable(),
-    image_url: z.string().url().nullable(),
+    image_url: imageUrlSchema,
     image_alt: z.string().max(200),
   })
   .partial();
