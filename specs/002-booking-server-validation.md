@@ -364,6 +364,41 @@ Nature des échecs : 18 assertions comportementales (règle absente : `ok: true`
 
 Tous les tests de cette tranche échouent à ce stade (RED confirmé via la commande test du profil (`BU`) le 2026-10-01 20:04, 28 failed / 85 total).
 
+### Tranche 4 — créneau pris (409), contrat
+
+Horloge `FIXED_NOW`, entrées via `aBookingRequest` (défaut `2026-10-05` 10:00, 60 min). Doublure étendue (outillage de test) : `InMemoryBookingRepository.insert` rejette `SlotTakenError` (importée de `db/booking-repository.ts`) quand la demande chevauche une réservation déjà enregistrée le même jour (plage `[)`, adjacent accepté). La sémantique de chevauchement de référence reste la base (ADR-0001), prouvée en tranche 5 ; aucun test de route n'asserte les cas limites de la doublure.
+
+Écart de découpage, demandé par la session principale : `isExclusionViolation` est épinglé ici par un test unitaire pur (sans DB). Restent en tranche 5 : son branchement dans `createBookingRepository` (insert → `SlotTakenError`), la migration et le PATCH `/:id/status` → 409 (le handler accède à `db` en direct, testable seulement en intégration).
+
+Sweep de l'état seedé (la doublure rejette désormais un chevauchement) sur `backend/src/**/*.spec.ts` et `backend/src/test/` : `appointments.spec.ts`, `booking-rules.spec.ts`, `paris-time.spec.ts`, `french-holidays.spec.ts`, `booking-fakes.ts`. Seul `appointments.spec.ts` enregistre plusieurs réservations dans une même instance : le test de rate-limit (`09:00`, `10:00`, `11:00`, `14:00`, `15:00` en 60 min, sans chevauchement) et le test du jour désactivé (un seul insert). Aucune suite ne devient fausse, aucune adaptation mécanique. `setup()` prend un second paramètre optionnel (repository), sans changement des appels existants.
+
+`backend/src/routes/appointments.spec.ts` (ajouts) :
+
+- **refuse un créneau déjà réservé en 409 sans enregistrer ni notifier la seconde demande** (`it.each`) : même créneau ; `10:30` en 30 min après `10:00` en 60 min. Statut 409, corps `{ error: "Ce créneau vient d'être réservé, choisissez-en un autre.", code: 'slot_taken' }`, `inserted` et `booked` égaux à `[première demande]` (aucun email pour la demande refusée).
+- **ne traduit pas en 409 une panne d'enregistrement, et ne notifie pas** : `BrokenBookingRepository` (sous-classe locale, `insert` rejette une `Error` quelconque) → 500, `booked` vide. Garde-fou contre un `catch` trop large : vert dès maintenant, voulu.
+
+`backend/src/db/booking-repository.spec.ts` (nouveau) — `isExclusionViolation(err)`, `toBe` strict :
+
+- **reconnaît** : `pg.DatabaseError` de code `23P01` (`err.code`) ; `DrizzleQueryError` (vraie classe `drizzle-orm/errors`) enveloppant ce `23P01` (`err.cause.code`, footgun Drizzle 0.45).
+- **ignore** : `23505` direct et enveloppé ; `DrizzleQueryError` sans cause ; `Error` sans code ; `null` ; `undefined` ; la chaîne `'23P01'`.
+
+Sortie `BU` condensée :
+
+```
+ FAIL  unit  src/db/booking-repository.spec.ts > isExclusionViolation > reconnaît une … (x2)
+ FAIL  unit  src/db/booking-repository.spec.ts > isExclusionViolation > ignore une … (x7)
+TypeError: isExclusionViolation is not a function
+ FAIL  unit  src/routes/appointments.spec.ts > POST /api/appointments > refuse 'le même créneau' déjà réservé en 409 …
+ FAIL  unit  src/routes/appointments.spec.ts > POST /api/appointments > refuse 'un créneau qui chevauche' déjà réservé en 409 …
+AssertionError: expected 500 to be 409 // Object.is equality
+ Test Files  2 failed | 3 passed (5)
+      Tests  11 failed | 86 passed (97)
+```
+
+Nature des échecs : 2 assertions comportementales sur la route (`500` reçu au lieu de `409` : `SlotTakenError` absente, l'erreur remonte au gestionnaire par défaut de Hono) ; 9 `TypeError` sur le symbole applicatif dû au GREEN `isExclusionViolation`. Aucune erreur de harnais : les deux suites se chargent, tous les cas sont collectés. Non-régression : les 85 tests des tranches 1 à 3 restent verts (86 passed = 85 + le garde-fou 500). `typecheck` backend échoue uniquement sur les deux symboles dus au GREEN dans `src/db/booking-repository.ts` : `SlotTakenError` (TS2305, importée par `src/test/booking-fakes.ts`) et `isExclusionViolation` (TS2305). Prettier vert sur les trois fichiers. Front : `pnpm test --watch=false` → 90 passed / 90 (19 fichiers), aucune régression.
+
+Tous les tests de cette tranche échouent à ce stade (RED confirmé via la commande test du profil (`BU`) le 2026-10-01 20:11, 11 failed / 97 total).
+
 ## Implémentation
 
 ### Tranche 1
@@ -388,11 +423,18 @@ Tous les tests de cette tranche échouent à ce stade (RED confirmé via la comm
 - `ParisDateTime` est exporté par `paris-time.ts` : `booking-rules.ts` en a besoin pour typer `bookingThreshold` / `isSlotTooSoon`. `BookingDuration`, `BookingRuleResult` et les helpers `formatTime` / `toMinutes` restent privés (aucun consommateur hors fichier à ce stade).
 - Route inchangée : le 422 `{ error, code }` existant relaie les nouveaux codes.
 
+### Tranche 4
+
+- `backend/src/db/booking-repository.ts` : `SlotTakenError` (classe d'erreur nommée, message neutre) et `isExclusionViolation(err: unknown)` : vrai si `err.code` ou, pour une `Error`, `err.cause.code` vaut `23P01` (garde `hasSqlState` privée, constante `EXCLUSION_VIOLATION` privée). Exporté sans consommateur applicatif à ce stade : le plan le branche dans `createBookingRepository` en tranche 5, le test unitaire l'épingle dès maintenant (écart de découpage demandé).
+- Route POST : `insert` entouré d'un `try/catch` qui ne traduit que `SlotTakenError` en 409 `{ error: "Ce créneau vient d'être réservé, choisissez-en un autre.", code: 'slot_taken' }` et relance tout le reste (500 par le gestionnaire Hono, garde-fou testé). Le `return` du 409 précède le `notifier` : aucun email pour une demande refusée.
+- **Non fait (tranche 5)** : `createBookingRepository.insert` ne lève pas encore `SlotTakenError` (pas de contrainte en base, pas de mapping), PATCH `/:id/status` inchangé. En production, le 409 reste donc inatteignable jusqu'à la tranche 5.
+
 ## Journal des tranches
 
 - **Tranche 1 — réservation nominale acceptée, infra de test backend** : GREEN 13 passed / 13 total (4 route + 9 `toParisDateTime`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), `ParisDateTime` dés-exporté (aucun consommateur hors fichier), import de type `db` renommé `appDb` dans le repository pour ne pas masquer le paramètre
 - **Tranche 2 — règles de calendrier (422)** : GREEN 50 passed / 50 total (10 route + 9 `toParisDateTime` + 17 `checkBookingRules` + 14 `getUnavailableDayReason`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), commentaire d'en-tête de `french-holidays.ts` réduit à son WHY (jumeau front, calcul UTC), aucun autre changement
 - **Tranche 3 — règles horaires et délai de prévenance (422)** : GREEN 85 passed / 85 total (backend ; `typecheck` vert, dont l'`expectTypeOf` `30 | 60`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), aucun changement retenu (helpers `formatTime` / `toMinutes` privés et nommés par intention, aucune duplication avec l'existant)
+- **Tranche 4 — créneau pris (409), contrat** : GREEN 97 passed / 97 total (backend ; `typecheck` et `build` verts ; front 90 / 90) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), aucun changement retenu (le test du SQLSTATE factorisé dès le premier jet dans `hasSqlState`, message 409 littéral à son unique site d'usage)
 
 ## Verify
 
@@ -461,3 +503,25 @@ GET /booked → [{"appointment_date":"2026-10-05","appointment_time":"10:00","du
 ```
 
 Console serveur : propre. Une seule ligne `[mail] appointment: Error: connect ECONNREFUSED 127.0.0.1:1`, juste après le `--> POST /api/appointments 201` (échec SMTP provoqué, absorbé en fire & forget) ; les quatre `422` ne sont suivis d'aucune tentative d'email. Seul le RDV accepté est en base.
+
+**Tranche 4 : PASS.** La tranche enveloppe l'`insert` du chemin `POST /api/appointments` (atteignable en production) dans un `try/catch` : la preuve est due sur le chemin nominal. Le 409 lui-même n'est pas atteignable en production avant la tranche 5 (le repository Drizzle ne lève pas encore `SlotTakenError`) ; il est prouvé par les tests de route.
+
+Steps (horloge réelle, 2026-10-01 ; PostgreSQL jetable `postgres:18` sur 54339, SMTP volontairement injoignable) :
+
+1. `docker run --rm -d --name cl-f001-verify4 -e POSTGRES_PASSWORD=test -p 54339:5432 postgres:18`, puis `npx tsx src/db/migrate.ts` → `Migrations applied`
+2. `PORT=3921 SMTP_HOST=127.0.0.1 SMTP_PORT=1 … npx tsx src/index.ts`
+3. `POST /api/appointments` valide (`2026-10-05` 10:00, 60 min), puis le même créneau une seconde fois, puis `GET /api/appointments/booked?month=2026-10`
+
+Capture (sorties curl) :
+
+```
+1er POST 2026-10-05 10:00 → {"success":true,"message":"Votre rendez-vous a été réservé avec succès !"} HTTP 201
+2e POST même créneau      → {"success":true,"message":"Votre rendez-vous a été réservé avec succès !"} HTTP 201
+GET /booked               → [{…"2026-10-05","10:00",60},{…"2026-10-05","10:00",60}] HTTP 200
+```
+
+Le second 201 est attendu à ce stade : sans contrainte d'exclusion ni mapping (tranche 5), la base accepte le doublon. Ce qui est prouvé ici : le chemin nominal traverse le `try/catch` sans régression (201, ligne en base, notification tentée).
+
+Console serveur : propre. Une ligne `[mail] appointment: Error: connect ECONNREFUSED 127.0.0.1:1` après chaque `--> POST /api/appointments 201` (échec SMTP provoqué, absorbé en fire & forget). Le premier `POST` de la session (corps de test mal formé, `coaching_type` invalide) a reçu un 400 Zod, sans email.
+
+Observation hors périmètre (préexistante, non introduite par ce diff) : un `docker stop` de la base pendant que le serveur tourne fait **planter le processus** (`Unhandled 'error' event` émis par le `Pool` de `backend/src/db/index.ts`, qui n'a pas d'écouteur `error`, code `57P01`). À remonter comme constat séparé ; le cas « panne d'enregistrement → 500 » reste couvert par le test de route.

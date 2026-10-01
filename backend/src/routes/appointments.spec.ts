@@ -16,8 +16,16 @@ class FailingBookingNotifier extends SpyBookingNotifier {
   };
 }
 
-function setup(notifier: SpyBookingNotifier = new SpyBookingNotifier()) {
-  const bookings = new InMemoryBookingRepository();
+class BrokenBookingRepository extends InMemoryBookingRepository {
+  override insert = async (): Promise<void> => {
+    throw new Error('Connexion à la base perdue');
+  };
+}
+
+function setup(
+  notifier: SpyBookingNotifier = new SpyBookingNotifier(),
+  bookings: InMemoryBookingRepository = new InMemoryBookingRepository(),
+) {
   const app = createAppointmentRoutes({ bookings, notifier, now: fixedClock() });
   return { app, bookings, notifier };
 }
@@ -185,5 +193,37 @@ describe('POST /api/appointments', () => {
       error: "Ce jour n'est pas ouvert à la réservation.",
       code: 'unavailable_day',
     });
+  });
+
+  it.each([
+    { cas: 'le même créneau', overrides: {} },
+    { cas: 'un créneau qui chevauche', overrides: { appointment_time: '10:30', duration: 30 } },
+  ])(
+    'refuse $cas déjà réservé en 409 sans enregistrer ni notifier la seconde demande',
+    async ({ overrides }) => {
+      const { app, bookings, notifier } = setup();
+      const first = aBookingRequest();
+
+      await postBooking(app, first);
+      const response = await postBooking(app, aBookingRequest(overrides));
+
+      expect(response.status).toBe(409);
+      expect(await response.json()).toEqual({
+        error: "Ce créneau vient d'être réservé, choisissez-en un autre.",
+        code: 'slot_taken',
+      });
+      expect(bookings.inserted).toEqual([first]);
+      expect(notifier.booked).toEqual([first]);
+    },
+  );
+
+  it("ne traduit pas en 409 une panne d'enregistrement, et ne notifie pas", async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const { app, notifier } = setup(new SpyBookingNotifier(), new BrokenBookingRepository());
+
+    const response = await postBooking(app, aBookingRequest());
+
+    expect(response.status).toBe(500);
+    expect(notifier.booked).toEqual([]);
   });
 });

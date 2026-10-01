@@ -1,5 +1,5 @@
 import type { Hono } from 'hono';
-import type { BookingRepository } from '../db/booking-repository.js';
+import { SlotTakenError, type BookingRepository } from '../db/booking-repository.js';
 import type { BookingNotifier } from '../lib/booking-notifier.js';
 
 export type BookingRequest = Parameters<BookingRepository['insert']>[0];
@@ -35,8 +35,21 @@ export class InMemoryBookingRepository implements BookingRepository {
   isDateDisabled = async (date: string): Promise<boolean> => this.disabledDates.has(date);
 
   insert = async (data: BookingRequest): Promise<void> => {
+    if (this.inserted.some((booked) => overlaps(booked, data))) throw new SlotTakenError();
     this.inserted.push(data);
   };
+}
+
+function overlaps(a: BookingRequest, b: BookingRequest): boolean {
+  if (a.appointment_date !== b.appointment_date) return false;
+  const aStart = toMinutes(a.appointment_time);
+  const bStart = toMinutes(b.appointment_time);
+  return aStart < bStart + b.duration && bStart < aStart + a.duration;
+}
+
+function toMinutes(time: string): number {
+  const [hours, minutes] = time.split(':').map(Number) as [number, number];
+  return hours * 60 + minutes;
 }
 
 export class SpyBookingNotifier implements BookingNotifier {

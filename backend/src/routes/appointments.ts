@@ -3,7 +3,11 @@ import { zValidator } from '@hono/zod-validator';
 import { eq, ne, asc, and, gte, lte } from 'drizzle-orm';
 import { z } from 'zod';
 import { db, appointments, disabled_dates } from '../db/index.js';
-import { createBookingRepository, type BookingRepository } from '../db/booking-repository.js';
+import {
+  createBookingRepository,
+  SlotTakenError,
+  type BookingRepository,
+} from '../db/booking-repository.js';
 import { requireAdmin } from '../middleware/auth.js';
 import { rateLimit } from '../middleware/rate-limit.js';
 import { createAppointmentSchema } from '../lib/appointment-schema.js';
@@ -119,7 +123,15 @@ export function createAppointmentRoutes({ bookings, notifier, now }: Appointment
           );
         }
 
-        await bookings.insert(data);
+        try {
+          await bookings.insert(data);
+        } catch (err) {
+          if (!(err instanceof SlotTakenError)) throw err;
+          return c.json(
+            { error: "Ce créneau vient d'être réservé, choisissez-en un autre.", code: 'slot_taken' },
+            409,
+          );
+        }
 
         // Emails en fire & forget (n'empêche pas la réponse si ça échoue)
         notifier.appointmentBooked(data).catch((err) => console.error('[mail] appointment:', err));
