@@ -271,3 +271,38 @@ TypeError: createAppointmentRoutes is not a function   (x4)
 Nature des échecs : symbole applicatif absent (`createAppointmentRoutes`) pour les 4 tests de route, module applicatif absent (`paris-time.ts`) pour la suite de 9 cas, non collectée. Aucune erreur de harnais : le module de route se charge sous Vitest (db/mailer instanciés sans connexion). `BT` (typecheck) échoue uniquement sur des symboles dus au GREEN : `createAppointmentRoutes` (`src/routes/appointments.ts`), `./paris-time.js` (`src/lib/paris-time.ts`), `BookingRepository` (`src/db/booking-repository.ts`), `BookingNotifier` (`src/lib/booking-notifier.ts`). Front : `pnpm test --watch=false` → 90 passed / 90 (19 fichiers), aucune régression.
 
 Tous les tests de cette tranche échouent à ce stade (RED confirmé via la commande test du profil (`BU`) le 2026-10-01 19:49, 4 failed / 4 total, plus la suite `paris-time.spec.ts` (9 cas) en échec de chargement).
+
+## Implémentation
+
+### Tranche 1
+
+- `CreateAppointmentInput` et `createAppointmentSchema` vivent dans `backend/src/lib/appointment-schema.ts` (sortis de la route) : `db/booking-repository.ts` et `lib/booking-notifier.ts` en dépendent sans importer `routes/`.
+- Ports réduits à ce que la tranche exerce : `BookingRepository = { insert }` (`isDateDisabled` arrive en tranche 2 avec `disabled_date`), `BookingNotifier = { appointmentBooked }`. `createBookingRepository(db)` fait l'insert Drizzle sans mapping d'erreur ; `mailBookingNotifier` reprend les deux envois existants.
+- `createAppointmentRoutes({ bookings, notifier, now })` : rate-limit de soumission instancié dans la factory ; `appointmentRoutes = createAppointmentRoutes(defaultDeps)` exporté, `backend/src/index.ts` inchangé. `now` fait partie du contrat de deps mais n'est lu qu'à partir de la tranche 2.
+- **Écart au plan** : `checkBookingRules` « réduit à `{ ok: true }` » n'est **pas** introduit. Aucun test de la tranche ne l'exerce, et une fonction qui renvoie toujours `ok` serait du code non couvert. Il arrive en tranche 2 avec sa première règle (`invalid_date`).
+
+## Journal des tranches
+
+- **Tranche 1 — réservation nominale acceptée, infra de test backend** : GREEN 13 passed / 13 total (4 route + 9 `toParisDateTime`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), `ParisDateTime` dés-exporté (aucun consommateur hors fichier), import de type `db` renommé `appDb` dans le repository pour ne pas masquer le paramètre
+
+## Verify
+
+**Tranche 1 : PASS.** La tranche restructure `POST /api/appointments`, déjà atteignable en production : la preuve est due.
+
+Steps (backend seul, PostgreSQL jetable `postgres:18` sur le port 54339, SMTP volontairement injoignable) :
+
+1. `docker run --rm -d --name cl-f001-verify -e POSTGRES_PASSWORD=test -p 54339:5432 postgres:18`
+2. `DATABASE_URL=postgres://postgres:test@localhost:54339/postgres npx tsx src/db/migrate.ts` → `Migrations applied`
+3. `PORT=3917 SMTP_HOST=127.0.0.1 SMTP_PORT=1 … npx tsx src/index.ts` → `Backend démarré sur http://localhost:3917`
+4. `POST /api/appointments` valide (`2026-10-05` 10:00, 60 min) ; `POST` mal formé ; `GET /api/appointments/booked?month=2026-10` ; `GET /health`
+
+Capture (sorties curl) :
+
+```
+POST valide     → {"success":true,"message":"Votre rendez-vous a été réservé avec succès !"} HTTP 201
+POST mal formé  → {"success":false,"error":{"name":"ZodError",…}} HTTP 400
+GET /booked     → [{"appointment_date":"2026-10-05","appointment_time":"10:00","duration":60}] HTTP 200
+GET /health     → {"status":"ok",…} HTTP 200
+```
+
+Console serveur : propre, à une ligne attendue près. `[mail] appointment: Error: connect ECONNREFUSED 127.0.0.1:1` est loggée **après** le `--> POST /api/appointments 201` : l'échec SMTP provoqué est bien absorbé en fire & forget par `mailBookingNotifier` via la route, sans rejection non gérée ni crash. La ligne réservée est en base (relue par `/booked`). Le câblage par défaut (`createBookingRepository(db)` + `mailBookingNotifier`) est donc exercé de bout en bout.
