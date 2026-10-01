@@ -92,7 +92,7 @@ describe('appointment.adapter', () => {
         .with('coachingType', 'personal-development')
         .with('appointmentDate', '2026-05-10')
         .with('appointmentTime', '09:00')
-        .with('duration', 45)
+        .with('duration', 30)
         .build();
 
       expect(toInsert(formData)).toEqual({
@@ -102,7 +102,7 @@ describe('appointment.adapter', () => {
         coaching_type: 'personal-development',
         appointment_date: '2026-05-10',
         appointment_time: '09:00',
-        duration: 45,
+        duration: 30,
         message: 'Je souhaite travailler sur ma confiance en soi.',
       });
     });

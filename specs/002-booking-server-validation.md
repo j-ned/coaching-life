@@ -450,6 +450,82 @@ Point ouvert pour le GREEN : le corps du 409 du PATCH n'est pas fixé par le pla
 
 Tous les tests de cette tranche échouent à ce stade (RED confirmé via la commande test du profil (`BI`) le 2026-10-01 20:18, 11 failed / 14 total).
 
+### Tranche 6 — règles front alignées et parité
+
+Régime zoneless (`zone.js` absent de `package.json`) : horloge pilotée par `vi.useFakeTimers({ toFake: ['Date'] })` + `vi.setSystemTime` avant `TestBed.createComponent`, `await fixture.whenStable()` après chaque interaction ; aucun `fakeAsync`. Composants montés par `TestBed.createComponent(…, { bindings: [inputBinding, outputBinding] })` (pas de `@defer` dans le picker ni le calendrier). Données via `DisabledDateBuilder`.
+
+Sweep du contrat (`AppointmentFormData.duration: BookingDuration`, créneaux masqués, jours indisponibles) sur `src/**/*.spec.ts`, `src/app/features/booking/test-utils/` et `backend/src/**/*.spec.ts` : aucune suite existante ne monte le picker ni le calendrier ; `AppointmentFormDataBuilder` (défaut 60) et `AppointmentBuilder` restent valides ; `http-appointment.gateway.spec.ts` (ligne `AppointmentRow`, `duration: 60`) inchangé. Seule suite rendue fausse par le resserrement de type : `appointment.adapter.spec.ts` (`toInsert`), qui construisait une `AppointmentFormData` de 45 min, durée qui ne compile plus. **Adaptation iso-invariant** (pas mécanique : la valeur attendue bouge avec l'entrée) : `45` → `30` en entrée et en sortie attendue ; l'invariant (la durée est recopiée telle quelle en `snake_case`, valeur distincte du défaut 60) est conservé. Le test reste vert avant et après le GREEN. `AppointmentRow.duration` / `Appointment.duration` (`90` dans le même fichier) restent `number` : non concernés.
+
+`src/app/features/booking/domain/booking-rules.spec.ts` — `hasBookableSlot(date, threshold)` (`it.each`, `toBe` strict) : seuil `2026-10-02`/600 → `2026-09-30` faux, `2026-10-01` faux, `2026-10-02` vrai, `2026-10-05` vrai ; seuil `2026-10-02`/1050 → `2026-10-02` vrai (17:30 en 30 min à exactement 24 h) ; seuil `2026-10-02`/1051 → `2026-10-02` faux, `2026-10-03` vrai (la règle ne juge que le délai, pas le week-end). Les autres fonctions du jumeau sont prouvées par la parité.
+
+`src/app/features/booking/components/booking-time-picker.spec.ts` (horloge `2026-10-01T08:00Z`, seuil `2026-10-02` 10:00) :
+
+- **propose les durées 30 min et 1h** : libellés des boutons de durée égaux à `['30 min', '1h']` (garde-fou de la génération depuis `BOOKING_DURATIONS`, vert dès maintenant).
+- **propose tous les créneaux d'une journée à plus de 24 h** : `2026-10-05` → `09:00`…`17:00` (garde-fou, vert).
+- **masque les créneaux du lendemain à moins de 24 h** : `2026-10-02` → `10:00`…`17:00` exactement.
+- **idem en 30 min** : clic « 30 min » → `10:00`…`17:30`.
+- **recalcule quand la date change** : `date` lié à un signal `2026-10-05` puis `set('2026-10-02')` → `10:00`…`17:00`.
+- **aucun créneau pour aujourd'hui** : `2026-10-01` → liste vide et message « Aucun créneau disponible pour cette date. ».
+- **émet le premier créneau réservable** : clic sur le premier bouton de `2026-10-02` → émissions `[{ time: '10:00', duration: 60 }]`.
+
+`src/app/features/booking/components/booking-calendar.spec.ts` (bouton du jour trouvé par son numéro dans la grille ; assertions `disabled` + `aria-label` exact) :
+
+- **aujourd'hui indisponible pour délai de prévenance** (`2026-10-01T08:00Z`) : jour 1 `disabled`, label « jeudi 1 octobre 2026, indisponible : Délai de prévenance de 24 h ».
+- **aujourd'hui non sélectionnable** : clic jour 1 → aucune émission de `selectedDateChange`.
+- **lendemain réservable** (`08:00Z`) : jour 2 actif, label « vendredi 2 octobre 2026, disponible », clic → `['2026-10-02']` (garde-fou, vert).
+- **lendemain réservable à exactement 24 h du dernier créneau** (`15:30Z`, 17:30 à Paris) : jour 2 actif (borne, garde-fou, vert).
+- **lendemain indisponible une fois 17:30 passé sous les 24 h** (`15:31Z`) : jour 2 `disabled`, label « vendredi 2 octobre 2026, indisponible : Délai de prévenance de 24 h ».
+- **raison admin prioritaire** : `disabledDates` = `2026-10-01` « Formation » → label « …, indisponible : Formation » (garde-fou, vert).
+- **week-end prioritaire sur le délai** (`2026-10-02T15:31Z`, samedi 3 sans créneau réservable) → label « samedi 3 octobre 2026, indisponible : Weekend » (garde-fou, vert).
+
+`backend/src/lib/booking-rules.parity.spec.ts` (importe directement `src/app/features/booking/domain/booking-rules.ts` et `src/app/shared/calendar/french-holidays.ts`) :
+
+- **fichiers de règles front sans import** (`it.each` sur les deux fichiers) : `not.toMatch(/^\s*import\s/m)` sur le source complet (regex vérifiée : rejette `import type …` en début de ligne, ignore un commentaire « importe »).
+- **constantes** : ouverture, fermeture, pas, durées, délai front `toEqual` back.
+- **`listSlotStarts`** égal pour chaque durée de `BOOKING_DURATIONS` (back).
+- **`toParisDateTime`** et **`bookingThreshold`** égaux sur 14 instants (`it.each`) : seuils de la tranche 3 et du calendrier (`2026-10-01T08:00Z`, `15:30Z`, `15:31Z`), été/hiver, passage à l'heure d'été (`2026-03-28T22:30Z`, `03-29T00:30Z`, `01:30Z`), heure rejouée (`2026-10-24T22:30Z`, `10-25T00:30Z`, `01:30Z`), changements de jour et d'année.
+- **`isSlotTooSoon`** pour ces 14 instants : chaque début de chaque durée sur J-1, J, J+1 du seuil → aucune divergence front/back, et les verdicts contiennent à la fois `true` et `false` (garde contre une comparaison vide).
+- **disponibilité de chaque jour de 2025 à 2035** : `getUnavailableReason(new Date(y, m-1, d), getFrenchHolidays(y))` === `getUnavailableDayReason(iso)` (égalité de la raison, `null` compris), 4017 jours comparés, liste des divergences égale à `[]`.
+
+Sortie `pnpm test --watch=false` (front) condensée :
+
+```
+✘ [ERROR] Could not resolve "./booking-rules"
+    src/app/features/booking/domain/booking-rules.spec.ts:1:32
+✘ [ERROR] TS2307: Cannot find module './booking-rules' or its corresponding type declarations.
+ ELIFECYCLE  Test failed.
+```
+
+Le bundle `ng test` compile toutes les specs ensemble : le module absent bloque la suite entière. Mesure comportementale prise avec `booking-rules.spec.ts` mis de côté le temps d'une exécution (puis remis) :
+
+```
+ × masque les créneaux du lendemain qui commencent à moins de 24 h
+     expected [ '09:00', '09:30', '10:00', …(14) ] to deeply equal [ '10:00', '10:30', '11:00', …(12) ]
+ × masque les créneaux à moins de 24 h aussi en 30 min
+ × recalcule les créneaux masqués quand la date change
+ × n’affiche aucun créneau pour aujourd’hui        expected [ '09:00', … ] to deeply equal []
+ × émet le premier créneau réservable du lendemain avec sa durée
+     expected [ { time: '09:00', duration: 60 } ] to deeply equal [ { time: '10:00', duration: 60 } ]
+ × rend indisponible aujourd’hui pour délai de prévenance      expected false to be true
+ × ne sélectionne pas aujourd’hui au clic                      expected [ '2026-10-01' ] to deeply equal []
+ × rend le lendemain indisponible une fois son dernier créneau passé sous les 24 h   expected false to be true
+ Test Files  2 failed | 19 passed (21)
+      Tests  8 failed | 96 passed (104)
+```
+
+Sortie `BU` condensée :
+
+```
+ FAIL  unit  src/lib/booking-rules.parity.spec.ts
+Error: Cannot find module '../../../src/app/features/booking/domain/booking-rules.js'
+ Test Files  1 failed | 5 passed (6)
+      Tests  97 passed (97)
+```
+
+Nature des échecs : 8 assertions comportementales sur les composants (créneaux non masqués, jours non désactivés) ; module applicatif absent `src/app/features/booking/domain/booking-rules.ts`, **scaffold dû au GREEN**, qui empêche le chargement de `booking-rules.spec.ts` (7 cas) côté front et de `booking-rules.parity.spec.ts` (48 cas) côté back. Aucune erreur de harnais : les deux specs de composant se montent sous zoneless, et la moitié de la parité qui ne dépend pas du nouveau module (fériés 2025-2035, absence d'import de `french-holidays.ts`) a été exécutée sur une copie temporaire : 2 passed, ce qui prouve la résolution `.js` → `.ts` des fichiers front par Vitest backend et le calcul des 4017 jours. 6 tests de composant verts dès maintenant, voulu : garde-fous du parcours nominal (durées, journée complète, lendemain réservable et cliquable, borne exacte, priorité admin et week-end). Non-régression : front 90 existants verts (96 passed = 90 + 6 garde-fous), back 97 passed / 97. `typecheck` backend échoue uniquement sur `../../../src/app/features/booking/domain/booking-rules.js` (TS2307, dû au GREEN) : l'import NodeNext de `french-holidays.ts` front typecheck. Exports attendus du jumeau front : `BOOKING_OPENING_HOUR`, `BOOKING_CLOSING_HOUR`, `BOOKING_SLOT_STEP_MINUTES`, `BOOKING_DURATIONS`, `BOOKING_LEAD_TIME_MS`, `listSlotStarts`, `toParisDateTime`, `bookingThreshold`, `isSlotTooSoon`, `hasBookableSlot`, type `BookingDuration`, sans aucune ligne `import`. Prettier vert sur les cinq fichiers.
+
+Tous les tests de cette tranche échouent à ce stade (RED confirmé via la commande test du profil (`pnpm test --watch=false` + `BU`) le 2026-10-01 20:30, 8 failed / 104 total côté composants, plus les suites `booking-rules.spec.ts` (7 cas) et `booking-rules.parity.spec.ts` (48 cas) en échec de chargement sur le module dû au GREEN).
+
 ## Implémentation
 
 ### Tranche 1
@@ -489,6 +565,14 @@ Tous les tests de cette tranche échouent à ce stade (RED confirmé via la comm
 - `backend/scripts/preflight-0002-appointments.sql` : **aligné, non modifié**. Vérifié sur `postgres:18` en appliquant 0000/0001 puis des lignes piégées : le script remonte `2026-02-30` (`jour inexistant`, bloquant) et la paire 10:00/60 – 10:30/30, et ignore l'adjacent 11:00 et l'annulé ; 0002 échoue alors sur ces deux cas (`date field value out of range`, puis `could not create exclusion constraint`), puis passe une fois les lignes corrigées/annulées et le script revenu à 0 ligne. Le script est plus strict que la fonction sur la forme (ex. `2026-1-5` serait signalé bloquant alors que `split_part` l'accepterait) : sans effet sur la sûreté du déploiement.
 - Chemin de migration du conteneur (`Dockerfile` : `cp -r backend/src/db/migrations backend/dist/db/migrations`, puis `start.sh` : `node dist/db/migrate.js`) rejoué à l'identique sur base vierge : `Migrations applied`, 3 lignes dans `drizzle.__drizzle_migrations`, contrainte `appointments_no_overlap` présente, `appointment_slot` en `provolatile = 'i'`.
 
+### Tranche 6
+
+- `src/app/features/booking/domain/booking-rules.ts` (nouveau, **aucune ligne `import`**, commentaire d'une ligne en tête qui le rappelle, cf. ADR-0002) : copie des constantes et des fonctions du backend (`listSlotStarts`, `toParisDateTime` avec le même `Intl.DateTimeFormat` Europe/Paris, `bookingThreshold`, `isSlotTooSoon`) et `hasBookableSlot(date, threshold)` (vrai s'il existe une durée et un début non trop proche ; ne juge que le délai, pas le week-end). Exports limités à ce que le brief et la parité consomment ; `ParisDateTime` et les helpers `formatTime` / `toMinutes` restent privés.
+- `BookingTimePicker` : constantes en dur supprimées. Les créneaux viennent de `listSlotStarts(duration)` filtrés par `!isSlotTooSoon(date, time, bookingThreshold(new Date()))` dans le `computed`. Les boutons de durée sont générés par `@for` sur `BOOKING_DURATIONS`, avec des libellés `Record<BookingDuration, string>` (`30 min` / `1h`, inchangés). `selectedDuration` et la durée émise sont typés `BookingDuration`. Le calcul de chevauchement avec les RDV pris est inchangé.
+- `BookingCalendar` : `bookingThreshold(new Date())` est calculé une fois par grille. Raison `'Délai de prévenance de 24 h'` quand `!hasBookableSlot`, en dernier dans `adminReason ?? unavailableReason ?? leadTimeReason`, ce qui donne la priorité admin > férié/week-end > délai. `isPast` est inchangé (le libellé « date passée » reste prioritaire sur les jours passés).
+- `AppointmentFormData.duration: BookingDuration`. La page `Booking` type son `selectedSlot` / `onSlotSelected` en `BookingDuration` (resserrement de type requis par la compile, aucun changement de comportement).
+- SSR : aucun accès `window` ajouté. Le formatter `Intl` est créé au chargement du module, ce qui ne pose pas de problème côté serveur. `new Date()` n'est lu que dans les `computed`. `pnpm build` prérend toujours les 5 routes.
+
 ## Journal des tranches
 
 - **Tranche 1 — réservation nominale acceptée, infra de test backend** : GREEN 13 passed / 13 total (4 route + 9 `toParisDateTime`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), `ParisDateTime` dés-exporté (aucun consommateur hors fichier), import de type `db` renommé `appDb` dans le repository pour ne pas masquer le paramètre
@@ -496,6 +580,7 @@ Tous les tests de cette tranche échouent à ce stade (RED confirmé via la comm
 - **Tranche 3 — règles horaires et délai de prévenance (422)** : GREEN 85 passed / 85 total (backend ; `typecheck` vert, dont l'`expectTypeOf` `30 | 60`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), aucun changement retenu (helpers `formatTime` / `toMinutes` privés et nommés par intention, aucune duplication avec l'existant)
 - **Tranche 4 — créneau pris (409), contrat** : GREEN 97 passed / 97 total (backend ; `typecheck` et `build` verts ; front 90 / 90) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), aucun changement retenu (le test du SQLSTATE factorisé dès le premier jet dans `hasSqlState`, message 409 littéral à son unique site d'usage)
 - **Tranche 5 — chevauchement garanti en base, y compris concurrent** : GREEN 14 passed / 14 total (intégration `BI`, PostgreSQL 18) ; `BU` 97 / 97 ; `typecheck` et `build` verts ; front 90 / 90 · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), PATCH réécrit avec le `404`/`200` dans le `try` (supprime un `let row` non typé), `make_timestamp` calculé une seule fois dans `appointment_slot` (sous-requête) au lieu d'être dupliqué
+- **Tranche 6 — règles front alignées et parité** : GREEN front 111 passed / 111 total, backend 145 passed / 145 total (dont la parité, 48 cas) ; `typecheck` front et back, `build` front et back, `format:check` verts · refactor : passe manuelle (skill `simplify` indisponible en sous-agent). La boucle imbriquée du picker est remplacée par `listSlotStarts(...).filter(...).map(...)`, ce qui supprime aussi le type littéral mutable des créneaux. Aucun autre changement retenu : le type inline `{ time; duration: BookingDuration }` en double dans `booking.ts` est antérieur, et `booking.ts` est retouché en tranche 7.
 
 ## Verify
 
@@ -609,3 +694,26 @@ GET /booked            → [{…"11:00",30},{…"10:30",30}] HTTP 200
 ```
 
 Console serveur : propre. Une ligne `[mail] appointment: Error: connect ECONNREFUSED 127.0.0.1:1` après chacun des trois `201` (échec SMTP provoqué, absorbé en fire & forget) ; aucune après le `409` du POST (pas d'email pour une demande refusée). Le `409` du PATCH est servi sans trace d'erreur : la violation est traduite, pas remontée en 500. L'annulé libère bien le créneau, l'adjacent 11:00 est accepté. Conteneurs `cl-f001-verify5` et `coaching-life-test-db` supprimés.
+
+**Tranche 6 : PASS.** La tranche change le calendrier et le sélecteur de créneaux de la page d'accueil (panneau « Prendre rendez-vous »), déjà accessibles en production. La preuve est donc due.
+
+Steps (front `ng serve --port 4300`, Chromium headless via `playwright-core` 1.58, fuseau `Europe/Paris`, `GET /api/**` servis par des listes vides interceptées : aucun RDV pris, aucun jour désactivé) :
+
+1. `/` → clic sur le bouton « Prendre rendez-vous » de la section contact (`aria-controls="contact-panel"`) → calendrier rendu
+2. Lecture de `disabled` et `aria-label` des jours 1, 2, 3 et 5 d'octobre 2026
+3. Clic sur un jour → lecture des boutons de durée et des créneaux en 1h, puis en « 30 min » → clic sur `17:30` → présence du formulaire
+4. Scénario A : horloge réelle (2026-10-01 20:36 CEST, seuil au 2026-10-02 20:36), jour 5. Scénario B : horloge fixée `page.clock.setFixedTime('2026-10-01T08:00:00Z')` (seuil au 2026-10-02 10:00), jour 2
+
+Capture (DOM relevé ; captures d'écran `verify6-calendar.png`, `fixed-verify6-picker.png` prises dans le scratchpad de session : calendrier avec 1, 2 et les week-ends en rouge, puis jour 2 sélectionné avec la grille 10:00…17:30 en 30 min) :
+
+```
+A (réel 20:36)  jour 1 → disabled  "jeudi 1 octobre 2026, indisponible : Délai de prévenance de 24 h"
+                jour 2 → disabled  "vendredi 2 octobre 2026, indisponible : Délai de prévenance de 24 h"
+                jour 3 → disabled  "samedi 3 octobre 2026, indisponible : Weekend"
+                jour 5 → actif     "lundi 5 octobre 2026, disponible"
+                durées ["30 min","1h"] ; 1h 09:00…17:00 (17) ; 30 min 09:00…17:30 (18) ; formulaire affiché après 17:30
+B (08:00Z)      jour 1 → disabled  "…, indisponible : Délai de prévenance de 24 h" ; jour 2 → actif "vendredi 2 octobre 2026, disponible"
+                jour 2 : 1h 10:00…17:00 (15) ; 30 min 10:00…17:30 (16) ; formulaire affiché après 17:30
+```
+
+Console navigateur : propre (0 `console.error`, 0 `pageerror`, dans les deux scénarios). Log `ng serve` : seulement l'avertissement attendu NG0751 (`@defer` chargé en eager sous HMR), aucune erreur SSR. Les créneaux du lendemain à moins de 24 h sont masqués, et les jours sans créneau réservable sont indisponibles avec la raison exacte. Le parcours nominal (jour lointain, journée complète, sélection, formulaire) n'a pas régressé.

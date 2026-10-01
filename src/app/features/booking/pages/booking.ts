@@ -7,6 +7,7 @@ import type {
 import { GetBookedSlotsUseCase } from '../domain/use-cases/get-booked-slots.use-case';
 import { GetDisabledDatesUseCase } from '../domain/use-cases/get-disabled-dates.use-case';
 import { SubmitAppointmentUseCase } from '../domain/use-cases/submit-appointment.use-case';
+import type { BookingDuration } from '../domain/booking-rules';
 import { BookingCalendar } from '../components/booking-calendar';
 import { BookingTimePicker } from '../components/booking-time-picker';
 import { BookingForm, type BookingFormPayload } from '../components/booking-form';
@@ -139,7 +140,9 @@ export class Booking {
   private readonly calendarRef = viewChild(BookingCalendar);
 
   protected readonly selectedDate = signal<string | null>(null);
-  protected readonly selectedSlot = signal<{ time: string; duration: number } | null>(null);
+  protected readonly selectedSlot = signal<{ time: string; duration: BookingDuration } | null>(
+    null,
+  );
   protected readonly bookedSlots = signal<readonly Appointment[]>([]);
   protected readonly disabledDates = signal<readonly DisabledDate[]>([]);
   protected readonly submissionMessage = signal<{ success: boolean; message: string } | null>(null);
@@ -164,7 +167,7 @@ export class Booking {
     this.loadBookedSlots(month);
   }
 
-  protected onSlotSelected(slot: { time: string; duration: number }): void {
+  protected onSlotSelected(slot: { time: string; duration: BookingDuration }): void {
     this.selectedSlot.set(slot);
   }
 
