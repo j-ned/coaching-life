@@ -1,4 +1,4 @@
-type ParisDateTime = { readonly date: string; readonly minutes: number };
+export type ParisDateTime = { readonly date: string; readonly minutes: number };
 
 const parisFormatter = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Europe/Paris',

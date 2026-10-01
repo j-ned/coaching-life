@@ -317,6 +317,53 @@ Nature des échecs : 6 assertions comportementales (`201` reçu au lieu de `422`
 
 Tous les tests de cette tranche échouent à ce stade (RED confirmé via la commande test du profil (`BU`) le 2026-10-01 19:58, 6 failed / 19 total, plus les suites `booking-rules.spec.ts` (17 cas) et `french-holidays.spec.ts` (14 cas) en échec de chargement).
 
+### Tranche 3 — règles horaires et délai de prévenance (422)
+
+Horloge `FIXED_NOW` = `2026-10-01T08:00Z` (jeudi, 10:00 à Paris ; seuil = `2026-10-02` 10:00). Entrées via `aBookingRequest` (défaut `2026-10-05` 10:00, 60 min). Doublures de `backend/src/test/booking-fakes.ts` réutilisées sans modification.
+
+Sweep du contrat (heure, durée, délai) sur `backend/src/**/*.spec.ts` et `backend/src/test/` : `booking-rules.spec.ts`, `appointments.spec.ts`, `paris-time.spec.ts`, `french-holidays.spec.ts`, `booking-fakes.ts`. Aucune suite existante ne devient fausse : les requêtes de route utilisent `2026-10-05` (ou `2026-10-06`) à 10:00 en 60 min, et le test de rate-limit les horaires `09:00`…`16:00` en 60 min. Ces créneaux sont proposés et à plus de 24 h. Les refus `past_date`, `unavailable_day` et `invalid_date` précèdent les nouvelles règles. Le test « ne traite pas la date du jour à Paris comme passée » (`2026-10-01` 10:00) recevra `too_soon` et reste valide (assertion `≠ past_date`). Aucune adaptation mécanique.
+
+`backend/src/lib/booking-rules.spec.ts` (ajouts) :
+
+- **constantes** (golden `toEqual`) : `BOOKING_OPENING_HOUR` 9, `BOOKING_CLOSING_HOUR` 18, `BOOKING_SLOT_STEP_MINUTES` 30, `BOOKING_DURATIONS` `[30, 60]`, `BOOKING_LEAD_TIME_MS` 86 400 000.
+- **`listSlotStarts`** : 60 min → `09:00`…`17:00` (17 débuts) ; 30 min → `09:00`…`17:30` (18 débuts), liste exacte.
+- **`bookingThreshold`** (`it.each`, égalité `{ date, minutes }`) : `2026-10-01T08:00Z` → `2026-10-02`/600 ; `2026-10-24T22:30Z` → `2026-10-25`/1410 (passage à l'heure d'hiver) ; `2026-03-28T22:30Z` → `2026-03-30`/30 (passage à l'heure d'été).
+- **`isSlotTooSoon`** contre `bookingThreshold(FIXED_NOW)` (`it.each`) : `2026-10-01` 17:30 → vrai (date antérieure, minutes supérieures au seuil) ; `2026-10-02` 09:30 → vrai ; `2026-10-02` 10:00 → faux (borne) ; `2026-10-02` 10:30 → faux ; `2026-10-05` 09:00 → faux (date postérieure, minutes inférieures au seuil).
+- **refuse la durée** 15, 45, 90, 120 → `{ ok: false, code: 'invalid_duration', message: "Cette durée de rendez-vous n'est pas proposée." }`.
+- **refuse l'horaire** `09:15`/60, `08:30`/60, `17:30`/60 (fin 18:30), `18:00`/30, `25:99`/60 → `invalid_slot`, « Cet horaire n'est pas proposé. ».
+- **accepte le créneau** `17:30`/30, `17:00`/60, `09:00`/60 → `{ ok: true, duration }`.
+- **refuse à moins de 24 h** : `2026-10-01` 17:00 et `2026-10-02` 09:30 → `too_soon`, « Les rendez-vous doivent être pris au moins 24 h à l'avance. ».
+- **accepte un créneau à exactement 24 h** : `2026-10-02` 10:00 → `{ ok: true, duration: 60 }`.
+- **première règle violée** : `2026-10-03` + 45 min → `unavailable_day` ; `09:15` + 45 min → `invalid_duration` ; `2026-10-01` `09:15` → `invalid_slot` (et non `too_soon`).
+- **restreint la durée acceptée** : `expectTypeOf(result.duration).toEqualTypeOf<30 | 60>()` dans la branche `ok`. Preuve compile-time portée par `typecheck`, pas par `BU`.
+
+`backend/src/routes/appointments.spec.ts` (ajouts) :
+
+- **refuse en 422 sans enregistrer ni notifier** (`it.each`) : 45 min → `invalid_duration` ; `09:15` → `invalid_slot` ; `17:30` en 60 min → `invalid_slot` ; `2026-10-02` 09:30 → `too_soon`. Statut 422, corps `{ error, code }`, `inserted` et `booked` vides (aucun email).
+- **accepte un créneau à exactement 24 h** : `2026-10-02` 10:00 → 201, `inserted` et `booked` égaux à `[request]`.
+
+Sortie `BU` condensée :
+
+```
+ FAIL  unit  src/lib/booking-rules.spec.ts   (24 failed)
+ FAIL  unit  src/routes/appointments.spec.ts (4 failed)
+     × fixent la plage 9h-18h, le pas de 30 min, les durées 30/60 et le délai de 24 h
+     × propose en 60 min / en 30 min …                      TypeError: listSlotStarts is not a function
+     × place le seuil de … (x3)                             TypeError: bookingThreshold is not a function
+     × juge … trop proche (x5)                              TypeError: bookingThreshold is not a function
+     × refuse la durée 15/45/90/120 min                     expected { ok: true, duration: 45 } to deeply equal { ok: false, … }
+     × refuse l’horaire … (x5)                              expected { ok: true, duration: 60 } to deeply equal { ok: false, … }
+     × refuse '2026-10-01' '17:00' / '2026-10-02' '09:30', à moins de 24 h
+     × signale la première règle violée : 'durée avant horaire' / 'horaire avant délai de prévenance'
+     × refuse '…' en 422 (invalid_duration / invalid_slot x2 / too_soon)   expected 201 to be 422
+ Test Files  2 failed | 2 passed (4)
+      Tests  28 failed | 57 passed (85)
+```
+
+Nature des échecs : 18 assertions comportementales (règle absente : `ok: true` au lieu du refus, `201` au lieu de `422`, constantes `undefined`) ; 10 `TypeError` sur des symboles applicatifs dus au GREEN (`listSlotStarts`, `bookingThreshold`, et par ricochet `isSlotTooSoon` dont l'entrée vient de `bookingThreshold`). Aucune erreur de harnais : les deux suites se chargent, tous les cas sont collectés. 7 nouveaux tests sont verts dès maintenant, et c'est voulu : ce sont les garde-fous contre un refus trop large (créneaux `17:30`/30, `17:00`/60, `09:00`/60, exactement 24 h en pur et en route, `unavailable_day` avant `invalid_duration`, durée 60 acceptée). Non-régression : les 50 tests des tranches 1 et 2 restent verts. `typecheck` backend échoue uniquement sur des symboles dus au GREEN (`src/lib/booking-rules.ts`) : exports `BOOKING_OPENING_HOUR`, `BOOKING_CLOSING_HOUR`, `BOOKING_SLOT_STEP_MINUTES`, `BOOKING_DURATIONS`, `BOOKING_LEAD_TIME_MS`, `listSlotStarts`, `bookingThreshold`, `isSlotTooSoon`, et `duration` du succès resserré en `BookingDuration` (TS2344 sur l'`expectTypeOf`). `checkBookingRules` doit aussi lire `appointment_time`. Prettier vert. Front : `pnpm test --watch=false` → 90 passed / 90 (19 fichiers), aucune régression.
+
+Tous les tests de cette tranche échouent à ce stade (RED confirmé via la commande test du profil (`BU`) le 2026-10-01 20:04, 28 failed / 85 total).
+
 ## Implémentation
 
 ### Tranche 1
@@ -334,10 +381,18 @@ Tous les tests de cette tranche échouent à ce stade (RED confirmé via la comm
 - Route POST : règles pures, puis `isDateDisabled`, puis `insert` ; refus → 422 `{ error, code }`, sans insert ni notification.
 - **Réduit à la tranche (le plan complet arrive en tranche 3)** : `BookingRuleViolation` ne porte que les 4 codes exercés ; `duration` du succès est typé `number` (le resserrement en `BookingDuration` suit l'arrivée de `invalid_duration`) ; `checkBookingRules` prend `Pick<…, 'appointment_date' | 'duration'>` (`appointment_time` arrive avec `invalid_slot` / `too_soon`). `BookingRuleResult` n'est pas exporté : aucun consommateur hors du fichier.
 
+### Tranche 3
+
+- `backend/src/lib/booking-rules.ts` : constantes `BOOKING_OPENING_HOUR`, `BOOKING_CLOSING_HOUR`, `BOOKING_SLOT_STEP_MINUTES`, `BOOKING_DURATIONS` (`as const`), `BOOKING_LEAD_TIME_MS` ; `listSlotStarts(duration)` (débuts au pas de 30 min dès 9h tant que `début + durée <= 18:00`) ; `bookingThreshold(now)` (`now + 24 h` sur l'instant absolu, puis `toParisDateTime`) ; `isSlotTooSoon(date, time, threshold)` (ordre lexicographique date ISO puis minutes, borne exacte acceptée).
+- `checkBookingRules` lit `appointment_time` et enchaîne, après les règles de calendrier, `invalid_duration` (garde de type `isBookingDuration`) → `invalid_slot` (`time ∉ listSlotStarts(duration)`, couvre aussi `25:99`) → `too_soon`. `BookingRuleViolation` porte désormais les 7 codes du plan ; `duration` du succès est resserré en `BookingDuration` (`30 | 60`) par la garde.
+- `ParisDateTime` est exporté par `paris-time.ts` : `booking-rules.ts` en a besoin pour typer `bookingThreshold` / `isSlotTooSoon`. `BookingDuration`, `BookingRuleResult` et les helpers `formatTime` / `toMinutes` restent privés (aucun consommateur hors fichier à ce stade).
+- Route inchangée : le 422 `{ error, code }` existant relaie les nouveaux codes.
+
 ## Journal des tranches
 
 - **Tranche 1 — réservation nominale acceptée, infra de test backend** : GREEN 13 passed / 13 total (4 route + 9 `toParisDateTime`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), `ParisDateTime` dés-exporté (aucun consommateur hors fichier), import de type `db` renommé `appDb` dans le repository pour ne pas masquer le paramètre
 - **Tranche 2 — règles de calendrier (422)** : GREEN 50 passed / 50 total (10 route + 9 `toParisDateTime` + 17 `checkBookingRules` + 14 `getUnavailableDayReason`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), commentaire d'en-tête de `french-holidays.ts` réduit à son WHY (jumeau front, calcul UTC), aucun autre changement
+- **Tranche 3 — règles horaires et délai de prévenance (422)** : GREEN 85 passed / 85 total (backend ; `typecheck` vert, dont l'`expectTypeOf` `30 | 60`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), aucun changement retenu (helpers `formatTime` / `toMinutes` privés et nommés par intention, aucune duplication avec l'existant)
 
 ## Verify
 
@@ -385,3 +440,24 @@ GET /booked?month=2026-12 → [] HTTP 200
 ```
 
 Console serveur : propre. Les seules lignes `[mail] appointment: Error: connect ECONNREFUSED 127.0.0.1:1` suivent les deux `201` (échec SMTP provoqué, absorbé en fire & forget) ; aucune ne suit un `422`, donc aucun email n'est tenté pour une réservation refusée. Seuls les deux RDV acceptés sont en base. `isDateDisabled` (Drizzle) est exercé sur vrai PostgreSQL : jour désactivé refusé, jour voisin accepté.
+
+**Tranche 3 : PASS.** La tranche ajoute trois refus au chemin `POST /api/appointments` (atteignable en production) : la preuve est due.
+
+Steps (horloge réelle, 2026-10-01 20:06 CEST, soit seuil de prévenance au 2026-10-02 20:06 ; PostgreSQL jetable `postgres:18` sur 54339, SMTP volontairement injoignable) :
+
+1. `docker run --rm -d --name cl-f001-verify3 -e POSTGRES_PASSWORD=test -p 54339:5432 postgres:18`, puis `npx tsx src/db/migrate.ts` → `Migrations applied`
+2. `PORT=3920 SMTP_HOST=127.0.0.1 SMTP_PORT=1 … npx tsx src/index.ts`
+3. Un `POST /api/appointments` par cas (5, sous le rate-limit de 5/min), puis `GET /api/appointments/booked?month=2026-10`
+
+Capture (sorties curl) :
+
+```
+2026-10-05 10:00 60min → {"success":true,"message":"Votre rendez-vous a été réservé avec succès !"} HTTP 201
+2026-10-05 14:00 45min → {"error":"Cette durée de rendez-vous n'est pas proposée.","code":"invalid_duration"} HTTP 422
+2026-10-05 09:15 60min → {"error":"Cet horaire n'est pas proposé.","code":"invalid_slot"} HTTP 422
+2026-10-05 17:30 60min → {"error":"Cet horaire n'est pas proposé.","code":"invalid_slot"} HTTP 422
+2026-10-02 17:00 60min → {"error":"Les rendez-vous doivent être pris au moins 24 h à l'avance.","code":"too_soon"} HTTP 422
+GET /booked → [{"appointment_date":"2026-10-05","appointment_time":"10:00","duration":60}] HTTP 200
+```
+
+Console serveur : propre. Une seule ligne `[mail] appointment: Error: connect ECONNREFUSED 127.0.0.1:1`, juste après le `--> POST /api/appointments 201` (échec SMTP provoqué, absorbé en fire & forget) ; les quatre `422` ne sont suivis d'aucune tentative d'email. Seul le RDV accepté est en base.

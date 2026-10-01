@@ -106,6 +106,56 @@ describe('POST /api/appointments', () => {
     },
   );
 
+  it.each([
+    {
+      cas: 'une durée non proposée',
+      overrides: { duration: 45 },
+      code: 'invalid_duration',
+      error: "Cette durée de rendez-vous n'est pas proposée.",
+    },
+    {
+      cas: 'un horaire hors pas',
+      overrides: { appointment_time: '09:15' },
+      code: 'invalid_slot',
+      error: "Cet horaire n'est pas proposé.",
+    },
+    {
+      cas: 'un créneau qui finit après 18h',
+      overrides: { appointment_time: '17:30' },
+      code: 'invalid_slot',
+      error: "Cet horaire n'est pas proposé.",
+    },
+    {
+      cas: 'un créneau à moins de 24 h',
+      overrides: { appointment_date: '2026-10-02', appointment_time: '09:30' },
+      code: 'too_soon',
+      error: "Les rendez-vous doivent être pris au moins 24 h à l'avance.",
+    },
+  ])(
+    'refuse $cas en 422 ($code) sans rien enregistrer ni notifier',
+    async ({ overrides, code, error }) => {
+      const { app, bookings, notifier } = setup();
+
+      const response = await postBooking(app, aBookingRequest(overrides));
+
+      expect(response.status).toBe(422);
+      expect(await response.json()).toEqual({ error, code });
+      expect(bookings.inserted).toEqual([]);
+      expect(notifier.booked).toEqual([]);
+    },
+  );
+
+  it('accepte un créneau qui commence exactement 24 h après la demande', async () => {
+    const { app, bookings, notifier } = setup();
+    const request = aBookingRequest({ appointment_date: '2026-10-02', appointment_time: '10:00' });
+
+    const response = await postBooking(app, request);
+
+    expect(response.status).toBe(201);
+    expect(bookings.inserted).toEqual([request]);
+    expect(notifier.booked).toEqual([request]);
+  });
+
   it("refuse en 422 le seul jour désactivé par l'admin, sans l'enregistrer ni le notifier", async () => {
     const { app, bookings, notifier } = setup();
     bookings.disableDate('2026-10-05');
