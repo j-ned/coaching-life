@@ -399,6 +399,57 @@ Nature des échecs : 2 assertions comportementales sur la route (`500` reçu au 
 
 Tous les tests de cette tranche échouent à ce stade (RED confirmé via la commande test du profil (`BU`) le 2026-10-01 20:11, 11 failed / 97 total).
 
+### Tranche 5 — chevauchement garanti en base, y compris concurrent
+
+Outillage de test posé (qa) :
+
+- `backend/vitest.config.ts` : projet `integration` (`src/**/*.integration.spec.ts`, env `node`, `globalSetup: src/test/integration-global-setup.ts`, `setupFiles: src/test/integration-env.ts`, `fileParallelism: false`, `testTimeout` 15 s). Le projet `unit` exclut déjà `*.integration.spec.ts` : `BU` reste à 97 tests.
+- `backend/package.json` : scripts `test:integration` (`vitest run --project integration`), `test:db:up` / `test:db:down` (conteneur `coaching-life-test-db`, `postgres:18`, port 54329), conformes à la commande `BI`.
+- `src/test/integration-global-setup.ts` : exige `TEST_DATABASE_URL` (sinon erreur explicite, vérifiée : `Error: TEST_DATABASE_URL absent : la suite d'intégration exige un PostgreSQL de test (…)`, exit 1, aucun test collecté), refuse une URL égale au `DATABASE_URL` du shell ou du `.env` racine, attend la base (≤ 30 s), `DROP SCHEMA public/drizzle CASCADE`, `CREATE SCHEMA public`, `migrate()` sur `src/db/migrations`.
+- `src/test/integration-env.ts` (worker) : `DATABASE_URL = TEST_DATABASE_URL` avant le chargement de `db/index.ts`. Le handler PATCH et le câblage par défaut lisent le `db` du module : la suite exerce donc le vrai pool applicatif (`max: 10`), sans toucher au code.
+- `src/test/booking-db.ts` : `resetBookingTables` (`TRUNCATE appointments, disabled_dates`, avant chaque test), `seedAppointment(db, request, status)` (requête construite par `aBookingRequest`), `listBookedSlots`, `statusOf`.
+
+Sweep de l'état seedé (la base refuse désormais un chevauchement non annulé) : `backend/src/**/*.spec.ts` et `backend/src/test/`. Aucune suite unitaire ne touche PostgreSQL (`appointments.spec.ts` et `booking-repository.spec.ts` passent par la doublure in-memory ou par des erreurs construites). `db/seed.ts` n'insère aucun rendez-vous. Aucune adaptation mécanique.
+
+`backend/src/db/booking-repository.integration.spec.ts` (`createBookingRepository(db)` sur PostgreSQL) :
+
+- **refuse le chevauchement par `SlotTakenError` sans l'enregistrer** (`it.each`, existant 10:00 en 60 min) : même créneau, `10:30`/30 (inclus), `10:30`/60 (déborde après), `09:30`/60 (déborde avant) → `rejects.toBeInstanceOf(SlotTakenError)`, table égale à la seule ligne 10:00.
+- **considère le créneau pris** par un RDV `pending`, `confirmed`, `completed` (`it.each`) → `SlotTakenError`.
+- **libère le créneau d'un RDV annulé** : ligne `cancelled` + nouvel insert même créneau → deux lignes (`cancelled`, `pending`).
+- **accepte l'adjacent et l'autre jour** : 10:00/60 puis 11:00/30, 09:30/30, `2026-10-06` 10:00 → les quatre lignes exactes (plage `[)`).
+- **refuse un chevauchement écrit hors du repository** : `db.insert(appointments)` direct (statut `confirmed`) → l'erreur levée satisfait `isExclusionViolation` (la garantie est en base, pas dans le repository).
+- **10 insertions simultanées du même créneau** (`Promise.allSettled`, pool `max: 10`) → 1 résolue, 9 rejetées toutes `SlotTakenError`, 1 ligne.
+
+`backend/src/routes/appointments.integration.spec.ts` (factory avec `createBookingRepository(db)`, `SpyBookingNotifier`, `fixedClock()`) :
+
+- **2 POST simultanés du même créneau** → statuts triés `[201, 409]`, corps du 409 `{ error: "Ce créneau vient d'être réservé, choisissez-en un autre.", code: 'slot_taken' }`, notifier appelé 1 fois, 1 ligne en base.
+- **PATCH `/:id/status` : réactivation d'un RDV annulé dont le créneau a été repris** (cookie de session admin signé par `signSession`) : annulé 10:00/60 + pris 10:30/30, PATCH `confirmed` → 409, corps contenant `code: 'slot_taken'`, ligne toujours `cancelled`.
+- **PATCH : réactivation d'un RDV annulé au créneau libre** (voisin adjacent 11:00/30) → 200, ligne renvoyée `{ id, status: 'confirmed' }`, statut `confirmed` en base.
+
+Sortie `BI` condensée (conteneur lancé par `test:db:up`) :
+
+```
+     × refuse 'le même créneau' d'un rendez-vous 10:00-11:00 par SlotTakenError, sans l'enregistrer
+     × refuse 'un créneau inclus' / 'un créneau qui déborde après' / 'un créneau qui déborde avant' …
+AssertionError: promise resolved "undefined" instead of rejecting            (x7, dont pending/confirmed/completed)
+     × refuse un chevauchement écrit hors du repository, au niveau de la base
+AssertionError: expected false to be true // Object.is equality
+     × n'enregistre qu'une réservation sur 10 insertions simultanées du même créneau
+AssertionError: expected [ { status: 'fulfilled', …(1) }, …(9) ] to have a length of 1 but got 10
+     × n'accepte qu'une de deux réservations simultanées du même créneau et ne notifie qu'elle
+AssertionError: expected [ 201, 201 ] to deeply equal [ 201, 409 ]
+     × refuse en 409 de réactiver un rendez-vous annulé dont le créneau a été repris
+AssertionError: expected 200 to be 409 // Object.is equality
+ Test Files  2 failed (2)
+      Tests  11 failed | 3 passed (14)
+```
+
+Nature des échecs : 11 assertions comportementales (aucune contrainte en base : les inserts chevauchants et concurrents réussissent, le PATCH réactive). Aucune erreur de harnais : reset du schéma et migrations 0000/0001 appliqués, les 14 cas collectés, résultat identique sur une seconde exécution. 3 tests verts dès maintenant, voulu : ce sont les garde-fous contre une contrainte trop large (annulé libère, adjacent et autre jour acceptés, réactivation au créneau libre). Dû au GREEN : `src/db/migrations/0002_appointments_no_overlap.sql` + entrée `_journal.json`, mapping `isExclusionViolation` → `SlotTakenError` dans `createBookingRepository.insert`, 409 dans le PATCH. Non-régression : `BU` → 97 passed / 97 (5 fichiers, aucun `*.integration.spec.ts` collecté) ; `typecheck` et `build` backend verts (aucun symbole manquant) ; Prettier vert ; front `pnpm test --watch=false` → 90 passed / 90 (19 fichiers). Conteneur arrêté et supprimé (`test:db:down`).
+
+Point ouvert pour le GREEN : le corps du 409 du PATCH n'est pas fixé par le plan (message pensé pour le visiteur). Le test n'épingle que `code: 'slot_taken'`.
+
+Tous les tests de cette tranche échouent à ce stade (RED confirmé via la commande test du profil (`BI`) le 2026-10-01 20:18, 11 failed / 14 total).
+
 ## Implémentation
 
 ### Tranche 1
@@ -429,12 +480,22 @@ Tous les tests de cette tranche échouent à ce stade (RED confirmé via la comm
 - Route POST : `insert` entouré d'un `try/catch` qui ne traduit que `SlotTakenError` en 409 `{ error: "Ce créneau vient d'être réservé, choisissez-en un autre.", code: 'slot_taken' }` et relance tout le reste (500 par le gestionnaire Hono, garde-fou testé). Le `return` du 409 précède le `notifier` : aucun email pour une demande refusée.
 - **Non fait (tranche 5)** : `createBookingRepository.insert` ne lève pas encore `SlotTakenError` (pas de contrainte en base, pas de mapping), PATCH `/:id/status` inchangé. En production, le 409 reste donc inatteignable jusqu'à la tranche 5.
 
+### Tranche 5
+
+- `backend/src/db/migrations/0002_appointments_no_overlap.sql` (écrite à la main, `drizzle-kit generate` non lancé) : fonction `appointment_slot(text, text, integer) RETURNS tsrange` `IMMUTABLE STRICT PARALLEL SAFE`, début calculé une seule fois par `make_timestamp` dans une sous-requête, plage `[)` ; `ALTER TABLE appointments ADD CONSTRAINT appointments_no_overlap EXCLUDE USING gist (…) WHERE (status <> 'cancelled')`. Pas de `--> statement-breakpoint`, comme 0000 et 0001 (le migrator envoie le fichier en un seul appel, protocole simple). Entrée `idx: 2` dans `meta/_journal.json`, `when` = `1790812800000` (2026-10-01), supérieur à 0001 : le migrator l'applique sur une base déjà en 0001.
+- `schema.ts` : commentaire d'une ligne au-dessus de `appointments` signalant la contrainte portée par la migration.
+- `createBookingRepository.insert` : `isExclusionViolation(err)` → `SlotTakenError`, toute autre erreur relancée.
+- PATCH `/:id/status` : `isExclusionViolation` → 409 `{ error: 'Ce créneau est déjà occupé par un autre rendez-vous.', code: 'slot_taken' }` (message destiné à l'admin, le message visiteur du POST ne convient pas) ; autre erreur relancée (500). Le `404` et le `200` restent dans le `try`, ce qui évite un `let` non typé.
+- `backend/scripts/preflight-0002-appointments.sql` : **aligné, non modifié**. Vérifié sur `postgres:18` en appliquant 0000/0001 puis des lignes piégées : le script remonte `2026-02-30` (`jour inexistant`, bloquant) et la paire 10:00/60 – 10:30/30, et ignore l'adjacent 11:00 et l'annulé ; 0002 échoue alors sur ces deux cas (`date field value out of range`, puis `could not create exclusion constraint`), puis passe une fois les lignes corrigées/annulées et le script revenu à 0 ligne. Le script est plus strict que la fonction sur la forme (ex. `2026-1-5` serait signalé bloquant alors que `split_part` l'accepterait) : sans effet sur la sûreté du déploiement.
+- Chemin de migration du conteneur (`Dockerfile` : `cp -r backend/src/db/migrations backend/dist/db/migrations`, puis `start.sh` : `node dist/db/migrate.js`) rejoué à l'identique sur base vierge : `Migrations applied`, 3 lignes dans `drizzle.__drizzle_migrations`, contrainte `appointments_no_overlap` présente, `appointment_slot` en `provolatile = 'i'`.
+
 ## Journal des tranches
 
 - **Tranche 1 — réservation nominale acceptée, infra de test backend** : GREEN 13 passed / 13 total (4 route + 9 `toParisDateTime`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), `ParisDateTime` dés-exporté (aucun consommateur hors fichier), import de type `db` renommé `appDb` dans le repository pour ne pas masquer le paramètre
 - **Tranche 2 — règles de calendrier (422)** : GREEN 50 passed / 50 total (10 route + 9 `toParisDateTime` + 17 `checkBookingRules` + 14 `getUnavailableDayReason`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), commentaire d'en-tête de `french-holidays.ts` réduit à son WHY (jumeau front, calcul UTC), aucun autre changement
 - **Tranche 3 — règles horaires et délai de prévenance (422)** : GREEN 85 passed / 85 total (backend ; `typecheck` vert, dont l'`expectTypeOf` `30 | 60`) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), aucun changement retenu (helpers `formatTime` / `toMinutes` privés et nommés par intention, aucune duplication avec l'existant)
 - **Tranche 4 — créneau pris (409), contrat** : GREEN 97 passed / 97 total (backend ; `typecheck` et `build` verts ; front 90 / 90) · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), aucun changement retenu (le test du SQLSTATE factorisé dès le premier jet dans `hasSqlState`, message 409 littéral à son unique site d'usage)
+- **Tranche 5 — chevauchement garanti en base, y compris concurrent** : GREEN 14 passed / 14 total (intégration `BI`, PostgreSQL 18) ; `BU` 97 / 97 ; `typecheck` et `build` verts ; front 90 / 90 · refactor : passe manuelle (skill `simplify` indisponible en sous-agent), PATCH réécrit avec le `404`/`200` dans le `try` (supprime un `let row` non typé), `make_timestamp` calculé une seule fois dans `appointment_slot` (sous-requête) au lieu d'être dupliqué
 
 ## Verify
 
@@ -525,3 +586,26 @@ Le second 201 est attendu à ce stade : sans contrainte d'exclusion ni mapping (
 Console serveur : propre. Une ligne `[mail] appointment: Error: connect ECONNREFUSED 127.0.0.1:1` après chaque `--> POST /api/appointments 201` (échec SMTP provoqué, absorbé en fire & forget). Le premier `POST` de la session (corps de test mal formé, `coaching_type` invalide) a reçu un 400 Zod, sans email.
 
 Observation hors périmètre (préexistante, non introduite par ce diff) : un `docker stop` de la base pendant que le serveur tourne fait **planter le processus** (`Unhandled 'error' event` émis par le `Pool` de `backend/src/db/index.ts`, qui n'a pas d'écouteur `error`, code `57P01`). À remonter comme constat séparé ; le cas « panne d'enregistrement → 500 » reste couvert par le test de route.
+
+**Tranche 5 : PASS.** La tranche change le comportement de `POST /api/appointments` et de `PATCH /api/appointments/:id/status`, atteignables en production : la preuve est due. Elle est jouée sur le **build de production** (`dist/`), migrations appliquées par le chemin du conteneur.
+
+Steps (horloge réelle, 2026-10-01 ; PostgreSQL jetable `postgres:18` sur 54339, base vierge, SMTP volontairement injoignable) :
+
+1. `docker run --rm -d --name cl-f001-verify5 -e POSTGRES_PASSWORD=test -p 54339:5432 postgres:18`
+2. `pnpm build && cp -r src/db/migrations dist/db/migrations` (étape du `Dockerfile`), puis `DATABASE_URL=… pnpm db:migrate:prod` → `Migrations applied` ; `drizzle.__drizzle_migrations` : 3 lignes ; `pg_constraint` : `appointments_no_overlap`
+3. `ADMIN_PASSWORD=… node dist/db/seed.js`, puis `PORT=3923 SMTP_HOST=127.0.0.1 SMTP_PORT=1 SESSION_SECRET=… node dist/index.js`
+4. Sur `2026-10-05` : POST 10:00/60, POST 10:30/30, POST 11:00/30 ; login admin ; PATCH 10:00 → `cancelled` ; POST 10:30/30 ; PATCH 10:00 → `confirmed` ; `GET /booked?month=2026-10`
+
+Capture (sorties curl) :
+
+```
+POST 10:00/60          → {"success":true,"message":"Votre rendez-vous a été réservé avec succès !"} HTTP 201
+POST 10:30/30          → {"error":"Ce créneau vient d'être réservé, choisissez-en un autre.","code":"slot_taken"} HTTP 409
+POST 11:00/30          → {"success":true,"message":"Votre rendez-vous a été réservé avec succès !"} HTTP 201
+PATCH 10:00 cancelled  → HTTP 200
+POST 10:30/30          → {"success":true,"message":"Votre rendez-vous a été réservé avec succès !"} HTTP 201
+PATCH 10:00 confirmed  → {"error":"Ce créneau est déjà occupé par un autre rendez-vous.","code":"slot_taken"} HTTP 409
+GET /booked            → [{…"11:00",30},{…"10:30",30}] HTTP 200
+```
+
+Console serveur : propre. Une ligne `[mail] appointment: Error: connect ECONNREFUSED 127.0.0.1:1` après chacun des trois `201` (échec SMTP provoqué, absorbé en fire & forget) ; aucune après le `409` du POST (pas d'email pour une demande refusée). Le `409` du PATCH est servi sans trace d'erreur : la violation est traduite, pas remontée en 500. L'annulé libère bien le créneau, l'adjacent 11:00 est accepté. Conteneurs `cl-f001-verify5` et `coaching-life-test-db` supprimés.

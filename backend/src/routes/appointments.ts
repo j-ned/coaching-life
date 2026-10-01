@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { db, appointments, disabled_dates } from '../db/index.js';
 import {
   createBookingRepository,
+  isExclusionViolation,
   SlotTakenError,
   type BookingRepository,
 } from '../db/booking-repository.js';
@@ -160,13 +161,22 @@ export function createAppointmentRoutes({ bookings, notifier, now }: Appointment
         async (c) => {
           const { id } = c.req.valid('param');
           const { status } = c.req.valid('json');
-          const [row] = await db
-            .update(appointments)
-            .set({ status })
-            .where(eq(appointments.id, id))
-            .returning();
-          if (!row) return c.json({ error: 'Not found' }, 404);
-          return c.json(row);
+          try {
+            const [row] = await db
+              .update(appointments)
+              .set({ status })
+              .where(eq(appointments.id, id))
+              .returning();
+            if (!row) return c.json({ error: 'Not found' }, 404);
+            return c.json(row);
+          } catch (err) {
+            // Réactiver un RDV annulé peut chevaucher un créneau repris depuis.
+            if (!isExclusionViolation(err)) throw err;
+            return c.json(
+              { error: 'Ce créneau est déjà occupé par un autre rendez-vous.', code: 'slot_taken' },
+              409,
+            );
+          }
         },
       )
 

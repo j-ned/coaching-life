@@ -38,7 +38,12 @@ export function createBookingRepository(db: typeof appDb): BookingRepository {
       return rows.length > 0;
     },
     insert: async (data) => {
-      await db.insert(appointments).values(data);
+      try {
+        await db.insert(appointments).values(data);
+      } catch (err) {
+        if (isExclusionViolation(err)) throw new SlotTakenError();
+        throw err;
+      }
     },
   };
 }

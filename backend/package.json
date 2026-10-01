@@ -12,6 +12,9 @@
     "db:seed": "tsx src/db/seed.ts",
     "db:migrate:prod": "node dist/db/migrate.js",
     "test": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:db:up": "docker run --rm -d --name coaching-life-test-db -e POSTGRES_PASSWORD=test -p 54329:5432 postgres:18",
+    "test:db:down": "docker rm -f coaching-life-test-db",
     "typecheck": "tsc -p tsconfig.spec.json --noEmit"
   },
   "dependencies": {

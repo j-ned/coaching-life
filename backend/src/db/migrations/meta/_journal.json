@@ -15,6 +15,13 @@
       "when": 1748563200000,
       "tag": "0001_relative_image_urls",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790812800000,
+      "tag": "0002_appointments_no_overlap",
+      "breakpoints": true
     }
   ]
 }
