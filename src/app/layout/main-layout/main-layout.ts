@@ -35,7 +35,27 @@ const NAV_LINKS = [
     '(window:keydown.control.l)': 'toggleLogin($event)',
   },
   template: `
-    <header class="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-4">
+    <aside
+      data-testid="demo-banner"
+      aria-label="Site de démonstration"
+      class="flex flex-wrap items-center justify-center gap-x-4 px-4 py-1 text-center text-sm text-brand-50 bg-brand-950"
+    >
+      <p class="py-2">
+        <strong class="font-semibold text-white">Site de démonstration.</strong>
+        Coaching Life est une activité fictive, ses coordonnées et témoignages aussi.
+      </p>
+      <a
+        data-testid="demo-banner-link"
+        href="https://nedellec-julien.fr/offres/site-vitrine"
+        class="inline-flex min-h-11 items-center gap-1.5 rounded-sm font-semibold text-white underline decoration-brand-300 underline-offset-4 transition-colors hover:decoration-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+      >
+        Le même pour votre activité
+        <app-icon name="arrow-right" size="sm" />
+      </a>
+    </aside>
+
+    <!-- marge négative = hauteur du header : le contenu passe dessous, le padding des heros reste valable -->
+    <header class="sticky top-0 z-50 -mb-19 px-3 pt-3 sm:-mb-20 sm:px-6 sm:pt-4">
       <div
         class="mx-auto max-w-6xl rounded-full bg-white/75 backdrop-blur-xl ring-1 ring-slate-900/5 shadow-[0_8px_30px_-12px_rgba(76,29,24,0.18)]"
       >
@@ -115,7 +135,7 @@ const NAV_LINKS = [
       @if (isMobileMenuOpen()) {
         <div
           id="mobile-menu"
-          class="lg:hidden mx-auto mt-2 max-w-6xl rounded-3xl bg-white/95 p-3 backdrop-blur-xl ring-1 ring-slate-900/5 shadow-xl"
+          class="lg:hidden absolute inset-x-3 top-full mx-auto mt-2 max-w-6xl rounded-3xl sm:inset-x-6 bg-white/95 p-3 backdrop-blur-xl ring-1 ring-slate-900/5 shadow-xl"
         >
           <nav aria-label="Navigation mobile">
             @for (link of navLinks; track link.route) {
