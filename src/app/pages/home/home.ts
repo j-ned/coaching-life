@@ -18,7 +18,6 @@ import { GetSiteSettingUseCase } from '@features/content/domain/use-cases/get-si
 import { GetAllPagesUseCase } from '@features/content/domain/use-cases/get-all-pages.use-case';
 import { Seo } from '@core/seo/seo';
 import { ROUTE_SEO } from '@core/seo/route-seo';
-import { GOOGLE_REVIEWS_URL } from '@core/config';
 import {
   DEFAULT_HERO,
   DEFAULT_HOME_CTA,
@@ -256,7 +255,7 @@ const MANIFESTO =
     </section>
 
     @defer (on viewport) {
-      <app-reviews [googleReviewsUrl]="googleReviewsUrl" />
+      <app-reviews />
     } @placeholder {
       <div class="section-chapter"></div>
     } @error {
@@ -373,7 +372,6 @@ export class Home {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly _seo = inject(Seo);
 
-  protected readonly googleReviewsUrl = GOOGLE_REVIEWS_URL;
   protected readonly manifesto = MANIFESTO;
 
   protected readonly variantClass: Record<BentoVariant, string> = {

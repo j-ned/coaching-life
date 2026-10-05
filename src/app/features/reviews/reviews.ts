@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { Icon } from '@shared/components/icon/icon';
 
 type Review = {
@@ -131,28 +131,10 @@ const STARS = [1, 2, 3, 4, 5] as const;
           </figcaption>
         </figure>
       </div>
-
-      @if (googleReviewsUrl()) {
-        <div class="mt-16 lg:grid lg:grid-cols-12 lg:gap-20">
-          <div class="lg:col-span-8 lg:col-start-5">
-            <a
-              [href]="googleReviewsUrl()"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 font-semibold text-brand-700 transition-colors hover:text-brand-800"
-            >
-              Voir tous les avis sur Google
-              <app-icon name="arrow-right" size="sm" />
-            </a>
-          </div>
-        </div>
-      }
     </section>
   `,
 })
 export class Reviews {
-  readonly googleReviewsUrl = input<string>('');
-
   protected readonly reviews = REVIEWS;
   protected readonly stars = STARS;
   protected readonly index = signal(0);
