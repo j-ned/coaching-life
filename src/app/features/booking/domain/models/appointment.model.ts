@@ -40,10 +40,13 @@ export type AppointmentFormData = {
   readonly message: string;
 };
 
-export type AppointmentSubmission = {
-  readonly success: boolean;
-  readonly message: string;
-};
+export type AppointmentSubmission =
+  | { readonly success: true; readonly message: string }
+  | {
+      readonly success: false;
+      readonly reason: 'slot-taken' | 'rejected' | 'error';
+      readonly message: string;
+    };
 
 export type DisabledDate = {
   readonly id: string;

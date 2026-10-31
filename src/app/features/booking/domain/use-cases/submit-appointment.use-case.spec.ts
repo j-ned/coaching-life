@@ -17,6 +17,7 @@ describe('SubmitAppointmentUseCase', () => {
       label: 'échec',
       submission: {
         success: false,
+        reason: 'error',
         message: 'Une erreur est survenue lors de la réservation.',
       } satisfies AppointmentSubmission,
     },

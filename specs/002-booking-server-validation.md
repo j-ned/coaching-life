@@ -526,6 +526,63 @@ Nature des échecs : 8 assertions comportementales sur les composants (créneaux
 
 Tous les tests de cette tranche échouent à ce stade (RED confirmé via la commande test du profil (`pnpm test --watch=false` + `BU`) le 2026-10-01 20:30, 8 failed / 104 total côté composants, plus les suites `booking-rules.spec.ts` (7 cas) et `booking-rules.parity.spec.ts` (48 cas) en échec de chargement sur le module dû au GREEN).
 
+### Tranche 7 — 409 consommé par le front
+
+Régime zoneless : `vi.useFakeTimers({ toFake: ['Date'] })` + `vi.setSystemTime(2026-10-01T08:00Z)`, `await fixture.whenStable()` après chaque interaction, aucun `fakeAsync` (fuseau européen supposé, comme la tranche 6). `Booking` contient **lui-même** un `@defer (on viewport)` (calendrier, sélecteur, formulaire) : `deferBlockBehavior: DeferBlockBehavior.Manual` puis `render(DeferBlockState.Complete)` sur le seul bloc. Pas d'Angular Testing Library ni de jest-dom dans le dépôt : boutons trouvés par leur nom accessible (`aria-label`, à défaut texte), champs par leur `<label>`. `AppointmentGateway` doublé (aucune doublure partagée du port n'existe), données via `AppointmentFormDataBuilder` / `AppointmentBuilder`. Parcours piloté par le DOM réel des enfants : clic sur le jour, clic sur le créneau, saisie du formulaire, clic « Confirmer la réservation ».
+
+Sweep du contrat (`AppointmentSubmission` → union discriminée) sur `src/**/*.spec.ts` et `backend/src/**/*.spec.ts` : consommateurs `http-appointment.gateway.spec.ts` (test d'échec 500 recalibré, intégré au `it.each` des statuts génériques avec `reason: 'error'`) et `submit-appointment.use-case.spec.ts` (fixture d'échec `satisfies AppointmentSubmission` complétée de `reason: 'error'` ; l'invariant « le use case relaie le résultat du gateway » est inchangé). `contact` (`success: false` de `HttpMessageGateway`) a son propre type, non concerné. Aucun test backend ne consomme le type front.
+
+Contrat retenu pour le 422 sans `error` textuel : `reason: 'rejected'` + message générique (§ 3 du plan et brief). La liste de la sous-section `### Tranches` dit `error` pour « 422 sans corps » : contradiction tranchée en faveur du § 3, à confirmer.
+
+`src/app/features/booking/infra/http-appointment.gateway.spec.ts` (`submitAppointment`, `HttpTestingController`) :
+
+- **409 → `slot-taken`** : corps serveur `{ error: 'Conflit' }` volontairement différent → `{ success: false, reason: 'slot-taken', message: "Ce créneau vient d'être réservé, choisissez-en un autre." }` (message front constant).
+- **422 avec `error` textuel → `rejected`** + `"Cet horaire n'est pas proposé."` (message serveur relayé).
+- **422 sans corps / `error` non textuel** (`it.each`) → `rejected` + message générique.
+- **400, 429, 500 → `error`** (`it.each`, corps `{ error: 'Message serveur' }` non relayé) + message générique.
+- **erreur réseau → `error`** + message générique.
+- Succès 201 inchangé (garde-fou existant, vert).
+
+`src/app/features/booking/pages/booking.spec.ts` (premier test de composant de `Booking`, RDV sur `lundi 5 octobre 2026`, créneau `10:00`) :
+
+- **succès inchangé** : message « Votre rendez-vous a été réservé avec succès ! » affiché, bouton de confirmation absent, sélecteur retiré, invite « Sélectionnez un créneau » revenue (garde-fou, vert).
+- **409 : message dédié, formulaire retiré** : message affiché, bouton « Confirmer la réservation » absent.
+- **409 : date conservée, créneau pris rafraîchi** : le gateway enregistre le RDV pris pendant la soumission → après le 409, le bouton « 10:00, créneau réservé » est `disabled` et « 11:00, disponible » est présent (10:30 chevauche le RDV de 60 min) (sélecteur toujours affiché sur la même date).
+- **409 : rechargement du mois de la date, pas du mois affiché** : calendrier avancé au mois suivant avant la confirmation → `getBookedSlots` appelé exactement `[['2026-10']]`.
+- **refus `rejected` : formulaire conservé** : message serveur affiché, bouton de confirmation présent (garde-fou, vert).
+
+Sortie `pnpm test --watch=false` (front), fichiers de la tranche en place :
+
+```
+✘ [ERROR] TS2353: Object literal may only specify known properties, and 'reason' does not exist in type 'AppointmentSubmission'. [plugin angular-compiler]
+    src/app/features/booking/domain/use-cases/submit-appointment.use-case.spec.ts:20:8
+ ELIFECYCLE  Test failed.
+```
+
+Le compilateur Angular typecheck toutes les specs, `--include` compris : la fixture alignée sur l'union bloque la suite entière. **Scaffold dû au GREEN** : union `AppointmentSubmission` dans `src/app/features/booking/domain/models/appointment.model.ts` (déjà actée au § 3). Mesure comportementale prise avec cette seule ligne retirée le temps d'une exécution (puis remise) :
+
+```
+ × should return a slot-taken failure with the front message on 409
+ × should return a rejected failure carrying the server message on 422
+ × should return a rejected failure with the generic message on 422 'sans corps'
+ × should return a rejected failure with the generic message on 422 'avec un error non textuel'
+ × should return a generic error failure on 400 / 429 / 500
+ × should return a generic error failure on network error
+     AssertionError: expected { success: false, …(1) } to deeply equal { success: false, …(2) }
+ × affiche le message dédié et retire le formulaire quand le créneau vient d’être pris
+     AssertionError: expected <button type="submit" …> to be null
+ × garde la date et affiche le créneau pris comme réservé après rechargement
+     AssertionError: expected undefined to be true
+ × recharge les créneaux du mois de la date choisie même si le calendrier a changé de mois
+     AssertionError: expected [] to deeply equal [ [ '2026-10' ] ]
+ Test Files  2 failed | 21 passed (23)
+      Tests  11 failed | 112 passed (123)
+```
+
+Nature des échecs : 11 assertions comportementales (8 gateway sans `reason`, 3 page sans branche `slot-taken`), aucune erreur de harnais. Les deux garde-fous de `Booking` (succès, refus `rejected`) sont verts : le harnais `@defer` manuel, la saisie du formulaire et la soumission fonctionnent sous zoneless. Non-régression : 110 tests existants verts (111 − l'ancien test d'échec 500, recalibré dans l'`it.each` des statuts génériques) + 2 garde-fous = 112. `BU` : 145 passed / 145. `pnpm typecheck` (`tsconfig.app.json`) et `format:check` verts.
+
+Tous les tests de cette tranche échouent à ce stade (RED confirmé via la commande test du profil (`pnpm test --watch=false` + `BU`) le 2026-10-01 20:42, 11 failed / 123 total, fixture du use case en échec de typecheck sur le type dû au GREEN).
+
 ## Implémentation
 
 ### Tranche 1

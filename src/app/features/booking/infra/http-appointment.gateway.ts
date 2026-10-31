@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AppointmentGateway } from '../domain/gateways/appointment.gateway';
 import type {
@@ -14,6 +14,24 @@ import type { AppointmentRow, DisabledDateRow } from './appointment.adapter';
 import { API_URL } from '@core/config';
 
 const BASE = `${API_URL}/api/appointments`;
+const GENERIC_SUBMISSION_ERROR =
+  'Une erreur est survenue lors de la réservation. Veuillez réessayer.';
+const SLOT_TAKEN_MESSAGE = "Ce créneau vient d'être réservé, choisissez-en un autre.";
+
+function toSubmissionFailure(error: unknown): AppointmentSubmission {
+  if (error instanceof HttpErrorResponse && error.status === 409) {
+    return { success: false, reason: 'slot-taken', message: SLOT_TAKEN_MESSAGE };
+  }
+  if (error instanceof HttpErrorResponse && error.status === 422) {
+    const serverMessage: unknown = error.error?.error;
+    return {
+      success: false,
+      reason: 'rejected',
+      message: typeof serverMessage === 'string' ? serverMessage : GENERIC_SUBMISSION_ERROR,
+    };
+  }
+  return { success: false, reason: 'error', message: GENERIC_SUBMISSION_ERROR };
+}
 
 @Injectable()
 export class HttpAppointmentGateway implements AppointmentGateway {
@@ -34,11 +52,8 @@ export class HttpAppointmentGateway implements AppointmentGateway {
     try {
       await firstValueFrom(this.http.post(`${BASE}`, toInsert(data)));
       return { success: true, message: 'Votre rendez-vous a été réservé avec succès !' };
-    } catch {
-      return {
-        success: false,
-        message: 'Une erreur est survenue lors de la réservation. Veuillez réessayer.',
-      };
+    } catch (error) {
+      return toSubmissionFailure(error);
     }
   }
 

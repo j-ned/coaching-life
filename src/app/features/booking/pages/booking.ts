@@ -1,4 +1,11 @@
-import { Component, ChangeDetectionStrategy, inject, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  PendingTasks,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import type {
   Appointment,
   AppointmentFormData,
@@ -136,6 +143,7 @@ export class Booking {
   private readonly getBookedSlotsUseCase = inject(GetBookedSlotsUseCase);
   private readonly getDisabledDatesUseCase = inject(GetDisabledDatesUseCase);
   private readonly submitAppointmentUseCase = inject(SubmitAppointmentUseCase);
+  private readonly pendingTasks = inject(PendingTasks);
   private readonly bookingFormRef = viewChild(BookingForm);
   private readonly calendarRef = viewChild(BookingCalendar);
 
@@ -199,6 +207,9 @@ export class Booking {
         const calendarMonth =
           this.calendarRef()?.currentMonthString() ?? new Date().toISOString().substring(0, 7);
         this.loadBookedSlots(calendarMonth);
+      } else if (result.reason === 'slot-taken') {
+        this.selectedSlot.set(null);
+        this.loadBookedSlots(date.substring(0, 7));
       }
     } catch {
       formRef.setSubmitting(false);
@@ -210,8 +221,12 @@ export class Booking {
   }
 
   private async loadBookedSlots(month: string): Promise<void> {
-    const slots = await this.getBookedSlotsUseCase.execute(month);
-    this.bookedSlots.set(slots);
+    const done = this.pendingTasks.add();
+    try {
+      this.bookedSlots.set(await this.getBookedSlotsUseCase.execute(month));
+    } finally {
+      done();
+    }
   }
 
   private async loadDisabledDates(): Promise<void> {

@@ -85,17 +85,83 @@ describe('HttpAppointmentGateway', () => {
       });
     });
 
-    it('should return a failure Result when the request errors', async () => {
-      const data = AppointmentFormDataBuilder.default().build();
-
-      const promise = gateway.submitAppointment(data);
+    it('should return a slot-taken failure with the front message on 409', async () => {
+      const promise = gateway.submitAppointment(AppointmentFormDataBuilder.default().build());
 
       httpMock
         .expectOne('/api/appointments')
-        .flush('boom', { status: 500, statusText: 'Server Error' });
+        .flush({ error: 'Conflit', code: 'slot_taken' }, { status: 409, statusText: 'Conflict' });
 
       await expect(promise).resolves.toEqual({
         success: false,
+        reason: 'slot-taken',
+        message: "Ce créneau vient d'être réservé, choisissez-en un autre.",
+      });
+    });
+
+    it('should return a rejected failure carrying the server message on 422', async () => {
+      const promise = gateway.submitAppointment(AppointmentFormDataBuilder.default().build());
+
+      httpMock
+        .expectOne('/api/appointments')
+        .flush(
+          { error: "Cet horaire n'est pas proposé.", code: 'invalid_slot' },
+          { status: 422, statusText: 'Unprocessable Entity' },
+        );
+
+      await expect(promise).resolves.toEqual({
+        success: false,
+        reason: 'rejected',
+        message: "Cet horaire n'est pas proposé.",
+      });
+    });
+
+    it.each([
+      { label: 'sans corps', body: null },
+      { label: 'avec un error non textuel', body: { error: { name: 'ZodError' } } },
+    ])(
+      'should return a rejected failure with the generic message on 422 $label',
+      async ({ body }) => {
+        const promise = gateway.submitAppointment(AppointmentFormDataBuilder.default().build());
+
+        httpMock
+          .expectOne('/api/appointments')
+          .flush(body, { status: 422, statusText: 'Unprocessable Entity' });
+
+        await expect(promise).resolves.toEqual({
+          success: false,
+          reason: 'rejected',
+          message: 'Une erreur est survenue lors de la réservation. Veuillez réessayer.',
+        });
+      },
+    );
+
+    it.each([
+      { status: 400, statusText: 'Bad Request' },
+      { status: 429, statusText: 'Too Many Requests' },
+      { status: 500, statusText: 'Server Error' },
+    ])('should return a generic error failure on $status', async ({ status, statusText }) => {
+      const promise = gateway.submitAppointment(AppointmentFormDataBuilder.default().build());
+
+      httpMock
+        .expectOne('/api/appointments')
+        .flush({ error: 'Message serveur' }, { status, statusText });
+
+      await expect(promise).resolves.toEqual({
+        success: false,
+        reason: 'error',
+        message: 'Une erreur est survenue lors de la réservation. Veuillez réessayer.',
+      });
+    });
+
+    it('should return a generic error failure on network error', async () => {
+      const promise = gateway.submitAppointment(AppointmentFormDataBuilder.default().build());
+
+      httpMock.expectOne('/api/appointments').error(new ProgressEvent('error'));
+
+      await expect(promise).resolves.toEqual({
+        success: false,
+        reason: 'error',
         message: 'Une erreur est survenue lors de la réservation. Veuillez réessayer.',
       });
     });
