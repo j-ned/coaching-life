@@ -2,8 +2,12 @@ packages:
   - '.'
   - 'backend'
 
-ignoredBuiltDependencies:
+onlyBuiltDependencies:
   - '@parcel/watcher'
   - esbuild
   - lmdb
   - msgpackr-extract
+
+overrides:
+  # drizzle-orm > gel (pilote optionnel inutilisé) tire une version vulnérable
+  shell-quote: '>=1.9.0'

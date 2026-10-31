@@ -1,10 +1,7 @@
 import type { BookingDuration } from '../booking-rules';
 
 export type CoachingType =
-  | 'life-coaching'
-  | 'personal-development'
-  | 'equine-coaching'
-  | 'neuroatypical-parents';
+  'life-coaching' | 'personal-development' | 'equine-coaching' | 'neuroatypical-parents';
 
 export type AppointmentStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 

@@ -1,8 +1,5 @@
 export type PageSlug =
-  | 'life-coach'
-  | 'personal-development'
-  | 'equine-coaching'
-  | 'neuroatypical-parents';
+  'life-coach' | 'personal-development' | 'equine-coaching' | 'neuroatypical-parents';
 
 export type PageContentItem = {
   readonly title: string;
