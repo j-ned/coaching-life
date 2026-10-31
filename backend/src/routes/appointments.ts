@@ -118,10 +118,7 @@ export function createAppointmentRoutes({ bookings, notifier, now }: Appointment
         if (!rules.ok) return c.json({ error: rules.message, code: rules.code }, 422);
 
         if (await bookings.isDateDisabled(data.appointment_date)) {
-          return c.json(
-            { error: BOOKING_RULE_MESSAGES.disabled_date, code: 'disabled_date' },
-            422,
-          );
+          return c.json({ error: BOOKING_RULE_MESSAGES.disabled_date, code: 'disabled_date' }, 422);
         }
 
         try {
@@ -129,7 +126,10 @@ export function createAppointmentRoutes({ bookings, notifier, now }: Appointment
         } catch (err) {
           if (!(err instanceof SlotTakenError)) throw err;
           return c.json(
-            { error: "Ce créneau vient d'être réservé, choisissez-en un autre.", code: 'slot_taken' },
+            {
+              error: "Ce créneau vient d'être réservé, choisissez-en un autre.",
+              code: 'slot_taken',
+            },
             409,
           );
         }

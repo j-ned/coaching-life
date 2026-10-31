@@ -8,6 +8,7 @@ import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { secureHeaders } from 'hono/secure-headers';
 import { authRoutes } from './routes/auth.js';
 import { appointmentRoutes } from './routes/appointments.js';
 import { messageRoutes } from './routes/messages.js';
@@ -46,6 +47,12 @@ const app = new Hono();
 // Middleware global
 
 app.use(logger());
+app.use(
+  secureHeaders({
+    referrerPolicy: 'strict-origin-when-cross-origin',
+    crossOriginResourcePolicy: false,
+  }),
+);
 
 app.use(
   '/api/*',

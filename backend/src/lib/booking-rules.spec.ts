@@ -14,13 +14,19 @@ import { FIXED_NOW, aBookingRequest } from '../test/booking-fakes.js';
 
 describe('checkBookingRules — règles de calendrier', () => {
   it('accepte un jour ouvré futur', () => {
-    const result = checkBookingRules(aBookingRequest({ appointment_date: '2026-10-05' }), FIXED_NOW);
+    const result = checkBookingRules(
+      aBookingRequest({ appointment_date: '2026-10-05' }),
+      FIXED_NOW,
+    );
 
     expect(result).toEqual({ ok: true, duration: 60 });
   });
 
   it('accepte le 29 février d’une année bissextile', () => {
-    const result = checkBookingRules(aBookingRequest({ appointment_date: '2028-02-29' }), FIXED_NOW);
+    const result = checkBookingRules(
+      aBookingRequest({ appointment_date: '2028-02-29' }),
+      FIXED_NOW,
+    );
 
     expect(result).toEqual({ ok: true, duration: 60 });
   });
@@ -47,8 +53,11 @@ describe('checkBookingRules — règles de calendrier', () => {
     },
   );
 
-  it("ne traite pas la date du jour à Paris comme passée", () => {
-    const result = checkBookingRules(aBookingRequest({ appointment_date: '2026-10-01' }), FIXED_NOW);
+  it('ne traite pas la date du jour à Paris comme passée', () => {
+    const result = checkBookingRules(
+      aBookingRequest({ appointment_date: '2026-10-01' }),
+      FIXED_NOW,
+    );
 
     expect(result.ok ? null : result.code).not.toBe('past_date');
   });
@@ -101,15 +110,46 @@ describe('constantes de réservation', () => {
 describe('listSlotStarts', () => {
   it('propose en 60 min les débuts de 09:00 à 17:00, toutes les 30 min', () => {
     expect(listSlotStarts(60)).toEqual([
-      '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00',
-      '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00',
+      '09:00',
+      '09:30',
+      '10:00',
+      '10:30',
+      '11:00',
+      '11:30',
+      '12:00',
+      '12:30',
+      '13:00',
+      '13:30',
+      '14:00',
+      '14:30',
+      '15:00',
+      '15:30',
+      '16:00',
+      '16:30',
+      '17:00',
     ]);
   });
 
   it('propose en 30 min les débuts de 09:00 à 17:30, toutes les 30 min', () => {
     expect(listSlotStarts(30)).toEqual([
-      '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00',
-      '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
+      '09:00',
+      '09:30',
+      '10:00',
+      '10:30',
+      '11:00',
+      '11:30',
+      '12:00',
+      '12:30',
+      '13:00',
+      '13:30',
+      '14:00',
+      '14:30',
+      '15:00',
+      '15:30',
+      '16:00',
+      '16:30',
+      '17:00',
+      '17:30',
     ]);
   });
 });
@@ -156,18 +196,15 @@ describe('checkBookingRules — règles horaires et délai de prévenance', () =
     { appointment_time: '17:30', duration: 60 },
     { appointment_time: '18:00', duration: 30 },
     { appointment_time: '25:99', duration: 60 },
-  ])(
-    'refuse l’horaire $appointment_time en $duration min',
-    ({ appointment_time, duration }) => {
-      const result = checkBookingRules(aBookingRequest({ appointment_time, duration }), FIXED_NOW);
+  ])('refuse l’horaire $appointment_time en $duration min', ({ appointment_time, duration }) => {
+    const result = checkBookingRules(aBookingRequest({ appointment_time, duration }), FIXED_NOW);
 
-      expect(result).toEqual({
-        ok: false,
-        code: 'invalid_slot',
-        message: "Cet horaire n'est pas proposé.",
-      });
-    },
-  );
+    expect(result).toEqual({
+      ok: false,
+      code: 'invalid_slot',
+      message: "Cet horaire n'est pas proposé.",
+    });
+  });
 
   it.each([
     { appointment_time: '17:30', duration: 30 },
@@ -193,7 +230,7 @@ describe('checkBookingRules — règles horaires et délai de prévenance', () =
       expect(result).toEqual({
         ok: false,
         code: 'too_soon',
-        message: 'Les rendez-vous doivent être pris au moins 24 h à l\'avance.',
+        message: "Les rendez-vous doivent être pris au moins 24 h à l'avance.",
       });
     },
   );

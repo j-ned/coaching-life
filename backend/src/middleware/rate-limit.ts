@@ -1,9 +1,23 @@
+import type { Context } from 'hono';
 import { createMiddleware } from 'hono/factory';
+import { getConnInfo } from '@hono/node-server/conninfo';
 
 type RateLimitOptions = {
   readonly windowMs: number;
   readonly max: number;
 };
+
+// IP du client telle que vue par le proxy de confiance (Traefik) : il AJOUTE l'adresse réelle
+// en fin de `X-Forwarded-For`. Les entrées de gauche sont fournies par le client, donc forgeables.
+function clientIp(c: Context): string {
+  const forwarded = c.req.header('x-forwarded-for')?.split(',').at(-1)?.trim();
+  if (forwarded) return forwarded;
+  try {
+    return getConnInfo(c).remote.address ?? 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
 
 // Rate-limit à fenêtre fixe, en mémoire (par instance). Suffisant pour une app mono-instance
 // derrière Traefik. Pour du multi-instance, déporter le compteur (ex. Redis).
@@ -11,10 +25,7 @@ export function rateLimit({ windowMs, max }: RateLimitOptions) {
   const hits = new Map<string, { count: number; resetAt: number }>();
 
   return createMiddleware(async (c, next) => {
-    const ip =
-      c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ||
-      c.req.header('x-real-ip') ||
-      'unknown';
+    const ip = clientIp(c);
     const now = Date.now();
     const entry = hits.get(ip);
 

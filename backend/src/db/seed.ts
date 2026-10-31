@@ -13,9 +13,7 @@ async function seed() {
     if (process.env['NODE_ENV'] === 'production') {
       throw new Error('ADMIN_PASSWORD manquant : refus de seeder un compte admin en production.');
     }
-    console.warn(
-      'ADMIN_PASSWORD absent, seed admin ignoré (définissez-le pour créer le compte).',
-    );
+    console.warn('ADMIN_PASSWORD absent, seed admin ignoré (définissez-le pour créer le compte).');
   }
   const hash = adminPassword ? await bcrypt.hash(adminPassword, 12) : null;
 

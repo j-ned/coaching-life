@@ -2,11 +2,8 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
-  HeadObjectCommand,
   GetObjectCommand,
 } from '@aws-sdk/client-s3';
-import { extname } from 'node:path';
-import { randomUUID } from 'node:crypto';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -41,24 +38,11 @@ function getBucket(): string {
   return requireEnv('S3_BUCKET');
 }
 
-const MIME_TYPES: Record<string, string> = {
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.png': 'image/png',
-  '.webp': 'image/webp',
-  '.gif': 'image/gif',
-  '.svg': 'image/svg+xml',
-};
-
 export async function uploadFile(
   buffer: ArrayBuffer,
-  originalName: string,
-  path = '',
-): Promise<string> {
-  const ext = extname(originalName).toLowerCase() || '.bin';
-  const key = path || `${randomUUID()}${ext}`;
-  const contentType = MIME_TYPES[ext] ?? 'application/octet-stream';
-
+  key: string,
+  contentType: string,
+): Promise<void> {
   await getS3().send(
     new PutObjectCommand({
       Bucket: getBucket(),
@@ -67,21 +51,10 @@ export async function uploadFile(
       ContentType: contentType,
     }),
   );
-
-  return key;
 }
 
 export async function deleteFile(key: string): Promise<void> {
   await getS3().send(new DeleteObjectCommand({ Bucket: getBucket(), Key: key }));
-}
-
-export async function fileExists(key: string): Promise<boolean> {
-  try {
-    await getS3().send(new HeadObjectCommand({ Bucket: getBucket(), Key: key }));
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 export async function getFileStream(
