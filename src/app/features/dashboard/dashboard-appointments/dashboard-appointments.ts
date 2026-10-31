@@ -226,7 +226,7 @@ type DisabledDateRow = {
 
           <div
             class="grid grid-cols-7 gap-1"
-            role="grid"
+            role="group"
             aria-label="Calendrier de gestion des disponibilités"
           >
             @for (day of daysGrid(); track day.date) {

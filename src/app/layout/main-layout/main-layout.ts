@@ -245,7 +245,9 @@ const NAV_LINKS = [
     </footer>
 
     @if (showLogin()) {
-      <app-login (closed)="showLogin.set(false)" />
+      @defer {
+        <app-login (closed)="showLogin.set(false)" />
+      }
     }
   `,
 })

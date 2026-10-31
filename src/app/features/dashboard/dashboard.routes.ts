@@ -1,8 +1,16 @@
 import { Routes } from '@angular/router';
+import { provideCharts } from 'ng2-charts';
+import { BarController, BarElement, CategoryScale, Legend, LinearScale, Tooltip } from 'chart.js';
 
 export const DASHBOARD_ROUTES: Routes = [
   {
     path: '',
+    // Chart.js limité au graphique en barres du tableau de bord, hors bundle du site public.
+    providers: [
+      provideCharts({
+        registerables: [BarController, BarElement, CategoryScale, LinearScale, Legend, Tooltip],
+      }),
+    ],
     loadComponent: () =>
       import('../../layout/dashboard-layout/dashboard-layout').then((m) => m.DashboardLayout),
     children: [

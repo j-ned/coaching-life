@@ -57,7 +57,7 @@ export function getFrenchHolidays(year: number): Map<string, string> {
   return holidays;
 }
 
-export function isWeekend(date: Date): boolean {
+function isWeekend(date: Date): boolean {
   const day = date.getDay();
   return day === 0 || day === 6;
 }

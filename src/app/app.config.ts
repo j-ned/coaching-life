@@ -6,7 +6,6 @@ import {
   withEventReplay,
   withNoIncrementalHydration,
 } from '@angular/platform-browser';
-import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 import { routes } from './app.routes';
 import { AuthGateway } from '@features/auth/domain/gateways/auth.gateway';
@@ -34,7 +33,6 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(withFetch()),
     provideClientHydration(withEventReplay(), withNoIncrementalHydration()),
-    provideCharts(withDefaultRegisterables()),
     { provide: AuthGateway, useClass: HttpAuthGateway },
     { provide: AppointmentGateway, useClass: HttpAppointmentGateway },
     { provide: MessageGateway, useClass: HttpMessageGateway },

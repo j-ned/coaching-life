@@ -49,7 +49,7 @@ type CalendarDay = {
         }
       </div>
 
-      <div class="grid grid-cols-7 gap-1" role="grid" aria-label="Calendrier des disponibilités">
+      <div class="grid grid-cols-7 gap-1" role="group" aria-label="Calendrier des disponibilités">
         @for (day of daysGrid(); track day.date) {
           @if (day.isCurrentMonth) {
             <button

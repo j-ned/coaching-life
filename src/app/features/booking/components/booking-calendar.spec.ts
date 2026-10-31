@@ -19,7 +19,9 @@ async function renderCalendar(now: string, disabledDates: readonly DisabledDate[
   const host: HTMLElement = fixture.nativeElement;
   const day = (dayNumber: number) => {
     const button = Array.from(
-      host.querySelectorAll<HTMLButtonElement>('[role="grid"] button'),
+      host.querySelectorAll<HTMLButtonElement>(
+        '[aria-label="Calendrier des disponibilités"] button',
+      ),
     ).find((candidate) => candidate.textContent?.trim() === String(dayNumber));
     if (!button) throw new Error(`Jour ${dayNumber} absent du calendrier`);
     return button;

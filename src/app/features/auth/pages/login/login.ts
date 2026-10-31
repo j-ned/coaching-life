@@ -217,18 +217,17 @@ export class Login {
     const { email, password } = this.loginForm.getRawValue();
 
     try {
-      await this.loginUseCase.execute({ email, password });
+      const session = await this.loginUseCase.execute({ email, password });
       this.isLoading.set(false);
+      if (!session) {
+        this.error.set('Email ou mot de passe incorrect.');
+        return;
+      }
       this.closed.emit();
       this.router.navigate(['/dashboard']);
-    } catch (err: unknown) {
+    } catch {
       this.isLoading.set(false);
-      const message = err instanceof Error ? err.message : '';
-      this.error.set(
-        message === 'Invalid login credentials'
-          ? 'Email ou mot de passe incorrect.'
-          : message || 'Erreur de connexion.',
-      );
+      this.error.set('Erreur de connexion.');
     }
   }
 }
