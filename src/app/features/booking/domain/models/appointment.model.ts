@@ -1,3 +1,5 @@
+import type { BookingDuration } from '../booking-rules';
+
 export type CoachingType =
   | 'life-coaching'
   | 'personal-development'
@@ -34,14 +36,17 @@ export type AppointmentFormData = {
   readonly coachingType: CoachingType;
   readonly appointmentDate: string;
   readonly appointmentTime: string;
-  readonly duration: number;
+  readonly duration: BookingDuration;
   readonly message: string;
 };
 
-export type AppointmentSubmission = {
-  readonly success: boolean;
-  readonly message: string;
-};
+export type AppointmentSubmission =
+  | { readonly success: true; readonly message: string }
+  | {
+      readonly success: false;
+      readonly reason: 'slot-taken' | 'rejected' | 'error';
+      readonly message: string;
+    };
 
 export type DisabledDate = {
   readonly id: string;

@@ -1,4 +1,11 @@
-import { Component, ChangeDetectionStrategy, inject, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  PendingTasks,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import type {
   Appointment,
   AppointmentFormData,
@@ -7,6 +14,7 @@ import type {
 import { GetBookedSlotsUseCase } from '../domain/use-cases/get-booked-slots.use-case';
 import { GetDisabledDatesUseCase } from '../domain/use-cases/get-disabled-dates.use-case';
 import { SubmitAppointmentUseCase } from '../domain/use-cases/submit-appointment.use-case';
+import type { BookingDuration } from '../domain/booking-rules';
 import { BookingCalendar } from '../components/booking-calendar';
 import { BookingTimePicker } from '../components/booking-time-picker';
 import { BookingForm, type BookingFormPayload } from '../components/booking-form';
@@ -135,11 +143,14 @@ export class Booking {
   private readonly getBookedSlotsUseCase = inject(GetBookedSlotsUseCase);
   private readonly getDisabledDatesUseCase = inject(GetDisabledDatesUseCase);
   private readonly submitAppointmentUseCase = inject(SubmitAppointmentUseCase);
+  private readonly pendingTasks = inject(PendingTasks);
   private readonly bookingFormRef = viewChild(BookingForm);
   private readonly calendarRef = viewChild(BookingCalendar);
 
   protected readonly selectedDate = signal<string | null>(null);
-  protected readonly selectedSlot = signal<{ time: string; duration: number } | null>(null);
+  protected readonly selectedSlot = signal<{ time: string; duration: BookingDuration } | null>(
+    null,
+  );
   protected readonly bookedSlots = signal<readonly Appointment[]>([]);
   protected readonly disabledDates = signal<readonly DisabledDate[]>([]);
   protected readonly submissionMessage = signal<{ success: boolean; message: string } | null>(null);
@@ -164,7 +175,7 @@ export class Booking {
     this.loadBookedSlots(month);
   }
 
-  protected onSlotSelected(slot: { time: string; duration: number }): void {
+  protected onSlotSelected(slot: { time: string; duration: BookingDuration }): void {
     this.selectedSlot.set(slot);
   }
 
@@ -196,6 +207,9 @@ export class Booking {
         const calendarMonth =
           this.calendarRef()?.currentMonthString() ?? new Date().toISOString().substring(0, 7);
         this.loadBookedSlots(calendarMonth);
+      } else if (result.reason === 'slot-taken') {
+        this.selectedSlot.set(null);
+        this.loadBookedSlots(date.substring(0, 7));
       }
     } catch {
       formRef.setSubmitting(false);
@@ -207,8 +221,12 @@ export class Booking {
   }
 
   private async loadBookedSlots(month: string): Promise<void> {
-    const slots = await this.getBookedSlotsUseCase.execute(month);
-    this.bookedSlots.set(slots);
+    const done = this.pendingTasks.add();
+    try {
+      this.bookedSlots.set(await this.getBookedSlotsUseCase.execute(month));
+    } finally {
+      done();
+    }
   }
 
   private async loadDisabledDates(): Promise<void> {

@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, computed, input, output, signal } f
 import type { Appointment, DisabledDate } from '../domain/models/appointment.model';
 import { Icon } from '../../../shared/components/icon/icon';
 import { getFrenchHolidays, getUnavailableReason } from '../../../shared/calendar/french-holidays';
+import { bookingThreshold, hasBookableSlot } from '../domain/booking-rules';
 
 type CalendarDay = {
   readonly date: string;
@@ -109,6 +110,7 @@ export class BookingCalendar {
     const bookedDates = new Set(this.bookedSlots().map((b) => b.appointmentDate));
     const adminDisabled = new Map(this.disabledDates().map((d) => [d.date, d.reason]));
     const holidays = getFrenchHolidays(year);
+    const threshold = bookingThreshold(new Date());
     const selected = this.selectedDate();
 
     let startDayOfWeek = firstDay.getDay() - 1;
@@ -137,7 +139,10 @@ export class BookingCalendar {
 
       const adminReason = adminDisabled.get(dateString);
       const unavailableReason = getUnavailableReason(dayDate, holidays);
-      const disabledReason = adminReason ?? unavailableReason ?? undefined;
+      const leadTimeReason = hasBookableSlot(dateString, threshold)
+        ? undefined
+        : 'Délai de prévenance de 24 h';
+      const disabledReason = adminReason ?? unavailableReason ?? leadTimeReason;
       const isPast = dayDate < today;
       const isToday = dayDate.getTime() === today.getTime();
       const isDisabled = !!disabledReason;

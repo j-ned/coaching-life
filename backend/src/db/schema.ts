@@ -13,6 +13,7 @@ export const users = pgTable('users', {
 
 // Appointments
 
+// Contrainte d'exclusion appointments_no_overlap (migration 0002) : Drizzle ne sait pas la déclarer.
 export const appointments = pgTable('appointments', {
   id: uuid('id').primaryKey().defaultRandom(),
   client_name: text('client_name').notNull(),

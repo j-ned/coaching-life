@@ -1,11 +1,20 @@
 import { Component, ChangeDetectionStrategy, computed, input, output, signal } from '@angular/core';
 import type { Appointment } from '../domain/models/appointment.model';
+import {
+  BOOKING_DURATIONS,
+  type BookingDuration,
+  bookingThreshold,
+  isSlotTooSoon,
+  listSlotStarts,
+} from '../domain/booking-rules';
 import { Icon } from '../../../shared/components/icon/icon';
 
 type SlotSelection = {
   readonly time: string;
-  readonly duration: number;
+  readonly duration: BookingDuration;
 };
+
+const DURATION_LABELS: Readonly<Record<BookingDuration, string>> = { 30: '30 min', 60: '1h' };
 
 @Component({
   selector: 'app-booking-time-picker',
@@ -21,26 +30,18 @@ type SlotSelection = {
 
       <fieldset class="flex gap-2 mb-6 border-0 p-0 m-0">
         <legend class="sr-only">Durée</legend>
-        <button
-          (click)="setDuration(30)"
-          [class]="
-            selectedDuration() === 30
-              ? 'px-4 py-2 rounded-lg text-sm font-medium bg-brand-700 text-white transition-colors'
-              : 'px-4 py-2 rounded-lg text-sm font-medium bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-800 hover:border-brand-300 transition-colors'
-          "
-        >
-          30 min
-        </button>
-        <button
-          (click)="setDuration(60)"
-          [class]="
-            selectedDuration() === 60
-              ? 'px-4 py-2 rounded-lg text-sm font-medium bg-brand-700 text-white transition-colors'
-              : 'px-4 py-2 rounded-lg text-sm font-medium bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-800 hover:border-brand-300 transition-colors'
-          "
-        >
-          1h
-        </button>
+        @for (duration of durations; track duration) {
+          <button
+            (click)="setDuration(duration)"
+            [class]="
+              selectedDuration() === duration
+                ? 'px-4 py-2 rounded-lg text-sm font-medium bg-brand-700 text-white transition-colors'
+                : 'px-4 py-2 rounded-lg text-sm font-medium bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-800 hover:border-brand-300 transition-colors'
+            "
+          >
+            {{ durationLabels[duration] }}
+          </button>
+        }
       </fieldset>
 
       <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -71,54 +72,39 @@ export class BookingTimePicker {
   readonly slotSelected = output<SlotSelection>();
 
   readonly selectedTime = signal<string | null>(null);
-  readonly selectedDuration = signal(60);
+  readonly selectedDuration = signal<BookingDuration>(60);
+
+  protected readonly durations = BOOKING_DURATIONS;
+  protected readonly durationLabels = DURATION_LABELS;
 
   readonly availableSlots = computed(() => {
     const dateValue = this.date();
     const duration = this.selectedDuration();
     const selected = this.selectedTime();
+    const threshold = bookingThreshold(new Date());
     const booked = this.bookedSlots().filter((b) => b.appointmentDate === dateValue);
 
-    const slots: {
-      time: string;
-      isBooked: boolean;
-      isSelected: boolean;
-      cssClass: string;
-      ariaLabel: string;
-    }[] = [];
-    const startHour = 9;
-    const endHour = 18;
-
-    for (let h = startHour; h < endHour; h++) {
-      for (const m of [0, 30]) {
-        const time = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-        const slotEndMinutes = h * 60 + m + duration;
-
-        if (slotEndMinutes > endHour * 60) continue;
-
+    return listSlotStarts(duration)
+      .filter((time) => !isSlotTooSoon(dateValue, time, threshold))
+      .map((time) => {
+        const slotStart = this.timeToMinutes(time);
+        const slotEnd = slotStart + duration;
         const isBooked = booked.some((b) => {
           const bookedStart = this.timeToMinutes(b.appointmentTime);
-          const bookedEnd = bookedStart + b.duration;
-          const slotStart = h * 60 + m;
-          const slotEnd = slotStart + duration;
-          return slotStart < bookedEnd && slotEnd > bookedStart;
+          return slotStart < bookedStart + b.duration && slotEnd > bookedStart;
         });
-
         const isSelected = selected === time;
-        slots.push({
+        return {
           time,
           isBooked,
           isSelected,
           cssClass: this.computeSlotClass(isBooked, isSelected),
           ariaLabel: isBooked ? `${time}, créneau réservé` : `${time}, disponible`,
-        });
-      }
-    }
-
-    return slots;
+        };
+      });
   });
 
-  setDuration(duration: number): void {
+  setDuration(duration: BookingDuration): void {
     this.selectedDuration.set(duration);
     this.selectedTime.set(null);
   }
