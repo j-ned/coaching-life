@@ -5,17 +5,7 @@ import { resolve } from 'node:path';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
-import { secureHeaders } from 'hono/secure-headers';
-import { authRoutes } from './routes/auth.js';
-import { appointmentRoutes } from './routes/appointments.js';
-import { messageRoutes } from './routes/messages.js';
-import { pageRoutes } from './routes/pages.js';
-import { settingRoutes } from './routes/settings.js';
-import { analyticsRoutes } from './routes/analytics.js';
-import { storageRoutes } from './routes/storage.js';
+import { app } from './app.js';
 
 // Frontend Angular mis en cache au démarrage.
 // Routes publiques prérendues (RenderMode.Prerender) → `<route>/index.html` : HTML statique
@@ -42,43 +32,6 @@ const csrShellPath =
   null;
 const csrShell = csrShellPath ? readFileSync(csrShellPath, 'utf-8') : null;
 
-const app = new Hono();
-
-// Middleware global
-
-app.use(logger());
-app.use(
-  secureHeaders({
-    referrerPolicy: 'strict-origin-when-cross-origin',
-    crossOriginResourcePolicy: false,
-  }),
-);
-
-app.use(
-  '/api/*',
-  cors({
-    origin: process.env['CORS_ORIGIN'] ?? 'http://localhost:4200',
-    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-    maxAge: 86400,
-  }),
-);
-
-// Routes
-
-app.route('/api/auth', authRoutes);
-app.route('/api/appointments', appointmentRoutes);
-app.route('/api/messages', messageRoutes);
-app.route('/api/pages', pageRoutes);
-app.route('/api/settings', settingRoutes);
-app.route('/api/analytics', analyticsRoutes);
-app.route('/api/storage', storageRoutes);
-
-// Health check
-
-app.get('/health', (c) => c.json({ status: 'ok', ts: new Date().toISOString() }));
-
 // Frontend Angular (static)
 
 if (csrShell) {
@@ -88,13 +41,6 @@ if (csrShell) {
     return c.html(prerenderedRoutes.get(path) ?? csrShell);
   });
 }
-
-app.notFound((c) => c.json({ error: 'Route introuvable' }, 404));
-
-app.onError((err, c) => {
-  console.error('[ERROR]', err);
-  return c.json({ error: 'Erreur interne du serveur' }, 500);
-});
 
 // Start
 
