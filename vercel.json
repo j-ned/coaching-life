@@ -5,32 +5,61 @@
   "buildCommand": "pnpm build && pnpm --filter @coaching-life/backend build",
   "ignoreCommand": "git diff --quiet \"${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}\" HEAD -- . ':(exclude,glob)**/*.md' ':(exclude)docs' ':(exclude)specs' ':(exclude).github' ':(exclude)Dockerfile' ':(exclude).dockerignore'",
   "outputDirectory": "dist/coaching-life/browser",
-  "regions": ["fra1"],
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "/api" },
-    { "source": "/((?!api(?:/|$))(?!.*\\.[a-zA-Z0-9]+$).*)", "destination": "/index.csr.html" }
+  "regions": [
+    "fra1"
   ],
-  "headers": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
-      ]
+      "src": "/(.*)",
+      "headers": {
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "SAMEORIGIN",
+        "Referrer-Policy": "strict-origin-when-cross-origin"
+      },
+      "continue": true
     },
     {
-      "source": "/((?:chunk|main|polyfills|styles)-[A-Za-z0-9_-]+\\.(?:js|css))",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "src": "/((?:chunk|main|polyfills|styles)-[A-Za-z0-9_-]+\\.(?:js|css))",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      },
+      "continue": true
     },
     {
-      "source": "/((?!api(?:/|$))(?!.*\\.[a-zA-Z0-9]+$).*)",
-      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      "src": "/((?!api(?:/|$))(?!.*\\.[a-zA-Z0-9]+$).*)",
+      "headers": {
+        "Cache-Control": "no-cache"
+      },
+      "continue": true
     },
     {
-      "source": "/(.*\\.html)",
-      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      "src": "/(.*\\.html)",
+      "headers": {
+        "Cache-Control": "no-cache"
+      },
+      "continue": true
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/api(?:/(.*))?",
+      "dest": "/api?path=$1",
+      "check": true
+    },
+    {
+      "src": "/((?!api(?:/|$))(?!.*\\.[a-zA-Z0-9]+$).*)",
+      "dest": "/index.csr.html",
+      "check": true
+    },
+    {
+      "src": "/(.*)",
+      "status": 404,
+      "dest": "/404.html",
+      "headers": {
+        "Cache-Control": "no-cache"
+      }
     }
   ]
 }
