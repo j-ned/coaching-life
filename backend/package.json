@@ -10,6 +10,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/db/seed.ts",
+    "db:init": "tsx src/db/migrate.ts && tsx src/db/seed.ts",
     "db:migrate:prod": "node dist/db/migrate.js",
     "test": "vitest run --project unit",
     "test:integration": "vitest run --project integration",

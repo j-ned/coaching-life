@@ -4,8 +4,10 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { requireEnv } from '../lib/env.js';
 
-const pool = new Pool({ connectionString: process.env['DATABASE_URL'] });
+// Jamais de repli implicite (PG*, localhost) : la base visée doit être nommée explicitement.
+const pool = new Pool({ connectionString: requireEnv('DATABASE_URL') });
 const db = drizzle(pool);
 
 const migrationsFolder = resolve(dirname(fileURLToPath(import.meta.url)), 'migrations');
