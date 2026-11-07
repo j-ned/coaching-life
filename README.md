@@ -160,11 +160,11 @@ En production, le backend Hono sert directement les fichiers statiques buildés 
 
 ### Page d'accueil (light mode)
 
-![Hero light](public/screen/hero-light.png)
+![Hero light](docs/screen/hero-light.png)
 
 ### Vue complète
 
-![Full page](public/screen/full-dark.png)
+![Full page](docs/screen/full-dark.png)
 
 ---
 
