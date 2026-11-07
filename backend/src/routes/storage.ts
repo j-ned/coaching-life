@@ -2,11 +2,21 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { bodyLimit } from 'hono/body-limit';
-import { uploadFile, deleteFile, getFileStream } from '../lib/s3.js';
+import { createMiddleware } from 'hono/factory';
+import { uploadFile, deleteFile, getFileStream, isStorageEnabled } from '../lib/s3.js';
 import { requireAdmin } from '../middleware/auth.js';
 import { MAX_UPLOAD_BYTES, buildStorageKey, detectImageType } from '../lib/upload-policy.js';
 
 const TOO_LARGE = 'Image trop lourde (5 Mo maximum)';
+
+// Preview/dev sans S3 : réponse explicite plutôt qu'un 404 trompeur ou un 500.
+// Une configuration partielle lève ici et finit en 500 : c'est une erreur, pas un choix.
+const requireStorage = createMiddleware(async (c, next) => {
+  if (!isStorageEnabled()) {
+    return c.json({ error: 'Stockage de fichiers désactivé sur cet environnement' }, 503);
+  }
+  return next();
+});
 
 export const storageRoutes = new Hono()
 
@@ -14,6 +24,7 @@ export const storageRoutes = new Hono()
   .post(
     '/upload',
     requireAdmin,
+    requireStorage,
     bodyLimit({
       maxSize: MAX_UPLOAD_BYTES + 64 * 1024,
       onError: (c) => c.json({ error: TOO_LARGE }, 413),
@@ -51,6 +62,7 @@ export const storageRoutes = new Hono()
   .delete(
     '/files',
     requireAdmin,
+    requireStorage,
     zValidator('json', z.object({ path: z.string().min(1) })),
     async (c) => {
       const { path } = c.req.valid('json');
@@ -60,7 +72,7 @@ export const storageRoutes = new Hono()
   )
 
   // GET /api/storage/files/:key (public, proxy depuis S3)
-  .get('/files/:key{.+}', async (c) => {
+  .get('/files/:key{.+}', requireStorage, async (c) => {
     const key = c.req.param('key');
     try {
       const { body, contentType } = await getFileStream(key);
