@@ -1,20 +1,22 @@
 import { SignJWT, jwtVerify } from 'jose';
+import { requireEnv, type EnvSource } from './env.js';
 
-// Lecture paresseuse : jamais de fallback "prod" silencieux. En production, l'absence de
-// SESSION_SECRET fait échouer (sinon n'importe qui forge un JWT admin avec le secret par défaut).
+const MIN_SECRET_LENGTH = 32;
+
+// Aucun secret par défaut, dans aucun environnement : le dépôt est public, un secret de repli
+// codé en dur permettrait à quiconque de forger un JWT admin.
+export function readSessionSecret(env: EnvSource = process.env): Uint8Array {
+  const raw = requireEnv('SESSION_SECRET', env);
+  if (raw.length < MIN_SECRET_LENGTH) {
+    throw new Error(`SESSION_SECRET trop court : ${MIN_SECRET_LENGTH} caractères minimum.`);
+  }
+  return new TextEncoder().encode(raw);
+}
+
+// Lecture paresseuse : l'env n'est lu qu'à la première requête, après le chargement du .env.
 let _secret: Uint8Array | null = null;
 function getSecret(): Uint8Array {
-  if (_secret) return _secret;
-  const raw = process.env['SESSION_SECRET'];
-  if (!raw) {
-    if (process.env['NODE_ENV'] === 'production') {
-      throw new Error(
-        'SESSION_SECRET manquant : refus de signer/vérifier une session en production.',
-      );
-    }
-    return (_secret = new TextEncoder().encode('dev_only_insecure_secret'));
-  }
-  return (_secret = new TextEncoder().encode(raw));
+  return (_secret ??= readSessionSecret());
 }
 
 const COOKIE_NAME = 'session';

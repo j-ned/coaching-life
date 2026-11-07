@@ -1,8 +1,11 @@
 import '../load-env.js';
 import { db, users, pages, site_settings } from './index.js';
 import bcrypt from 'bcryptjs';
+import { requireEnv } from '../lib/env.js';
 
 async function seed() {
+  // Sans DATABASE_URL, `pg` se rabattrait sur les variables PG* : la base doit être explicite.
+  requireEnv('DATABASE_URL');
   console.log('Seeding database...');
 
   // Admin user

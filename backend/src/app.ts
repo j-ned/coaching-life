@@ -9,6 +9,10 @@ import { pageRoutes } from './routes/pages.js';
 import { settingRoutes } from './routes/settings.js';
 import { analyticsRoutes } from './routes/analytics.js';
 import { storageRoutes } from './routes/storage.js';
+import { assertRuntimeConfig } from './lib/runtime-config.js';
+
+// Échec au démarrage (Docker comme fonction Vercel) si la configuration est incomplète.
+assertRuntimeConfig();
 
 // API seule : partagée par le serveur Node (index.ts, Docker/dev) et la fonction Vercel (api/).
 export const app = new Hono();
