@@ -3,11 +3,12 @@
   "framework": null,
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build && pnpm --filter @coaching-life/backend build",
+  "ignoreCommand": "git diff --quiet \"${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}\" HEAD -- . ':(exclude,glob)**/*.md' ':(exclude)docs' ':(exclude)specs' ':(exclude).github' ':(exclude)Dockerfile' ':(exclude).dockerignore'",
   "outputDirectory": "dist/coaching-life/browser",
   "regions": ["fra1"],
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api" },
-    { "source": "/:path*", "destination": "/index.csr.html" }
+    { "source": "/((?!api(?:/|$))(?!.*\\.[a-zA-Z0-9]+$).*)", "destination": "/index.csr.html" }
   ],
   "headers": [
     {
@@ -20,8 +21,16 @@
       ]
     },
     {
-      "source": "/(.*)\\.(js|css)",
+      "source": "/((?:chunk|main|polyfills|styles)-[A-Za-z0-9_-]+\\.(?:js|css))",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/((?!api(?:/|$))(?!.*\\.[a-zA-Z0-9]+$).*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
+      "source": "/(.*\\.html)",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
     }
   ]
 }
