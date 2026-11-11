@@ -1,4 +1,15 @@
-import { pgTable, uuid, text, integer, timestamp, jsonb } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import {
+  check,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 
 // Users
 
@@ -80,6 +91,23 @@ export const page_visits = pgTable('page_visits', {
   referrer: text('referrer'),
   user_agent: text('user_agent'),
 });
+
+// Rate limiting (compteurs à fenêtre fixe partagés entre instances, cf. ADR-0003)
+
+export const rate_limit_hits = pgTable(
+  'rate_limit_hits',
+  {
+    key: text('key').notNull(),
+    window_start: timestamp('window_start', { withTimezone: true }).notNull(),
+    expires_at: timestamp('expires_at', { withTimezone: true }).notNull(),
+    count: integer('count').notNull().default(1),
+  },
+  (table) => [
+    primaryKey({ name: 'rate_limit_hits_pkey', columns: [table.key, table.window_start] }),
+    index('rate_limit_hits_expires_at_idx').on(table.expires_at),
+    check('rate_limit_hits_key_length', sql`char_length(${table.key}) <= 64`),
+  ],
+);
 
 // Inferred types
 

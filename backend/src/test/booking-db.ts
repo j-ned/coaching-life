@@ -6,8 +6,10 @@ import type { BookingRequest } from './booking-fakes.js';
 type Db = typeof appDb;
 type AppointmentStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 
+// rate_limit_hits aussi : le quota de POST /api/appointments est désormais compté en base et
+// survivrait d'un test à l'autre.
 export async function resetBookingTables(db: Db): Promise<void> {
-  await db.execute(sql`TRUNCATE appointments, disabled_dates`);
+  await db.execute(sql`TRUNCATE appointments, disabled_dates, rate_limit_hits`);
 }
 
 export async function seedAppointment(
