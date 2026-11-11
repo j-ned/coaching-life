@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
+    "build:vercel": "tsc -p tsconfig.json --noEmit && node scripts/build-vercel.mjs",
+    "check:vercel-function": "node scripts/check-vercel-function.mjs",
     "start": "node dist/index.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -36,6 +38,7 @@
     "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
     "drizzle-kit": "^0.31.11",
+    "esbuild": "0.28.2",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "vitest": "^4.1.12"

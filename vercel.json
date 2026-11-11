@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm build && pnpm --filter @coaching-life/backend build",
+  "buildCommand": "pnpm build && pnpm --filter @coaching-life/backend build:vercel",
   "ignoreCommand": "git diff --quiet \"${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}\" HEAD -- . ':(exclude,glob)**/*.md' ':(exclude)docs' ':(exclude)specs' ':(exclude).github' ':(exclude)Dockerfile' ':(exclude).dockerignore'",
   "outputDirectory": "dist/coaching-life/browser",
   "regions": [

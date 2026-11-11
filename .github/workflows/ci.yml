@@ -32,6 +32,8 @@ jobs:
       - run: pnpm --filter @coaching-life/backend typecheck
       - run: pnpm --filter @coaching-life/backend test
       - run: pnpm --filter @coaching-life/backend build
+      - run: pnpm --filter @coaching-life/backend build:vercel
+      - run: pnpm --filter @coaching-life/backend check:vercel-function
       - run: pnpm audit --prod --audit-level high
 
   # Applique les migrations sur la branche Neon `preview` (jamais la prod). Ignoré si le secret
