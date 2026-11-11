@@ -9,6 +9,7 @@ import {
   SlotTakenError,
   type BookingRepository,
 } from '../db/booking-repository.js';
+import { afterResponse } from '../lib/after-response.js';
 import { requireAdmin } from '../middleware/auth.js';
 import { rateLimit } from '../middleware/rate-limit.js';
 import { createAppointmentSchema } from '../lib/appointment-schema.js';
@@ -134,8 +135,7 @@ export function createAppointmentRoutes({ bookings, notifier, now }: Appointment
           );
         }
 
-        // Emails en fire & forget (n'empêche pas la réponse si ça échoue)
-        notifier.appointmentBooked(data).catch((err) => console.error('[mail] appointment:', err));
+        afterResponse('[mail] appointment', notifier.appointmentBooked(data));
 
         return c.json(
           { success: true, message: 'Votre rendez-vous a été réservé avec succès !' },

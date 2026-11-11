@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import { eq, desc } from 'drizzle-orm';
 import { z } from 'zod';
 import { db, messages } from '../db/index.js';
+import { afterResponse } from '../lib/after-response.js';
 import { requireAdmin } from '../middleware/auth.js';
 import { rateLimit } from '../middleware/rate-limit.js';
 import { notifyAdminNewMessage } from '../lib/mailer.js';
@@ -31,12 +32,15 @@ export const messageRoutes = new Hono()
     const data = c.req.valid('json');
     await db.insert(messages).values(data);
 
-    notifyAdminNewMessage({
-      senderName: data.sender_name,
-      senderEmail: data.sender_email,
-      subject: data.subject,
-      content: data.content,
-    }).catch((err) => console.error('[mail] message:', err));
+    afterResponse(
+      '[mail] message',
+      notifyAdminNewMessage({
+        senderName: data.sender_name,
+        senderEmail: data.sender_email,
+        subject: data.subject,
+        content: data.content,
+      }),
+    );
 
     return c.json({ success: true, message: 'Votre message a été envoyé avec succès !' }, 201);
   })
