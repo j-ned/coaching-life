@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { waitUntil } from '@vercel/functions';
 import { createAppointmentRoutes } from './appointments.js';
 import {
   InMemoryBookingRepository,
@@ -8,6 +9,8 @@ import {
   postBooking,
   type BookingRequest,
 } from '../test/booking-fakes.js';
+
+vi.mock('@vercel/functions', () => ({ waitUntil: vi.fn() }));
 
 class FailingBookingNotifier extends SpyBookingNotifier {
   override appointmentBooked = async (data: BookingRequest): Promise<void> => {
@@ -31,6 +34,10 @@ function setup(
 }
 
 describe('POST /api/appointments', () => {
+  beforeEach(() => {
+    vi.mocked(waitUntil).mockClear();
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -61,6 +68,28 @@ describe('POST /api/appointments', () => {
     expect(response.status).toBe(201);
     expect(bookings.inserted).toEqual([request]);
     expect(notifier.booked).toEqual([request]);
+  });
+
+  it("confie l'envoi des emails à la plateforme, pour qu'il aboutisse après la réponse", async () => {
+    const { app, notifier } = setup();
+    const request = aBookingRequest();
+
+    const response = await postBooking(app, request);
+
+    expect(response.status).toBe(201);
+    expect(waitUntil).toHaveBeenCalledTimes(1);
+    await expect(vi.mocked(waitUntil).mock.calls[0]?.[0]).resolves.toBeUndefined();
+    expect(notifier.booked).toEqual([request]);
+  });
+
+  it("journalise un envoi d'emails en échec sans rejeter la tâche confiée à la plateforme", async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const { app } = setup(new FailingBookingNotifier());
+
+    await postBooking(app, aBookingRequest());
+
+    await expect(vi.mocked(waitUntil).mock.calls[0]?.[0]).resolves.toBeUndefined();
+    expect(logged).toHaveBeenCalledWith('[mail] appointment:', expect.any(Error));
   });
 
   it('refuse une requête mal formée en 400 sans rien enregistrer ni notifier', async () => {
