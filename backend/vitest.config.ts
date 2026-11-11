@@ -9,6 +9,7 @@ export default defineConfig({
           environment: 'node',
           include: ['src/**/*.spec.ts'],
           exclude: ['src/**/*.integration.spec.ts'],
+          setupFiles: ['src/test/unit-rate-limit-setup.ts'],
         },
       },
       {
