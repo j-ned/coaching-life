@@ -43,9 +43,19 @@ function proxiedClientIp(c: Context): string {
   }
 }
 
+// Derrière le tunnel Cloudflare, le dernier saut de `X-Forwarded-For` est le connecteur du tunnel,
+// le même pour tous les visiteurs. Cloudflare pose l'adresse du visiteur dans `CF-Connecting-IP` en
+// écrasant toute valeur envoyée par le client : `CLIENT_IP_HEADER` désigne cet en-tête. Digne de
+// confiance seulement si rien d'autre que le tunnel ne joint le serveur (aucun port 80/443 ouvert).
+function trustedHeaderClientIp(c: Context): string | undefined {
+  const name = readEnv('CLIENT_IP_HEADER')?.trim().toLowerCase();
+  if (!name) return undefined;
+  return c.req.header(name)?.trim() || undefined;
+}
+
 function clientIp(c: Context): string {
   if (readEnv('VERCEL') === '1') return vercelClientIp(c) ?? 'unknown';
-  return proxiedClientIp(c);
+  return trustedHeaderClientIp(c) ?? proxiedClientIp(c);
 }
 
 // Clé = limiteur + client. Le limiteur est identifié par la route DÉCLARÉE (motif, pas chemin

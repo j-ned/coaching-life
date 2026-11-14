@@ -149,6 +149,7 @@ En production, le backend Hono sert directement les fichiers statiques buildés 
 - **Container** : Docker multi-stage (Angular SSR + API)
 - **Reverse proxy** : Traefik
 - **Déploiement** : VPS OVH / Dokploy
+- **CI/CD** : images vérifiées et publiées sur GHCR, redéploiement Dokploy derrière un tunnel Cloudflare, sauvegarde chiffrée quotidienne de la base. Mise en place et bascule depuis Vercel + Neon : [`deploy/README.md`](./deploy/README.md)
 
 ---
 
