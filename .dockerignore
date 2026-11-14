@@ -9,7 +9,6 @@
 docs
 specs
 deploy
-ci
 **/.env
 **/.env.*
 !.env.example
