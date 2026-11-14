@@ -2,7 +2,6 @@
 .git
 .github
 .angular
-.vercel
 .idea
 .husky
 **/node_modules
@@ -11,7 +10,6 @@ docs
 specs
 deploy
 ci
-api
 **/.env
 **/.env.*
 !.env.example

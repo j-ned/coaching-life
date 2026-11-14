@@ -50,7 +50,6 @@ Thumbs.db
 
 # Backend
 /backend/dist
-/backend/dist-vercel
 /backend/storage/uploads
 
 # Claude

@@ -169,35 +169,16 @@ describe('rateLimit', () => {
     });
   });
 
-  describe('sur Vercel', () => {
-    it("identifie le client par x-real-ip et ignore un x-forwarded-for qu'il aurait forgé", async () => {
-      vi.stubEnv('VERCEL', '1');
-      const { request } = setupWithStore(1);
-      await request('/a', { 'x-real-ip': '198.51.100.4', 'x-forwarded-for': '1.1.1.1' });
+  it("ignore x-real-ip, que le client peut forger, même si une ancienne variable VERCEL traîne", async () => {
+    vi.stubEnv('VERCEL', '1');
+    const { request } = setupWithStore(1);
+    await request('/a', { 'x-real-ip': '198.51.100.4', 'x-forwarded-for': '203.0.113.7' });
 
-      const sameClient = await request('/a', {
-        'x-real-ip': '198.51.100.4',
-        'x-forwarded-for': '2.2.2.2',
-      });
-      const otherClient = await request('/a', {
-        'x-real-ip': '198.51.100.5',
-        'x-forwarded-for': '1.1.1.1',
-      });
-
-      expect(sameClient.status).toBe(429);
-      expect(otherClient.status).toBe(200);
+    const forgedOtherClient = await request('/a', {
+      'x-real-ip': '198.51.100.99',
+      'x-forwarded-for': '203.0.113.7',
     });
 
-    it('sans x-real-ip, retient le premier saut de x-forwarded-for posé par la plateforme', async () => {
-      vi.stubEnv('VERCEL', '1');
-      const { request } = setupWithStore(1);
-      await request('/a', { 'x-forwarded-for': '198.51.100.4, 10.0.0.1' });
-
-      const sameClient = await request('/a', { 'x-forwarded-for': '198.51.100.4, 10.0.0.2' });
-      const otherClient = await request('/a', { 'x-forwarded-for': '198.51.100.5, 10.0.0.1' });
-
-      expect(sameClient.status).toBe(429);
-      expect(otherClient.status).toBe(200);
-    });
+    expect(forgedOtherClient.status).toBe(429);
   });
 });

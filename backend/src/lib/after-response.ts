@@ -1,18 +1,13 @@
-import { waitUntil } from '@vercel/functions';
-
 /**
- * Lance une tâche qui doit aboutir après l'envoi de la réponse. Sur Vercel, l'instance peut être
- * suspendue dès la réponse partie : sans `waitUntil`, un envoi SMTP en cours ne finirait jamais.
- * Hors Vercel le processus reste actif et `waitUntil` ne fait rien. Un échec est journalisé :
- * la réponse est déjà partie, il ne peut plus la changer.
+ * Lance une tâche qui se termine après l'envoi de la réponse (envoi de mails). Le processus Node
+ * reste actif, rien ne l'interrompt. Un échec est journalisé : la réponse est déjà partie, il ne
+ * peut plus la changer, et il ne doit pas devenir un rejet non géré.
  */
 export function afterResponse(label: string, task: Promise<unknown>): void {
-  waitUntil(
-    task.then(
-      () => undefined,
-      (err: unknown) => {
-        console.error(`${label}:`, err);
-      },
-    ),
+  void task.then(
+    () => undefined,
+    (err: unknown) => {
+      console.error(`${label}:`, err);
+    },
   );
 }

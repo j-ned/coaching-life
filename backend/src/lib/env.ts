@@ -7,7 +7,7 @@ export class MissingEnvError extends Error {
   }
 }
 
-// Une variable vide ou blanche est traitée comme absente : Vercel et dotenv produisent
+// Une variable vide ou blanche est traitée comme absente : un `.env` (Dokploy, dotenv) contient
 // volontiers `NAME=` pour une valeur « retirée ».
 export function readEnv(name: string, env: EnvSource = process.env): string | undefined {
   const value = env[name];
@@ -20,11 +20,7 @@ export function requireEnv(name: string, env: EnvSource = process.env): string {
   return value;
 }
 
-// Vercel exécute aussi les previews avec NODE_ENV=production : seul VERCEL_ENV distingue une
-// preview. Hors preview/développement Vercel explicites, on reste strict dès que l'un des deux
-// signaux dit « production » (Docker ne pose que NODE_ENV).
+// L'image de production pose NODE_ENV=production (Dockerfile) : c'est le seul signal.
 export function isProductionEnv(env: EnvSource = process.env): boolean {
-  const vercelEnv = readEnv('VERCEL_ENV', env);
-  if (vercelEnv === 'preview' || vercelEnv === 'development') return false;
-  return vercelEnv === 'production' || readEnv('NODE_ENV', env) === 'production';
+  return readEnv('NODE_ENV', env) === 'production';
 }

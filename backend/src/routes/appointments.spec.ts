@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { waitUntil } from '@vercel/functions';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createAppointmentRoutes } from './appointments.js';
 import {
   InMemoryBookingRepository,
@@ -10,12 +9,10 @@ import {
   type BookingRequest,
 } from '../test/booking-fakes.js';
 
-vi.mock('@vercel/functions', () => ({ waitUntil: vi.fn() }));
-
 class FailingBookingNotifier extends SpyBookingNotifier {
   override appointmentBooked = async (data: BookingRequest): Promise<void> => {
     this.booked.push(data);
-    throw new Error('SMTP indisponible');
+    throw new Error('Resend indisponible');
   };
 }
 
@@ -34,10 +31,6 @@ function setup(
 }
 
 describe('POST /api/appointments', () => {
-  beforeEach(() => {
-    vi.mocked(waitUntil).mockClear();
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -70,26 +63,15 @@ describe('POST /api/appointments', () => {
     expect(notifier.booked).toEqual([request]);
   });
 
-  it("confie l'envoi des emails à la plateforme, pour qu'il aboutisse après la réponse", async () => {
-    const { app, notifier } = setup();
-    const request = aBookingRequest();
-
-    const response = await postBooking(app, request);
-
-    expect(response.status).toBe(201);
-    expect(waitUntil).toHaveBeenCalledTimes(1);
-    await expect(vi.mocked(waitUntil).mock.calls[0]?.[0]).resolves.toBeUndefined();
-    expect(notifier.booked).toEqual([request]);
-  });
-
-  it("journalise un envoi d'emails en échec sans rejeter la tâche confiée à la plateforme", async () => {
+  it("journalise un envoi d'emails en échec", async () => {
     const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const { app } = setup(new FailingBookingNotifier());
 
     await postBooking(app, aBookingRequest());
 
-    await expect(vi.mocked(waitUntil).mock.calls[0]?.[0]).resolves.toBeUndefined();
-    expect(logged).toHaveBeenCalledWith('[mail] appointment:', expect.any(Error));
+    await vi.waitFor(() =>
+      expect(logged).toHaveBeenCalledWith('[mail] appointment:', expect.any(Error)),
+    );
   });
 
   it('refuse une requête mal formée en 400 sans rien enregistrer ni notifier', async () => {

@@ -15,21 +15,13 @@ type RateLimitOptions = {
 
 const PURGE_INTERVAL_MS = 60_000;
 
-// Le compteur vit dans PostgreSQL : sur Vercel chaque instance de la fonction (et chaque
-// démarrage à froid) a sa propre mémoire, un compteur en mémoire n'y limite rien (cf. ADR-0003).
+// Le compteur vit dans PostgreSQL (cf. ADR-0003) : il survit aux redémarrages et aux
+// redéploiements du conteneur, et resterait partagé si l'application tournait en plusieurs copies.
 const postgresStore = withOpportunisticPurge(createRateLimitStore(db), {
   intervalMs: PURGE_INTERVAL_MS,
   now: Date.now,
   onPurgeError: (err) => console.error('[rate-limit] purge des fenêtres expirées :', err),
 });
-
-// Sur Vercel, la plateforme écrase `x-real-ip` et `x-forwarded-for` avec l'adresse du client :
-// ce qu'il envoie lui-même dans ces en-têtes n'arrive pas jusqu'à la fonction.
-function vercelClientIp(c: Context): string | undefined {
-  const realIp = c.req.header('x-real-ip')?.trim();
-  if (realIp) return realIp;
-  return c.req.header('x-forwarded-for')?.split(',').at(0)?.trim() || undefined;
-}
 
 // Derrière Traefik (Docker) : le proxy AJOUTE l'adresse réelle en fin de `X-Forwarded-For`.
 // Les entrées de gauche sont fournies par le client, donc forgeables.
@@ -54,7 +46,6 @@ function trustedHeaderClientIp(c: Context): string | undefined {
 }
 
 function clientIp(c: Context): string {
-  if (readEnv('VERCEL') === '1') return vercelClientIp(c) ?? 'unknown';
   return trustedHeaderClientIp(c) ?? proxiedClientIp(c);
 }
 
