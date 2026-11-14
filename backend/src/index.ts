@@ -6,6 +6,7 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { app } from './app.js';
+import { isFilePath, staticCacheControl } from './lib/static-files.js';
 
 // Frontend Angular mis en cache au démarrage.
 // Routes publiques prérendues (RenderMode.Prerender) → `<route>/index.html` : HTML statique
@@ -35,9 +36,18 @@ const csrShell = csrShellPath ? readFileSync(csrShellPath, 'utf-8') : null;
 // Frontend Angular (static)
 
 if (csrShell) {
-  app.use(serveStatic({ root: './browser' }));
+  app.use(
+    serveStatic({
+      root: './browser',
+      onFound: (_path, c) => {
+        c.header('Cache-Control', staticCacheControl(c.req.path));
+      },
+    }),
+  );
   app.get('*', (c) => {
+    if (isFilePath(c.req.path)) return c.notFound();
     const path = c.req.path.replace(/\/+$/, '') || '/';
+    c.header('Cache-Control', 'no-cache');
     return c.html(prerenderedRoutes.get(path) ?? csrShell);
   });
 }

@@ -1,6 +1,18 @@
-node_modules
-backend/node_modules
-dist
-backend/dist
-.env
-*.log
+# Contexte de build = racine du dépôt. Rien de local ni de secret dans l'image.
+.git
+.github
+.angular
+.vercel
+.idea
+.husky
+**/node_modules
+**/dist
+docs
+specs
+deploy
+ci
+api
+**/.env
+**/.env.*
+!.env.example
+**/*.md
