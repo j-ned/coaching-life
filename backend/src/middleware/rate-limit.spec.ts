@@ -126,6 +126,49 @@ describe('rateLimit', () => {
     expect(errors).toEqual([store.failure]);
   });
 
+  describe('derrière le tunnel Cloudflare (CLIENT_IP_HEADER)', () => {
+    it("identifie le client par l'en-tête désigné, pas par x-forwarded-for où le tunnel est le dernier saut", async () => {
+      vi.stubEnv('CLIENT_IP_HEADER', 'cf-connecting-ip');
+      const { request } = setupWithStore(1);
+      await request('/a', { 'cf-connecting-ip': '198.51.100.4', 'x-forwarded-for': '172.18.0.5' });
+
+      const sameClient = await request('/a', {
+        'cf-connecting-ip': '198.51.100.4',
+        'x-forwarded-for': '1.1.1.1, 172.18.0.9',
+      });
+      const otherClient = await request('/a', {
+        'cf-connecting-ip': '198.51.100.5',
+        'x-forwarded-for': '172.18.0.5',
+      });
+
+      expect(sameClient.status).toBe(429);
+      expect(otherClient.status).toBe(200);
+    });
+
+    it("lit le nom de l'en-tête sans tenir compte de la casse ni des espaces", async () => {
+      vi.stubEnv('CLIENT_IP_HEADER', ' CF-Connecting-IP ');
+      const { request } = setupWithStore(1);
+      await request('/a', { 'cf-connecting-ip': '198.51.100.4', 'x-forwarded-for': '172.18.0.5' });
+
+      const otherClient = await request('/a', {
+        'cf-connecting-ip': '198.51.100.5',
+        'x-forwarded-for': '172.18.0.5',
+      });
+
+      expect(otherClient.status).toBe(200);
+    });
+
+    it("sans l'en-tête désigné, retombe sur le dernier saut de x-forwarded-for, jamais sur une entrée forgeable", async () => {
+      vi.stubEnv('CLIENT_IP_HEADER', 'cf-connecting-ip');
+      const { request } = setupWithStore(1);
+      await request('/a', { 'x-forwarded-for': '1.1.1.1, 172.18.0.5' });
+
+      const forgedLeft = await request('/a', { 'x-forwarded-for': '2.2.2.2, 172.18.0.5' });
+
+      expect(forgedLeft.status).toBe(429);
+    });
+  });
+
   describe('sur Vercel', () => {
     it("identifie le client par x-real-ip et ignore un x-forwarded-for qu'il aurait forgé", async () => {
       vi.stubEnv('VERCEL', '1');
