@@ -29,16 +29,17 @@ ENV=(
   -e SESSION_SECRET=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
   -e ADMIN_EMAIL=admin@example.test -e ADMIN_PASSWORD=verify-admin-password
   -e CORS_ORIGIN=https://coaching-life.example.test
-  -e SMTP_HOST=smtp.example.test -e SMTP_USER=user -e SMTP_PASS=pass
+  -e RESEND_API_KEY=re_verify_key -e MAIL_FROM=noreply@example.test
   -e S3_ENDPOINT=https://s3.example.test -e S3_ACCESS_KEY=key -e S3_SECRET_KEY=secret -e S3_BUCKET=bucket
   -e CLIENT_IP_HEADER=cf-connecting-ip
 )
 
-# Une configuration de production incomplète arrête le conteneur au lieu de dégrader en silence.
+# Une configuration de production incomplète (ni Resend ni SMTP, ni S3) arrête le conteneur au lieu
+# de dégrader en silence.
 if timeout 60 docker run --rm --network "$id" -e "DATABASE_URL=postgres://postgres:verify@$db:5432/coaching" \
   -e SESSION_SECRET=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \
   -e ADMIN_PASSWORD=verify-admin-password "$image" >/dev/null 2>&1; then
-  fail "l'image démarre sans SMTP_* ni S3_*"
+  fail "l'image démarre sans transport de mail ni S3_*"
 fi
 
 start() {
