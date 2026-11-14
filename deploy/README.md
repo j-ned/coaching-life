@@ -129,5 +129,5 @@ Un redéploiement coupe le site quelques secondes (Dokploy recrée le conteneur)
   `preview` et le secret `PREVIEW_DATABASE_URL_UNPOOLED` du dépôt.
 - Retirer du dépôt ce qui ne sert qu'à Vercel : `vercel.json`, `api/`, `build:vercel`,
   `check:vercel-function`, `@vercel/functions` (`afterResponse`), la lecture de `VERCEL` /
-  `VERCEL_ENV`, le job `preview-migrations` et `docs/preview-env.md`. Le transport SMTP
-  (`nodemailer`, `SMTP_*`) ne sert plus qu'à Vercel : il part avec le reste.
+  `VERCEL_ENV`. Le transport SMTP (`nodemailer`, `SMTP_*`) ne sert plus qu'à Vercel : il part
+  avec le reste. (Le job `preview-migrations` et `docs/preview-env.md` sont déjà retirés.)
