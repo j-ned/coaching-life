@@ -84,6 +84,15 @@ for missing in /main-AAAAAAAA.js /absent.css /icons/absent.svg; do
   expect "statut de $missing" "$(status "$missing")" 404
 done
 
+# Adresse de l'API inconnue : le 404 JSON de l'API, jamais la coquille HTML en 200.
+for missing in /api /api/settings-absent /api/inconnue/42; do
+  expect "statut de $missing" "$(status "$missing")" 404
+  case "$(header "$missing" Content-Type)" in
+    application/json*) ;;
+    *) fail "$missing ne répond pas en JSON" ;;
+  esac
+done
+
 # En-têtes de sécurité (secureHeaders de Hono) sur les pages comme sur l'API.
 for path in / /api/health; do
   expect "X-Content-Type-Options de $path" "$(header "$path" X-Content-Type-Options)" nosniff
