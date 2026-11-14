@@ -1,13 +1,12 @@
 import { MissingEnvError, isProductionEnv, readEnv, type EnvSource } from './env.js';
+import { readMailTransportConfig } from './mailer.js';
 import { readSessionSecret } from './session.js';
 
+// Le transport de mail (Resend ou SMTP) est vérifié à part, par readMailTransportConfig.
 const PRODUCTION_REQUIRED = [
   'DATABASE_URL',
   'SESSION_SECRET',
   'ADMIN_EMAIL',
-  'SMTP_HOST',
-  'SMTP_USER',
-  'SMTP_PASS',
   'S3_ENDPOINT',
   'S3_ACCESS_KEY',
   'S3_SECRET_KEY',
@@ -20,6 +19,7 @@ export function assertRuntimeConfig(env: EnvSource = process.env): void {
   if (isProductionEnv(env)) {
     const missing = PRODUCTION_REQUIRED.filter((name) => readEnv(name, env) === undefined);
     if (missing.length > 0) throw new MissingEnvError(missing);
+    readMailTransportConfig(env);
   }
   readSessionSecret(env);
 }

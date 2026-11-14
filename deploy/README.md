@@ -5,7 +5,7 @@ Angular prérendu et l'API sous `/api`) et la sauvegarde. La base Postgres 18 es
 pile** : un service de base de données de Dokploy, dans le même projet, joint par
 `dokploy-network`. Dokploy ne construit rien ; il tire les images publiées sur GHCR par la CI
 (`coaching-life-app`, `coaching-life-backup`). Le trafic arrive par le tunnel Cloudflare, puis le
-Traefik de Dokploy. Les fichiers restent sur R2, les mails partent par le même SMTP.
+Traefik de Dokploy. Les fichiers restent sur R2, les mails partent par l'API de Resend.
 
 Tant que l'étape « Bascule » n'est pas faite, Vercel et Neon restent la production : tout ce qui
 précède est sans impact. Le dépôt garde ce qui sert à Vercel (`vercel.json`, `api/`) jusqu'à ce que
@@ -24,8 +24,9 @@ la bascule soit stable.
    `master`, Compose Path `./deploy/compose.yaml`. **Auto Deploy désactivé** : c'est la CI qui
    déclenche. Pas de mode **Raw** : il ignorerait le dépôt.
 4. **Environment** : coller `coaching-life.env.example` rempli. Les `POSTGRES_*` viennent de la
-   fiche du service de base (Internal Credentials). `SESSION_SECRET`, `S3_*` et `SMTP_*` se
-   reprennent **à l'identique** du projet Vercel (variables de Production).
+   fiche du service de base (Internal Credentials). `SESSION_SECRET` et `S3_*` se reprennent
+   **à l'identique** du projet Vercel (variables de Production). Mail : `RESEND_API_KEY` et
+   `MAIL_FROM`, une adresse sur un domaine vérifié chez Resend (le serveur n'utilise plus SMTP).
 5. **Domains** : service `coaching-life-app`, port `3000`, HTTP (le TLS est celui de Cloudflare),
    pour `coaching-life.nedellec-julien.fr`. _Preview Compose_ doit montrer les deux services sur
    `dokploy-network`.
@@ -128,4 +129,5 @@ Un redéploiement coupe le site quelques secondes (Dokploy recrée le conteneur)
   `preview` et le secret `PREVIEW_DATABASE_URL_UNPOOLED` du dépôt.
 - Retirer du dépôt ce qui ne sert qu'à Vercel : `vercel.json`, `api/`, `build:vercel`,
   `check:vercel-function`, `@vercel/functions` (`afterResponse`), la lecture de `VERCEL` /
-  `VERCEL_ENV`, le job `preview-migrations` et `docs/preview-env.md`.
+  `VERCEL_ENV`, le job `preview-migrations` et `docs/preview-env.md`. Le transport SMTP
+  (`nodemailer`, `SMTP_*`) ne sert plus qu'à Vercel : il part avec le reste.

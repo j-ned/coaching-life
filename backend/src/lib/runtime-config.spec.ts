@@ -47,6 +47,35 @@ describe('assertRuntimeConfig', () => {
     ).toThrow(/SMTP_HOST/);
   });
 
+  describe('mail par l’API Resend au lieu de SMTP', () => {
+    const RESEND_PRODUCTION_ENV = {
+      ...COMPLETE_PRODUCTION_ENV,
+      VERCEL_ENV: undefined,
+      NODE_ENV: 'production',
+      SMTP_HOST: undefined,
+      SMTP_USER: undefined,
+      SMTP_PASS: undefined,
+      RESEND_API_KEY: 're_test_key',
+      MAIL_FROM: 'noreply@coaching.example',
+    } as const;
+
+    it('accepte une production configurée pour Resend, sans aucune variable SMTP', () => {
+      expect(() => assertRuntimeConfig(RESEND_PRODUCTION_ENV)).not.toThrow();
+    });
+
+    it('fait échouer le démarrage en production si MAIL_FROM manque', () => {
+      expect(() => assertRuntimeConfig({ ...RESEND_PRODUCTION_ENV, MAIL_FROM: undefined })).toThrow(
+        /MAIL_FROM/,
+      );
+    });
+
+    it('fait échouer le démarrage en production sans Resend ni SMTP, en nommant RESEND_API_KEY', () => {
+      expect(() =>
+        assertRuntimeConfig({ ...RESEND_PRODUCTION_ENV, RESEND_API_KEY: undefined }),
+      ).toThrow(/RESEND_API_KEY/);
+    });
+  });
+
   it('accepte une preview sans SMTP ni S3, avec son propre SESSION_SECRET', () => {
     expect(() =>
       assertRuntimeConfig({
