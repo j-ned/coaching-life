@@ -17,3 +17,9 @@ export function staticCacheControl(path: string): string {
 export function isFilePath(path: string): boolean {
   return /\.[A-Za-z0-9]+$/.test(path);
 }
+
+// Une adresse de l'API qu'aucune route ne sert doit répondre le 404 JSON de l'API : la coquille
+// HTML en 200 ferait croire à un client (ou à une sonde) que l'appel a réussi.
+export function isApiPath(path: string): boolean {
+  return path === '/api' || path.startsWith('/api/');
+}

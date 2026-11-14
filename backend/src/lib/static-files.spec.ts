@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { IMMUTABLE, isFilePath, staticCacheControl } from './static-files.js';
+import { IMMUTABLE, isApiPath, isFilePath, staticCacheControl } from './static-files.js';
 
 describe('staticCacheControl', () => {
   it.each(['/main-AbCdEf12.js', '/chunk-zusXQg_7.js', '/chunk-0uwEYm9E.js', '/polyfills-AB-cd_12.js', '/styles-ABCDEFGH.css'])(
@@ -38,6 +38,22 @@ describe('isFilePath', () => {
     '%s est une route de l’application',
     (path) => {
       expect(isFilePath(path)).toBe(false);
+    },
+  );
+});
+
+describe('isApiPath', () => {
+  it.each(['/api', '/api/', '/api/settings', '/api/inconnue/42', '/api/auth/login'])(
+    '%s relève de l’API : inconnue, elle répond un 404 JSON, jamais la page HTML',
+    (path) => {
+      expect(isApiPath(path)).toBe(true);
+    },
+  );
+
+  it.each(['/', '/apiculture', '/dashboard/api', '/life-coach', '/api-docs'])(
+    '%s n’est pas une adresse de l’API',
+    (path) => {
+      expect(isApiPath(path)).toBe(false);
     },
   );
 });
