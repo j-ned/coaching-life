@@ -2,7 +2,7 @@ import { MissingEnvError, isProductionEnv, readEnv, type EnvSource } from './env
 import { readMailTransportConfig } from './mailer.js';
 import { readSessionSecret } from './session.js';
 
-// Le transport de mail (Resend ou SMTP) est vérifié à part, par readMailTransportConfig.
+// Le transport de mail (Resend) est vérifié à part, par readMailTransportConfig.
 const PRODUCTION_REQUIRED = [
   'DATABASE_URL',
   'SESSION_SECRET',

@@ -34,7 +34,7 @@ ENV=(
   -e CLIENT_IP_HEADER=cf-connecting-ip
 )
 
-# Une configuration de production incomplète (ni Resend ni SMTP, ni S3) arrête le conteneur au lieu
+# Une configuration de production incomplète (ni Resend, ni S3) arrête le conteneur au lieu
 # de dégrader en silence.
 if timeout 60 docker run --rm --network "$id" -e "DATABASE_URL=postgres://postgres:verify@$db:5432/coaching" \
   -e SESSION_SECRET=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \

@@ -44,14 +44,14 @@ const accepted = () => Promise.resolve(new Response('{"id":"email_1"}', { status
 
 describe('createMailer', () => {
   it('reste strict en production : sans transport de mail configuré, le démarrage échoue', () => {
-    expect(() => createMailer({ VERCEL_ENV: 'production' })).toThrow(MissingEnvError);
+    expect(() => createMailer({ NODE_ENV: 'production' })).toThrow(MissingEnvError);
     expect(() => createMailer({ NODE_ENV: 'production' })).toThrow(/RESEND_API_KEY/);
   });
 
   describe('API Resend', () => {
-    it('est choisie dès que RESEND_API_KEY est posée, même si SMTP est aussi configuré', () => {
+    it('est choisie dès que RESEND_API_KEY est posée', () => {
       expect(createMailer({ ...RESEND_ENV, NODE_ENV: 'production' }).kind).toBe('resend');
-      expect(createMailer({ ...SMTP_ENV, ...RESEND_ENV, NODE_ENV: 'production' }).kind).toBe('resend');
+      expect(createMailer(RESEND_ENV).kind).toBe('resend');
     });
 
     it('exige MAIL_FROM, en production comme ailleurs', () => {
@@ -121,27 +121,19 @@ describe('createMailer', () => {
     });
   });
 
-  it('refuse en production une configuration SMTP incomplète', () => {
-    expect(() =>
-      createMailer({ ...SMTP_ENV, VERCEL_ENV: 'production', SMTP_PASS: undefined }),
-    ).toThrow(/SMTP_PASS/);
+  it('ne se contente plus d’une ancienne configuration SMTP_* : sans Resend, la production échoue', () => {
+    expect(() => createMailer({ ...SMTP_ENV, NODE_ENV: 'production' })).toThrow(/RESEND_API_KEY/);
   });
 
-  it('utilise SMTP en production quand il est configuré', () => {
-    expect(createMailer({ ...SMTP_ENV, VERCEL_ENV: 'production' }).kind).toBe('smtp');
-  });
-
-  it('sélectionne le transport « log » en preview quand SMTP n’est pas configuré', () => {
-    expect(createMailer({ VERCEL_ENV: 'preview', NODE_ENV: 'production' }).kind).toBe('log');
-  });
-
-  it('sélectionne le transport « log » en développement quand SMTP n’est pas configuré', () => {
+  it('sélectionne le transport « log » hors production quand Resend n’est pas configuré', () => {
     expect(createMailer({}).kind).toBe('log');
+    expect(createMailer({ NODE_ENV: 'test' }).kind).toBe('log');
+    expect(createMailer({ ...SMTP_ENV, NODE_ENV: 'development' }).kind).toBe('log');
   });
 
   it('le transport « log » n’écrit ni destinataire, ni sujet, ni contenu (codes, liens)', async () => {
     const { lines, log } = captureLog();
-    const mailer = createMailer({ VERCEL_ENV: 'preview' }, log);
+    const mailer = createMailer({}, log);
 
     await mailer.send({
       template: 'appointment-confirmation',

@@ -12,7 +12,6 @@ describe('readSessionSecret', () => {
 
   it.each([
     { NODE_ENV: 'production' },
-    { VERCEL_ENV: 'preview', NODE_ENV: 'production' },
     { NODE_ENV: 'development' },
     {},
   ])('refuse de fonctionner sans SESSION_SECRET, sans secret par défaut (%j)', (env) => {

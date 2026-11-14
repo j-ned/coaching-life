@@ -1,4 +1,4 @@
-// Politique HTTP des fichiers du front servis par le serveur Node (hors Vercel).
+// Politique HTTP des fichiers du front servis par le serveur Node.
 
 export const IMMUTABLE = 'public, max-age=31536000, immutable';
 

@@ -24,7 +24,7 @@ export class StorageDisabledError extends Error {
   }
 }
 
-// `null` = stockage volontairement désactivé (preview/dev sans aucune variable S3_*).
+// `null` = stockage volontairement désactivé (hors production, sans aucune variable S3_*).
 // Une configuration partielle ou absente en production reste une erreur de configuration.
 export function readStorageConfig(env: EnvSource = process.env): StorageConfig | null {
   const missing = S3_REQUIRED.filter((name) => readEnv(name, env) === undefined);

@@ -11,10 +11,10 @@ import { analyticsRoutes } from './routes/analytics.js';
 import { storageRoutes } from './routes/storage.js';
 import { assertRuntimeConfig } from './lib/runtime-config.js';
 
-// Échec au démarrage (Docker comme fonction Vercel) si la configuration est incomplète.
+// Échec au démarrage si la configuration de production est incomplète.
 assertRuntimeConfig();
 
-// API seule : partagée par le serveur Node (index.ts, Docker/dev) et la fonction Vercel (api/).
+// API seule : le serveur Node (index.ts) y ajoute le front Angular ; les tests l'appellent directement.
 export const app = new Hono();
 
 // Middleware global

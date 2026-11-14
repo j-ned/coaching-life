@@ -9,7 +9,7 @@ import { MAX_UPLOAD_BYTES, buildStorageKey, detectImageType } from '../lib/uploa
 
 const TOO_LARGE = 'Image trop lourde (5 Mo maximum)';
 
-// Preview/dev sans S3 : réponse explicite plutôt qu'un 404 trompeur ou un 500.
+// Hors production sans S3 : réponse explicite plutôt qu'un 404 trompeur ou un 500.
 // Une configuration partielle lève ici et finit en 500 : c'est une erreur, pas un choix.
 const requireStorage = createMiddleware(async (c, next) => {
   if (!isStorageEnabled()) {

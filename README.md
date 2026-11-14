@@ -140,7 +140,7 @@ En production, le backend Hono sert directement les fichiers statiques buildés 
 - **ORM** : Drizzle ORM + drizzle-kit
 - **Database** : PostgreSQL
 - **Validation** : Zod + `@hono/zod-validator`
-- **Auth** : Magic links via `jose` (JWT) + Nodemailer
+- **Auth** : Magic links via `jose` (JWT) + mails par l'API Resend
 - **Hashing** : bcryptjs (pour les comptes coach)
 - **Storage** : AWS S3 (uploads clients)
 
@@ -149,7 +149,7 @@ En production, le backend Hono sert directement les fichiers statiques buildés 
 - **Container** : Docker multi-stage (Angular SSR + API)
 - **Reverse proxy** : Traefik
 - **Déploiement** : VPS OVH / Dokploy
-- **CI/CD** : images vérifiées et publiées sur GHCR, redéploiement Dokploy derrière un tunnel Cloudflare, sauvegarde chiffrée quotidienne de la base. Mise en place et bascule depuis Vercel + Neon : [`deploy/README.md`](./deploy/README.md)
+- **CI/CD** : images vérifiées et publiées sur GHCR, redéploiement Dokploy derrière un tunnel Cloudflare, sauvegarde chiffrée quotidienne de la base. Mise en place et exploitation : [`deploy/README.md`](./deploy/README.md)
 
 ---
 

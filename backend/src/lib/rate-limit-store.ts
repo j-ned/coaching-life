@@ -36,9 +36,9 @@ type OpportunisticPurgeOptions = {
 
 // Purge au fil de l'eau, sans tâche planifiée : au plus une par intervalle et par instance, en
 // commençant au premier comptage (une instance éphémère purge donc au moins une fois).
-// Elle est attendue avant de rendre la main, car une fonction Vercel peut être gelée dès la
-// réponse envoyée. Son échec ne doit jamais refuser une requête déjà comptée : il est remis à
-// `onPurgeError` et la purge sera retentée à l'intervalle suivant.
+// Elle est attendue avant de rendre la main : la purge reste ainsi bornée et observable. Son échec
+// ne doit jamais refuser une requête déjà comptée : il est remis à `onPurgeError` et la purge sera
+// retentée à l'intervalle suivant.
 export function withOpportunisticPurge(
   store: PurgeableRateLimitStore,
   { intervalMs, now, onPurgeError }: OpportunisticPurgeOptions,
