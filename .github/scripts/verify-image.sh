@@ -3,7 +3,7 @@
 # refus de démarrer sans configuration, migrations et seed rejouables, pages prérendues et coquille
 # CSR, caches, 404 des fichiers absents, en-têtes de sécurité, limitation de débit par l'adresse du
 # visiteur derrière le tunnel Cloudflare, utilisateur non root.
-# Usage : ci/verify-image.sh <image>
+# Usage : .github/scripts/verify-image.sh <image>
 set -euo pipefail
 image=${1:?image attendue}
 id="coaching-life-verify-$$"

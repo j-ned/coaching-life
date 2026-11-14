@@ -7,6 +7,9 @@ pile** : un service de base de données de Dokploy, dans le même projet, joint 
 (`coaching-life-app`, `coaching-life-backup`). Le trafic arrive par le tunnel Cloudflare, puis le
 Traefik de Dokploy. Les fichiers restent sur R2, les mails partent par l'API de Resend.
 
+Ce dossier ne contient que ce qui concerne le serveur. Les scripts de la CI (vérification de
+l'image, du compose, déclenchement de Dokploy) sont dans `.github/scripts/`.
+
 ## Mise en place (une fois)
 
 1. **Paquets GHCR** : après la première CI sur `master`, vérifier que `coaching-life-app` et
